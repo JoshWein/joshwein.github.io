@@ -33,4 +33,7 @@ if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && lo
     return false;
   }
 }
+});$('li > a').click(function() {
+    $('li').removeClass();
+    $(this).parent().addClass('active');
 });

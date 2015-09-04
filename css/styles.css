@@ -7,6 +7,9 @@
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 }
+#name {
+  margin-top: -20px;
+}
 .nameB {
 	background: -webkit-linear-gradient(top, #B8F9DA, #62CE9B);
 }
@@ -18,10 +21,6 @@
 .progress-bar {
     -webkit-transition: none !important;
     transition: none !important;
-}
-#name {
-  margin-top: -20px;
-  margin-bottom: -10px
 }
 .contact {
 	padding: 30px 0;	
@@ -52,4 +51,13 @@ a.contact:hover {
 
 .exp {
 	background-color: #96C6F5;
+}
+
+/* Nav CSS */
+li.page-scroll{
+transition: background-color 1s ease;
+}
+li.page-scroll.active {
+	background-color: gray !important;	
+	color: white !important;
 }
