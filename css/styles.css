@@ -1,3 +1,7 @@
+.name {
+	padding: 80px 0 !important;
+	background-color: yellow;
+}
 .progress-bar {
     -webkit-transition: none !important;
     transition: none !important;
