@@ -1,8 +1,57 @@
-.name {
-	padding: 80px 0 !important;
-	background-color: yellow;
+.name {	
+	padding-top: 100px;
+	padding-bottom: -20px;
+	font-size: 5em;
+	background: -webkit-linear-gradient(top, #878787, #000);
+	background: linear-gradient(top, #878787, #000);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+.nameB {
+	background: -webkit-linear-gradient(top, #B8F9DA, #62CE9B);
+}
+.tagline {
+	padding: 0px;
+	padding-bottom: 30px;
+	margin-top: 10px;
 }
 .progress-bar {
     -webkit-transition: none !important;
     transition: none !important;
+}
+#name {
+  margin-top: -20px;
+  margin-bottom: -10px
+}
+.contact {
+	padding: 30px 0;
+	background: -webkit-linear-gradient(top, #63D09D, #4CAD7F);
+	margin-top: -10px;
+	color: black !important;
+	text-decoration: none !important;
+}
+a.contact:hover {
+	color: #36463A !important;
+	text-decoration: none !important;
+}
+
+.edu {
+	padding-bottom: 25px;
+}
+.titleText {
+	border-bottom: 1px solid #ccc;
+}
+
+.prog {
+	background-color: #D6D6D6;
+	padding-bottom: 40px;
+}
+
+.proj {
+	padding: 30px;
+	padding-bottom: 50px;
+}
+
+.exp {
+	background-color: #96C6F5;
 }
