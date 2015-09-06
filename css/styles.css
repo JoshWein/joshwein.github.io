@@ -1,63 +1,91 @@
-.name {	
-	padding-top: 100px;
-	padding-bottom: -20px;
-	font-size: 5em;
-	background: -webkit-linear-gradient(top, #878787, #000);
-	background: linear-gradient(top, #878787, #000);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
+.navbar-fixed-top {
+    background-color:#fff
 }
+
+.name {
+    padding-top:160px;
+    padding-bottom:-20px;
+    font-size:5em;
+    background:-webkit-linear-gradient(top,#878787,#000);
+    background:linear-gradient(top,#878787,#000);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent
+}
+
 #name {
-  margin-top: -20px;
+    margin-top:-20px
 }
+
 .nameB {
-	background: -webkit-linear-gradient(top, #B8F9DA, #62CE9B);
+	background-image: -webkit-gradient(linear,left top,left bottom,from(#62CE9B),to(#72D4A6));
+	background-image: -webkit-linear-gradient(top,#62CE9B 0,#72D4A6 100%);
+    background-image: -o-linear-gradient(top,#62CE9B 0,#72D4A6 100%);
+    background-image: linear-gradient(to bottom,#62CE9B 0,#72D4A6 100%);     
+    padding-right:0;
+    padding-left:0;
+    padding-top:50px
 }
+
 .tagline {
-	padding: 0px;
-	padding-bottom: 30px;
-	margin-top: 10px;
+    padding:0;
+    padding-bottom:30px;
+    margin-top:10px
 }
+
 .progress-bar {
-    -webkit-transition: none !important;
-    transition: none !important;
+    -webkit-transition:none!important;
+    transition:none!important
 }
+
 .contact {
-	padding: 30px 0;	
-	color: black !important;
-	text-decoration: none !important;
+    padding:30px 0;
+    padding-top:80px;
+    color:#000!important;
+    text-decoration:none!important
 }
+
 a.contact:hover {
-	color: #36463A !important;
-	text-decoration: none !important;
+    color:#36463A!important;
+    text-decoration:none!important
 }
 
 .edu {
-	padding-bottom: 25px;
+    padding-bottom: 50px
 }
+
 .titleText {
-	border-bottom: 1px solid #ccc;
+    border-bottom:1px solid #ccc
 }
 
 .prog {
-	background-color: #D6D6D6;
-	padding-bottom: 40px;
+    background: -webkit-linear-gradient(top, #93F0C3, #65CF9D);
+    padding-bottom:40px
 }
 
 .proj {
-	padding: 30px;
-	padding-bottom: 50px;
+    padding:30px;
+    padding-bottom:50px
+}
+
+#proj {
+}
+
+.rwtitle {
+    padding:30px
 }
 
 .exp {
-	background-color: #96C6F5;
+    background:-webkit-linear-gradient(top,#7ADEAF,#90EEC1);
+    background:linear-gradient(top,#FFFFFF,#C4D4CD);
+    padding-bottom:50px
 }
 
 /* Nav CSS */
-li.page-scroll{
-transition: background-color 1s ease;
+li.page-scroll {
 }
-li.page-scroll.active {
-	background-color: gray !important;	
-	color: white !important;
+
+.navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:focus,.navbar-default .navbar-nav>.active>a:hover {
+    -webkit-transition:background-color 700ms ease;
+    background-color:#DAD8D8!important;
+    color:#000
 }
