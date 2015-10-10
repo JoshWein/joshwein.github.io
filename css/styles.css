@@ -4,7 +4,6 @@
 
 .name {
     padding-top:160px;
-    padding-bottom:-20px;
     font-size:5em;
     background:-webkit-linear-gradient(top,#878787,#000);
     background:linear-gradient(top,#878787,#000);
@@ -37,17 +36,12 @@
     transition:none!important
 }
 
-.contact {
-    padding:30px 0;
-    padding-top:80px;
+.tagline {
+    padding-bottom: 160px;
     color:#000!important;
     text-decoration:none!important
 }
 
-a.contact:hover {
-    color:#36463A!important;
-    text-decoration:none!important
-}
 
 .edu {
     padding-bottom: 50px
