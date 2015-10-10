@@ -22,9 +22,13 @@
   margin: 0 auto;
 }
 #slide1:hover {
-  content:url("../images/recolor1.jpg");
+  content:url("../images/recolor1b.jpg");
+}
+
+#slide3:hover {
+  content:url("../images/recolor3b.jpg");
 }
 
 #slide4:hover {
-  content:url("../images/2.jpg");
+  content:url("../images/removal1b.jpg");
 }
