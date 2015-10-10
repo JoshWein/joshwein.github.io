@@ -21,3 +21,10 @@
   text-align: center;
   margin: 0 auto;
 }
+#slide1:hover {
+  content:url("../images/recolor1.jpg");
+}
+
+#slide4:hover {
+  content:url("../images/2.jpg");
+}
