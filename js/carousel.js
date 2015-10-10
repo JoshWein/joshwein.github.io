@@ -1,5 +1,7 @@
 // Activate Carousel
-
+$(document).ready(function() {      
+   $('.carousel').carousel('pause');
+});
 // Enable Carousel Indicators
 $(".item").click(function(){
     $("#myCarousel").carousel(1);
