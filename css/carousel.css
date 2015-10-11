@@ -20,6 +20,7 @@
   width: auto;
   text-align: center;
   margin: 0 auto;
+  display: block;
 }
 .item-active #slide1:hover {
   content:url("../images/recolor1b.jpg") !important;
