@@ -4,11 +4,15 @@ a.list-group-item {
 
 pre.prettyprint {
     background-color: #F8F8F8;
-    border-radius: 0px;
-    border-left: 0px !important;
-    border-right: 0px !important;
+    border-radius: 1px;
+    border:none !important;
+    padding: 10px;
+    font-size: 1.1em;
 }
 
+p {
+	font-size: 1.2em;
+}
 /* Nav CSS */
 li.page-scroll {
 }

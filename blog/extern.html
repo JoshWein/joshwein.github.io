@@ -20,8 +20,8 @@
         <link href=
         "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
         rel="stylesheet">
-        <link href="../css/blogstyle.css" rel="stylesheet">
         <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+        <link href="../css/blogstyle.css" rel="stylesheet">
         <title>
             Josh Wein - Blog Title
         </title>
@@ -70,7 +70,7 @@
 <pre class="prettyprint">
 extern int i;
 </pre>
-                    <p>This will declare variable i but will not define it [no memory will be allocated]. You can do this as many times as you want and memory will never be allocated. But this also means that you can't define it in this file either.</p>
+                    <p>This will declare variable 'i' but will not define it [no memory will be allocated]. You can do this as many times as you want and memory will never be allocated. But this also means that you can't define it in this file either.</p>
                     <p>If you do:</p>
 <pre class="prettyprint">
 extern int i;
@@ -83,9 +83,9 @@ int main(void) {
 <pre class="prettyprint">
 int i = 10;
 </pre>
-                    <p>Then you would be able to use i in your other file.</p>
+                    <p>Then you would be able to use 'i' in your other file.</p>
 <pre class="prettyprint">
-#include 'someheader.h';
+#include 'someheader.h'
 extern int i;
 int main(void) {
     i = 5;
