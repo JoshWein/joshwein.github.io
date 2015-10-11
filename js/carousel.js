@@ -5,6 +5,7 @@ $(document).ready(function() {
 // Enable Carousel Indicators
 $(".item").click(function(){
     $("#myCarousel").carousel(1);
+    $('.carousel').carousel('pause');
 });
 
 // Enable Carousel Controls
