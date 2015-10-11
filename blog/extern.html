@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta content="IE=edge" http-equiv="X-UA-Compatible">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <script async>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-68050416-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+        <script src=
+        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" async></script> <!-- Javascript -->
+        <script src=
+        "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
+        <link href=
+        "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
+        rel="stylesheet">
+        <link href="../css/blogstyle.css" rel="stylesheet">
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+        <title>
+            Josh Wein - Blog Title
+        </title>
+    </head>
+    <body>
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header page-scroll">
+                    <button class="navbar-toggle" data-target=
+                    "#bs-example-navbar-collapse-1" data-toggle="collapse"
+                    type="button"><span class="sr-only">Toggle
+                    navigation</span> <span class="icon-bar"></span>
+                    <span class="icon-bar"></span> <span class=
+                    "icon-bar"></span></button> <a class="navbar-brand" href=
+                    "../contact.html">Contact</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id=
+                "bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="hidden">
+                            <a href="#page-top"></a>
+                        </li>
+                        <li class="page-scroll">
+                            <a href="blog.html">Blog</a>
+                        </li>
+                        <li class="page-scroll">
+                            <a href="../index.html">Back to Main Page</a>
+                        </li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+        <div class="container-fluid">
+            <div class="row" style="padding-top: 100px">
+                <div class="col-md-12 text-center">
+                    <h1>What is "extern"?</h1>
+                </div>
+            </div>
+            <div class="row" style="padding-top: 25px">
+                <div class="col-md-6 col-md-offset-3">
+                    <p>What the extern keyword does not do is allocate memory for that variable. It will only declare a variable/function and tell the compiler that this variable will be used elsewhere [it "extends" the visibility]. By default, all functions are prepended with the 'extern' keyword to the beginning of them when you declare them, ie in a header file. extern is also added to the definitions of the function [when you write the body of the code in a .c file]. This keyword tells the compiler to allow any files linked to this function's file to use the functions themselves.</p>
+                    <p>All of this happens automatically so extern on functions isn't the most interesting part. Variables are where things get a little more complicated.</p>
+                    <p>When you declare:</p>
+<pre class="prettyprint">
+extern int i;
+</pre>
+                    <p>This will declare variable i but will not define it [no memory will be allocated]. You can do this as many times as you want and memory will never be allocated. But this also means that you can't define it in this file either.</p>
+                    <p>If you do:</p>
+<pre class="prettyprint">
+extern int i;
+int main(void) {
+    i = 5;
+    return 0;
+}
+</pre>
+                    <p>This won't compile and the compiler will tell you that 'i' was never defined. The extern keyword specifically tells the compiler that the variable will be defined elsewhere. Now if you were to include let's some some header file that had:</p>
+<pre class="prettyprint">
+int i = 10;
+</pre>
+                    <p>Then you would be able to use i in your other file.</p>
+<pre class="prettyprint">
+#include 'someheader.h';
+extern int i;
+int main(void) {
+    i = 5;
+    return 0;
+}
+</pre>                  
+                    <p>The only case where you can declare a variable as extern and use it is if you also initialize it on the same line.</p>
+<pre class="prettyprint">
+extern int i = 10;
+</pre>
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

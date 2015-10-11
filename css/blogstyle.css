@@ -1,0 +1,24 @@
+a.list-group-item {
+    font-size: 1.7em;
+}
+
+pre.prettyprint {
+    background-color: #F8F8F8;
+    border-radius: 0px;
+    border-left: 0px !important;
+    border-right: 0px !important;
+}
+
+/* Nav CSS */
+li.page-scroll {
+}
+
+.navbar-fixed-top {
+    background-color:#fff
+}
+
+.navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:focus,.navbar-default .navbar-nav>.active>a:hover {
+    -webkit-transition:background-color 700ms ease;
+    background-color:#DAD8D8!important;
+    color:#000
+}
