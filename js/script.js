@@ -5,22 +5,25 @@ $(function() {
     $('[class^="progress"]').bind('inview', function(event, visible) {
         if (visible === true) {
             $("#pb1").animate({
-               width: [ "100%", "linear" ]
+               width: [ "100%", "swing" ]
             }, 1000);
             $("#pb2").animate({
-                width: [ "85%", "swing" ]
+                width: [ "95%", "swing" ]
             }, 1000);
             $("#pb3").animate({
-                width: [ "50%", "swing" ]
+                width: [ "75%", "swing" ]
             }, 1000);
             $("#pb4").animate({
-                width: [ "30%", "swing" ]
+                width: [ "60%", "swing" ]
             }, 1000);
             $("#pb5").animate({
-                width: [ "20%", "swing" ]
+                width: [ "55%", "swing" ]
             }, 1000);
             $("#pb6").animate({
-                width: [ "20%", "linear" ]
+                width: [ "50%", "swing" ]
+            }, 1000);
+            $("#pb7").animate({
+                width: [ "40%", "swing" ]
             }, 1000);
         } else {
             // element has gone out of viewport
