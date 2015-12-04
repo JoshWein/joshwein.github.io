@@ -20,7 +20,7 @@ window.onload = function() {
 }
 
 function loadPage(username) {
-	instruments = [[], [], [], [], [], [], []]; // Add a new slot for each instrument
+	instruments = [[], [], [], [], [], [], [], []]; // Add a new slot for each instrument
 	var insts = 8;
 	starterInst = Math.floor(Math.random() * insts) + 1;
 	colors = [];
