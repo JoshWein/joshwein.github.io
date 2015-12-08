@@ -14,7 +14,7 @@ window.onload = function() {
 		} else {
 			loadPage($('#username').val());			
 		}	
-		$('#target').html("<h2>Joining server...</h2>");
+		$('#target').html("<h2>loading sounds...</h2>");
 		return false;
 	});	
 }
@@ -37,7 +37,7 @@ function loadPage(username) {
 	for(var i = 0; i < insts; i++) {
 		var count = 16;
 		for(var j = 1; j <= 16; j++) {
-			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.wav';
+			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.mp3';
 			//console.log("Loading sound: " + path + " into: " + i + " " + j);
 			instruments[i][count--] = new Howl({
 				urls: [path],
@@ -62,6 +62,7 @@ function loadPage(username) {
 }
 
 function start(username) {	
+	$('#target').html("<h2>Joining server...</h2>");
 	var d = document.getElementById("messagePane");	
 	// set up event handlers
 	window.addEventListener("resize", resizeCanvas, false);
