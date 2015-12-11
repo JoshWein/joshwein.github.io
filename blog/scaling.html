@@ -14,15 +14,19 @@
 			ga('send', 'pageview');
 		</script>
         <script src=
-        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" async></script> <!-- Javascript -->
+        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> <!-- Javascript -->
         <script src=
         "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
         <link href=
         "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
         rel="stylesheet">
         <link href="../css/blogstyle.css" rel="stylesheet">
+        <script type="text/javascript"
+          src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
         <title>
-            Josh Wein
+            Josh Wein - HTML5 Canvas - Coordinate Scaling
         </title>
     </head>
     <body>
@@ -46,6 +50,9 @@
                             <a href="#page-top"></a>
                         </li>
                         <li class="page-scroll">
+                            <a href="blog.html">Blog</a>
+                        </li>
+                        <li class="page-scroll">
                             <a href="../index.html">Back to Main Page</a>
                         </li>
                     </ul>
@@ -55,26 +62,44 @@
         <div class="container-fluid">
             <div class="row" style="padding-top: 100px">
                 <div class="col-md-12 text-center">
-                    <h1>Blog</h1>
-                    <h4>This blog will serve as a place to put any interesting things I've discovered or learned while working on projects or studying.</h4>
+                    <h1>HTML5 Canvas - Coordinate Scaling</h1>
                 </div>
             </div>
             <div class="row" style="padding-top: 25px">
-                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
-                    <div class="list-group">
-                        <a class="list-group-item" href="scaling.html">
-                        <span class="badge">Dec 10, 2015</span>
-                            HTML5 Canvas - Coordinate Scaling
-                        </a>
-                        <a class="list-group-item" href="material.html">
-                        <span class="badge">Nov 23, 2015</span>
-                            Useful Resources
-                        </a>
-                        <a class="list-group-item" href="extern.html">
-                        <span class="badge">Oct 10, 2015</span>
-                            Extern in C
-                        </a>
+                <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">                    
+                    <p>While I was working on <a href="../muse/app.html">Muse,</a> I ran into a fun problem. The application relied heavily on everyone's x and y coordinates and since most people's screens were different sizes this meant that other people's mouse pointers would display in the wrong locations.</p>
+                    <p>To fix this I realized that I needed some way to scale everyone's coordinates to a default scale. It ended up being the same equation I use to figre out what grade I got out of 100 when getting an exam out of 130 or 47.</p> 
+                    <h3>The Equation</h3>  
+                    <div class="math text-center" style="margin-bottom: 10px">
+                        <div style="padding-bottom: 10px">
+                            \(Scaling: coordinate * {default scale \over current scale}\)       
+                        </div>
+                        <div>
+                            \(Descaling: coordinate / {default scale \over current scale}\)
+                        </div>
+
                     </div>
+                    <p>
+                    Simple enough, and it works. So for the application I used that to transfer scaled coordinates and unscale coordinates the client received.
+                    </p>
+                    <p> As an example: converting a 9/10 to an out of 100 scale:<br> 
+                    \(Sending: 9 * {100 \over 10} = 90\)<br>
+                    \(Receiving: 90 / {100 \over 10} = 9\)
+                    </p>
+                    <h3>Sending</h3>
+                    <pre class="prettyprint"> 
+socket.emit('mouseCoord',  { 
+    x: mouse.x * (2000/windowWidth), 
+    y: mouse.y * (2000/windowHeight)
+};
+                    </pre>
+                    <h3>Receiving</h3>
+                    <pre class="prettyprint"> 
+updateCursor(
+    data.x/(2000/windowWidth), 
+    data.y/(2000/windowHeight)
+);
+                    </pre>
                 </div>
             </div>
         </div>
