@@ -56,11 +56,11 @@ $(function() {
                 if (direction === 'down') {
                     $(this.element).animate({
                         opacity: 1
-                    })
+                    });
                 }
             }, {
                 offset: '75%'
-            })
+            });
     });
 });
 /**
