@@ -16,15 +16,6 @@ $(function() {
             $("#pb4").animate({
                 width: [ "60%", "swing" ]
             }, 1000);
-            $("#pb5").animate({
-                width: [ "55%", "swing" ]
-            }, 1000);
-            $("#pb6").animate({
-                width: [ "50%", "swing" ]
-            }, 1000);
-            $("#pb7").animate({
-                width: [ "40%", "swing" ]
-            }, 1000);
         } else {
             // element has gone out of viewport
         }
