@@ -21,12 +21,9 @@
         "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
         rel="stylesheet">
         <link href="../css/blogstyle.css" rel="stylesheet">
-        <script type="text/javascript"
-          src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-        </script>
         <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
         <title>
-            Josh Wein - HTML5 Canvas - Coordinate Scaling
+            Adding Syscalls to Xv6 - Josh Wein
         </title>
     </head>
     <body>
@@ -62,43 +59,29 @@
         <div class="container-fluid">
             <div class="row" style="padding-top: 100px">
                 <div class="header col-md-12 text-center">
-                    <h1>HTML5 Canvas - Coordinate Scaling</h1>
+                    <h1>Adding Syscalls to Xv6</h1>
                 </div>
             </div>
             <div class="row" style="padding-top: 25px">
-                <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">                    
-                    <p>While I was working on <a href="../muse/app.html">Muse,</a> I ran into a fun problem. The application relied heavily on everyone's x and y coordinates and since most people's screens were different sizes this meant that other people's mouse pointers would display in the wrong locations.</p>
-                    <p>To fix this I realized that I needed some way to scale everyone's coordinates to a default scale. It ended up being the same equation I use to figure out what grade I got out of 100 when getting an exam out of 130 or 47.</p> 
-                    <h3>The Equation</h3>  
-                    <div class="math text-center" style="margin-bottom: 10px">
-                        <div style="padding-bottom: 10px">
-                            \(Scaling: coordinate * {default scale \over current scale}\)       
-                        </div>
-                        <div>
-                            \(Descaling: coordinate / {default scale \over current scale}\)
-                        </div>
-
-                    </div>
-                    <p>
-                    Simple enough, and it works. So for the application I used that to transfer scaled coordinates and unscale coordinates the client received.
-                    </p>
-                    <p> As an example: converting a 9/10 to an out of 100 scale:<br> 
-                    \(Sending: 9 * {100 \over 10} = 90\)<br>
-                    \(Receiving: 90 / {100 \over 10} = 9\)
-                    </p>
-                    <h3>Sending</h3>
-                    <pre class="prettyprint"> 
-socket.emit('mouseCoord',  { 
-    x: mouse.x * (2000/windowWidth), 
-    y: mouse.y * (2000/windowHeight)
-};
-                    </pre>
-                    <h3>Receiving</h3>
-                    <pre class="prettyprint"> 
-updateCursor(
-    data.x/(2000/windowWidth), 
-    data.y/(2000/windowHeight)
-);
+                <div class="col-md-6 col-md-offset-3">
+                    <h2>Paragraph One</h2>
+                    <p>Files Edited
+    syscall.c
+        extern int sys_nice(void);  [line 102]
+        [SYS_nice]    sys_nice,     [line 127]
+    syscall.h
+        #define SYS_nice   23       [line 24]
+    user.h
+        int nice(int);              [line 27]
+    sysproc.c
+        int sys_nice(void){} function definition
+    usys.S
+        SYSCALL(nice)               [line 33]</p>   
+                    <pre class="prettyprint linenums"> 
+                    int main(void){
+                        printf("test");
+                        return 0;
+                    }
                     </pre>
                 </div>
             </div>

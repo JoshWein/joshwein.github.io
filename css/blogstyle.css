@@ -26,3 +26,11 @@ li.page-scroll {
     background-color:#DAD8D8!important;
     color:#000
 }
+
+.header {
+    padding: 5rem 6rem;
+    color: #fff;
+    text-align: center;
+    background-color: #159957;
+    background-image: linear-gradient(120deg, #609EEA, #3A6367);
+}
