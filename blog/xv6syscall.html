@@ -67,7 +67,7 @@
                 <div class="col-md-6 col-md-offset-3">
                     <h2>Background</h2>
                     <p>Xv6 is a very popular simple operating system used in many undergraduate Operating Systems courses. One of the foundations of the interactions that happen within an operating system is system calls and adding a system call to the OS is usually one of the first tasks given to someone starting out. If you came here looking for solutions to your assignment I highly recommend closing this tab and working it out on your own; I guarantee you it's not as difficult as it seems.</p>
-                    <p>Here, we'll be adding a syscall called random which will return the random number 4.</p><a href="#explanation">Jump to explanation</a>
+                    <p>I'll be walking through the steps of how to add a syscall to Xv6 by adding a syscall called random which will return the <a href="https://xkcd.com/221/">random number 4</a>.</p><a href="#explanation">Jump to explanation</a>
                     <h2>What files to change</h2>
                     <p>In order to add a working system call to your you will need to edit the following files:</p>
                     <ul>
@@ -136,10 +136,10 @@ SYSCALL(random)</code></pre>
                     <h2 id="explanation">Explanation</h2>
                     <p>The process of our syscall getting executed is as follows:</p>
                     <ul>
-                        <li>A user program includes 'user.h' and calls 'random()' to get a random number.</li>
+                        <li>A user program includes 'user.h' in their program and calls 'random()' to get a random number.</li>
                         <li>This causes a trap which ends up in usys.S. Here 'random' is put through the SYSCALL macro which moves the numerical value of SYS_random into %eax.</li>
                         <li>We set the value of SYS_random to 22 in syscall.h. The macro also sets the trap number to T_SYSCALL and returns to trap.c which branches into the syscall branch and calls syscall() which was included from 'defs.h'.</li>
-                        <li>We get the number stored in %eax to figure out which syscall to run from the onces defined in the system call table syscalls[] in syscall.c; in our case t would be syscalls[22] which is sys_random().</li>                        
+                        <li>We get the number stored in %eax to figure out which syscall to run from the onces defined in the system call table syscalls[] in syscall.c; in our case it would be syscalls[22] which is sys_random().</li>                        
                         <li>Finally, our system call returns a random number which happens to be 4 and returns it back through the trap frame to the calling function/program.</li>
                     </ul>
                 </div>
