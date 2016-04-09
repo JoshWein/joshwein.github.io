@@ -65,18 +65,18 @@
             </div>
             <div class="row" style="padding-top: 25px">
                 <div class="col-md-6 col-md-offset-3">
-                    <p>What the extern keyword does not do is allocate memory for that variable. It will only declare a variable/function and tell the compiler that this variable will be used elsewhere [it "extends" the visibility]. By default, all functions are prepended with the 'extern' keyword to the beginning of them when you declare them, ie in a header file. extern is also added to the definitions of the function [when you write the body of the code in a .c file]. This keyword tells the compiler to allow any files linked to this function's file to use the functions themselves.</p>
+                    <p>The extern keyword does not allocate memory for that variable. It will only declare a variable/function and tell the compiler that this variable will be defined elsewhere (it "extends" the visibility). By default, all functions are prepended with the 'extern' keyword to the beginning of them when you declare them, ie in a header file. extern is also added to the definitions of the function (when you write the body of the code in a .c file). This keyword tells the compiler to allow any files linked to this function's file to use the functions themselves.</p>
                     <p>All of this happens automatically so extern on functions isn't the most interesting part. Variables are where things get a little more complicated.</p>
                     <p>When you declare:</p>
 <pre class="lang-c"><code>extern int i;</code></pre>
-                    <p>This will declare variable 'i' but will not define it [no memory will be allocated]. You can do this as many times as you want and memory will never be allocated. But this also means that you can't define it in this file either.</p>
+                    <p>This will declare variable 'i' but will not define it (no memory will be allocated). You can do this as many times as you want and memory will never be allocated. But this also means that you can't define it in this file either.</p>
                     <p>If you do:</p>
 <pre class="lang-c"><code>extern int i;
 int main(void) {
     i = 5;
     return 0;
 }</code></pre>
-                    <p>This won't compile and the compiler will tell you that 'i' was never defined. The extern keyword specifically tells the compiler that the variable will be defined elsewhere. Now if you were to include let's some some header file that had:</p>
+                    <p>This won't compile and the compiler will tell you that 'i' was never defined. The extern keyword specifically tells the compiler that the variable will be defined elsewhere. Now if you were to include let's say some header file that had:</p>
 <pre class="lang-c"><code>int i = 10;</code></pre>
                     <p>Then you would be able to use 'i' in your other file.</p>
 <pre class="lang-c"><code>#include "someheader.h"
