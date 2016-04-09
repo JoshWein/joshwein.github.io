@@ -20,8 +20,9 @@
         <link href=
         "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
         rel="stylesheet">
-        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
         <link href="../css/blogstyle.css" rel="stylesheet">
+        <link href="../css/prism.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="../js/prism.js"></script>
         <title>
             What is "extern"? - Josh Wein
         </title>
@@ -67,36 +68,25 @@
                     <p>What the extern keyword does not do is allocate memory for that variable. It will only declare a variable/function and tell the compiler that this variable will be used elsewhere [it "extends" the visibility]. By default, all functions are prepended with the 'extern' keyword to the beginning of them when you declare them, ie in a header file. extern is also added to the definitions of the function [when you write the body of the code in a .c file]. This keyword tells the compiler to allow any files linked to this function's file to use the functions themselves.</p>
                     <p>All of this happens automatically so extern on functions isn't the most interesting part. Variables are where things get a little more complicated.</p>
                     <p>When you declare:</p>
-<pre class="prettyprint">
-extern int i;
-</pre>
+<pre class="lang-c"><code>extern int i;</code></pre>
                     <p>This will declare variable 'i' but will not define it [no memory will be allocated]. You can do this as many times as you want and memory will never be allocated. But this also means that you can't define it in this file either.</p>
                     <p>If you do:</p>
-<pre class="prettyprint">
-extern int i;
+<pre class="lang-c"><code>extern int i;
 int main(void) {
     i = 5;
     return 0;
-}
-</pre>
+}</code></pre>
                     <p>This won't compile and the compiler will tell you that 'i' was never defined. The extern keyword specifically tells the compiler that the variable will be defined elsewhere. Now if you were to include let's some some header file that had:</p>
-<pre class="prettyprint">
-int i = 10;
-</pre>
+<pre class="lang-c"><code>int i = 10;</code></pre>
                     <p>Then you would be able to use 'i' in your other file.</p>
-<pre class="prettyprint">
-#include "someheader.h"
+<pre class="lang-c"><code>#include "someheader.h"
 extern int i;
 int main(void) {
     i = 5;
     return 0;
-}
-</pre>                  
+}</code></pre>                  
                     <p>The only case where you can declare a variable as extern and use it is if you also initialize it on the same line.</p>
-<pre class="prettyprint">
-extern int i = 10;
-</pre>
-
+<pre class="lang-c"><code>extern int i = 10;</code></pre>
                 </div>
             </div>
         </div>

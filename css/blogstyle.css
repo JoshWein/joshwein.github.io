@@ -2,20 +2,10 @@ a.list-group-item {
     font-size: 1.7em;
 }
 
-pre.prettyprint {
-    background-color: #F8F8F8;
-    border-radius: 1px;
-    border:none !important;
-    padding: 10px;
-    font-size: 1.1em;
-}
-
 p {
 	font-size: 1.2em;
 }
-/* Nav CSS */
-li.page-scroll {
-}
+
 
 .navbar-fixed-top {
     background-color:#fff

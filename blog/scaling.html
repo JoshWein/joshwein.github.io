@@ -24,7 +24,8 @@
         <script type="text/javascript"
           src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
         </script>
-        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+        <link href="../css/prism.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="../js/prism.js"></script>
         <title>
             Josh Wein - HTML5 Canvas - Coordinate Scaling
         </title>
@@ -87,18 +88,15 @@
                     \(Receiving: 90 / {100 \over 10} = 9\)
                     </p>
                     <h3>Sending</h3>
-                    <pre class="prettyprint"> 
-socket.emit('mouseCoord',  { 
+                    <pre class="lang-c"><code>socket.emit('mouseCoord',  { 
     x: mouse.x * (2000/windowWidth), 
     y: mouse.y * (2000/windowHeight)
-};
-                    </pre>
+};</code></pre>
                     <h3>Receiving</h3>
-                    <pre class="prettyprint"> 
-updateCursor(
+                    <pre class="lang-c"><code>updateCursor(
     data.x/(2000/windowWidth), 
     data.y/(2000/windowHeight)
-);
+);</code></pre>
                     </pre>
                 </div>
             </div>

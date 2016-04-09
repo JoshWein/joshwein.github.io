@@ -14,14 +14,15 @@
 			ga('send', 'pageview');
 		</script>
         <script src=
-        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> <!-- Javascript -->
+        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src=
         "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
         <link href=
         "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
         rel="stylesheet">
         <link href="../css/blogstyle.css" rel="stylesheet">
-        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+        <link href="../css/prism.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="../js/prism.js"></script>
         <title>
             Adding Syscalls to Xv6 - Josh Wein
         </title>
@@ -64,25 +65,83 @@
             </div>
             <div class="row" style="padding-top: 25px">
                 <div class="col-md-6 col-md-offset-3">
-                    <h2>Paragraph One</h2>
-                    <p>Files Edited
-    syscall.c
-        extern int sys_nice(void);  [line 102]
-        [SYS_nice]    sys_nice,     [line 127]
-    syscall.h
-        #define SYS_nice   23       [line 24]
-    user.h
-        int nice(int);              [line 27]
-    sysproc.c
-        int sys_nice(void){} function definition
-    usys.S
-        SYSCALL(nice)               [line 33]</p>   
-                    <pre class="prettyprint linenums"> 
-                    int main(void){
-                        printf("test");
-                        return 0;
-                    }
-                    </pre>
+                    <h2>Background</h2>
+                    <p>Xv6 is a very popular simple operating system used in many undergraduate Operating Systems courses. One of the foundations of the interactions that happen within an operating system is system calls and adding a system call to the OS is usually one of the first tasks given to someone starting out. If you came here looking for solutions to your assignment I highly recommend closing this tab and working it out on your own, I guarantee you it's not as difficult as it seems.</p>
+                    <p>Here, we'll be adding a syscall called random which will return the random number 4.</p><a href="#explanation">Jump to explanation</a>
+                    <h2>What files to change</h2>
+                    <p>In order to add a working system call to your you will need to edit the following files:</p>
+                    <ul>
+                        <li><a href="#syscall.h">syscall.h</a></li>
+                        <li><a href="#syscall.c">syscall.c</a></li>
+                        <li><a href="#user.h">user.h</a></li>
+                        <li><a href="#usys.S">usys.S</a></li>
+                    </ul>
+                    <p>We'll add our actual syscall to <a href="#sysproc.c">sysproc.c</a> but you can also append it to any other files that contain syscalls like sysfile.c</p>    
+                    <h2 id="syscall.h">syscall.h</h2>
+                    <p>syscall.h contains the syscall numbers for each syscall in the OS.</p>
+                    <p>At the bottom we'll add our new syscall with the next available number:</p>
+                    <pre class="lang-c" data-line-offset=9 data-line=22><code>#define SYS_fork    1
+#define SYS_exit    2
+#define SYS_wait    3
+#define SYS_pipe    4
+#define SYS_read    5
+#define SYS_kill    6
+...
+#define SYS_mknod  17
+#define SYS_unlink 18
+#define SYS_link   19
+#define SYS_mkdir  20
+#define SYS_close  21
+#define SYS_random 22</code></pre>                    
+                    <h2 id="syscall.c">syscall.c</h2>
+                    <p>syscall.c contains the functions used by syscalls to get arguments. We'll add our syscall to the array of syscalls. Remember that we defined SYS_random as 22 which corresponds to that spot in the array.</p>
+                    <pre class="lang-c" data-line-offset=119 data-line=127><code>static int (*syscalls[])(void) = {
+[SYS_fork]    sys_fork,
+[SYS_exit]    sys_exit,
+[SYS_wait]    sys_wait,
+...
+[SYS_mkdir]   sys_mkdir,
+[SYS_close]   sys_close,
+[SYS_random]  sys_random, // will call sys_random() when syscalls[22] is chosen.
+};</code></pre>
+                    <p>We also need to add an extern function header so the syscall can actually be called here when we define it later in a different file.
+                    <pre class="lang-c" data-line-offset=96 data-line=102><code>...
+extern int sys_unlink(void);
+extern int sys_wait(void);
+extern int sys_write(void);
+extern int sys_uptime(void);
+extern int sys_random(void);</code></pre>
+                    <h2 id="user.h">user.h</h2>
+                    <p>user.h is the file used by user programs so the user can access system call. Here we'll add our user level definition of the syscall</p>
+                    <pre class="lang-c" data-line-offset=21 data-line=27><code>...
+int getpid(void);
+char* sbrk(int);
+int sleep(int);
+int uptime(void);
+int random(void);</code></pre>
+                    <h2 id="usys.S">usys.S</h2>
+                    <p>usys.S contains a short amount of assembly code to move the number of the called syscall into the %eax register.</p>
+                    <pre class="lang-c" data-line-offset=24 data-line=30><code>...
+SYSCALL(getpid)
+SYSCALL(sbrk)
+SYSCALL(sleep)
+SYSCALL(uptime)
+SYSCALL(random)</code></pre>
+                    <h2 id="sysproc.c">sysproc.c</h2>
+                    sysproc.c is one of the files that contains syscalls.
+                    <pre class="lang-c"><code>int sys_random(void) {
+  return 4;
+}
+</code></pre>
+                    <h2 id="explanation">Explanation</h2>
+                    <p>The process of our syscall getting executed is as follows:</p>
+                    <ul>
+                        <li>A user program includes 'user.h' and calls 'random()' to get a random number.</li>
+                        <li>This causes a trap which ends up in usys.S. Here 'random' is put through the SYSCALL macro which moves the numerical value of SYS_random into %eax.</li>
+                        <li>We set the value of SYS_random to 22 in syscall.h. The macro also sets the trap number to T_SYSCALL and returns to trap.c which branches into the syscall branch and calls syscall() which was included from 'defs.h'.</li>
+                        <li>We get the number stored in %eax to figure out which syscall to run from the onces defined in the system call table syscalls[] in syscall.c; in our case t would be syscalls[22] which is sys_random().</li>                        
+                        <li>Finally, our system call returns a random number which happens to be 4 and returns it back through the trap frame to the calling function/program.</li>
+                    </ul>
                 </div>
             </div>
         </div>
