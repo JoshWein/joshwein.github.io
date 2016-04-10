@@ -34,7 +34,8 @@
 
 .progress-bar {
     -webkit-transition:none!important;
-    transition:none!important
+    transition:none!important;
+    background-color: rgb(114, 186, 247);
 }
 
 .tagline {
@@ -88,3 +89,4 @@ li.page-scroll {
     background-color:#DAD8D8!important;
     color:#000
 }
+

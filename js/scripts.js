@@ -1,21 +1,16 @@
-$('.progress-bar').css({
-    'background-color': 'rgb(114, 186, 247)'
-});
 $(function() {
     $('[class^="progress"]').bind('inview', function(event, visible) {
         if (visible === true) {
-            $("#pb1").animate({
-               width: [ "100%", "swing" ]
+            $('[class^="progress"]').animate({                
+                width: [$('#prog').width(), "swing"]
             }, 1000);
-            $("#pb2").animate({
-                width: [ "95%", "swing" ]
-            }, 1000);
-            $("#pb3").animate({
-                width: [ "75%", "swing" ]
-            }, 1000);
-            $("#pb4").animate({
-                width: [ "60%", "swing" ]
-            }, 1000);
+            $('[class^="progress"]').unbind('inview');
+            var handler = function() {
+                $('[class^="progress"]').animate({                
+                    width: [$('#prog').width(), "linear"]
+                }, 20);
+            };
+            $(window).on('resize scroll', handler);
         } else {
             // element has gone out of viewport
         }
@@ -107,3 +102,6 @@ $(function() {
         $(window).scroll();
     });
 })(jQuery);
+
+
+
