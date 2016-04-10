@@ -58,8 +58,8 @@
             </div><!-- /.container-fluid -->
         </nav>
         <div class="container-fluid">
-            <div class="row" style="padding-top: 100px">
-                <div class="header col-md-12 text-center">
+            <div class="row header">
+                <div class="col-md-12 text-center">
                     <h1>Adding Syscalls to Xv6</h1>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                     <p>Xv6 is a very popular simple operating system used in many undergraduate Operating Systems courses. One of the foundations of the interactions that happen within an operating system is system calls and adding a system call to the OS is usually one of the first tasks given to someone starting out. If you came here looking for solutions to your assignment I highly recommend closing this tab and working it out on your own; I guarantee you it's not as difficult as it seems.</p>
                     <p>I'll be walking through the steps of how to add a syscall to Xv6 by adding a syscall called random which will return the <a href="https://xkcd.com/221/">random number 4</a>.</p><a href="#explanation">Jump to explanation</a>
                     <h2>What files to change</h2>
-                    <p>In order to add a working system call to your you will need to edit the following files:</p>
+                    <p>In order to add a working system call to your operating system you will need to edit the following files:</p>
                     <ul>
                         <li><a href="#syscall.h">syscall.h</a></li>
                         <li><a href="#syscall.c">syscall.c</a></li>
