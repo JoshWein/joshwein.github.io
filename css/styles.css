@@ -1,92 +1,124 @@
 .navbar-fixed-top {
-    background-color:#fff;
-    box-shadow: 0 0.15em 0.35em 0 rgba(0,0,0,0.135);
+    background-color: #fff;
+    box-shadow: 0 0.15em 0.35em 0 rgba(0, 0, 0, 0.135);
 }
 
 .name {
-    padding-top:160px;
-    font-size:5em;
-    background:-webkit-linear-gradient(top,#878787,#000);
-    background:linear-gradient(top,#878787,#000);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent
+    padding-top: 160px;
+    font-size: 5em;
+    background: -webkit-linear-gradient(top, #878787, #000);
+    background: linear-gradient(top, #878787, #000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent
 }
 
 #name {
-    margin-top:-20px
+    margin-top: -20px
 }
 
 .nameB {
-	background: -webkit-gradient(linear,left top,left bottom,from(#62CE9B),to(#72D4A6));
-	background: -webkit-linear-gradient(top,#62CE9B 0,#72D4A6 100%);
-    background: -o-linear-gradient(top,#62CE9B 0,#72D4A6 100%);
-    background: linear-gradient(to bottom,#62CE9B 0,#72D4A6 100%);     
-    padding-right:0;
-    padding-left:0;
-    padding-top:50px
+    background: -webkit-gradient(linear, left top, left bottom, from(#62CE9B), to(#72D4A6));
+    background: -webkit-linear-gradient(top, #62CE9B 0, #72D4A6 100%);
+    background: -o-linear-gradient(top, #62CE9B 0, #72D4A6 100%);
+    background: linear-gradient(to bottom, #62CE9B 0, #72D4A6 100%);
+    padding-right: 0;
+    padding-left: 0;
+    padding-top: 50px
 }
 
 .tagline {
-    padding:0;
-    padding-bottom:30px;
-    margin-top:10px
+    padding: 0 0 30px;
+    margin-top: 10px
+}
+
+.progress {
+    height: 55px;
 }
 
 .progress-bar {
-    -webkit-transition:none!important;
-    transition:none!important;
+    -webkit-transition: none !important;
+    transition: none !important;
     background-color: rgb(114, 186, 247);
+    line-height: 55px;
+    font-size: 1.2em;
+    color: rgb(51, 51, 51);
 }
 
 .tagline {
     padding-bottom: 160px;
-    color:#000!important;
-    text-decoration:none!important
+    color: #000 !important;
+    text-decoration: none !important
 }
-
 
 .edu {
     padding-bottom: 50px
-}
-
-.titleText {
-    border-bottom:1px solid #ccc
 }
 
 .prog {
     background: -webkit-linear-gradient(top, #93F0C3, #65CF9D);
     background: -o-linear-gradient(top, #93F0C3, #65CF9D 100%);
     background: linear-gradient(to bottom, #93F0C3 0, #65CF9D 100%);
-    padding-bottom:40px
-}
-
-.proj {
-    padding:30px;
-    padding-bottom:50px
-}
-
-#proj {
+    padding-bottom: 40px
 }
 
 .rwtitle {
-    padding-top:30px;
+    padding-top: 20px;
 }
 
-.exp {
-    background: -webkit-gradient(linear,left top,left bottom,from(#62CE9B),to(#72D4A6));
-    background: -webkit-linear-gradient(top,#62CE9B 0,#72D4A6 100%);
-    background: -o-linear-gradient(top,#62CE9B 0,#72D4A6 100%);
-    background: linear-gradient(to bottom,#62CE9B 0,#72D4A6 100%);     
-    padding-bottom:50px
+.proj {
+    background: -webkit-gradient(linear, left top, left bottom, from(#62CE9B), to(#72D4A6));
+    background: -webkit-linear-gradient(top, #62CE9B 0, #72D4A6 100%);
+    background: -o-linear-gradient(top, #62CE9B 0, #72D4A6 100%);
+    background: linear-gradient(to bottom, #62CE9B 0, #72D4A6 100%);
+}
+
+.githubRow {
+    background: -webkit-gradient(linear, left top, left bottom, from(#72D4A6), to(#72D4A6));
+    background: -webkit-linear-gradient(top, #72D4A6 0, #72D4A6 100%);
+    background: -o-linear-gradient(top, #72D4A6 0, #72D4A6 100%);
+    background: linear-gradient(to bottom, #72D4A6 0, #72D4A6 100%);
 }
 
 /* Nav CSS */
 li.page-scroll {
 }
 
-.navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:focus,.navbar-default .navbar-nav>.active>a:hover {
-    -webkit-transition:background-color 700ms ease;
-    background-color:#DAD8D8!important;
-    color:#000
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
+    -webkit-transition: background-color 700ms ease;
+    background-color: #DAD8D8 !important;
+    color: #000
+}
+
+.projSquare {
+    min-width: 260px;
+    min-height: 280px;
+    background-color: rgba(0, 0, 0, .2);
+    display: table;
+    table-layout: fixed;
+}
+
+.projSquare:hover {
+    transition-duration: 500ms;
+    background-color: rgba(0, 0, 0, .3);
+}
+
+.projSquareInfo {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.projSquareInfo a {
+    color: #202070;
+    text-decoration: none;
+}
+
+.projSquareInfo a:hover {
+    color: #51517a;
+}
+
+#exp {
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-bottom: 75px;
 }
 
