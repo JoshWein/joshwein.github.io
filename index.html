@@ -58,10 +58,10 @@
                     <a href="#page-top"></a>
                 </li>
                 <li class="page-scroll">
-                    <a href="#edu">Education</a>
+                    <a href="#prog">Programming</a>
                 </li>
                 <li class="page-scroll">
-                    <a href="#prog">Programming</a>
+                    <a href="#edu">Education</a>
                 </li>
                 <li class="page-scroll">
                     <a href="#proj">Projects</a>
@@ -96,34 +96,76 @@
             </h3>
         </div>
     </div>
-    <div class="row edu" id="edu">
+    <div class="row edu">
         <div class="col-md-6" id="prog">
             <h2 class="rwtitle text-center">
                 <strong class="titleText">Programming Skills</strong>
             </h2>
             </br>
-            <div class="progress">
-                <div class="progress-bar progress-bar" id="pb1">
-                    Java & JavaFX
+            <div data-toggle="collapse" data-target="#collapse1" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Languages</h3>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse in">
+                    <table class="table" id="demo">
+                        <tr>
+                            <td>Java</td>
+                            <td>C</td>
+                            <td>JavaScript</td>
+                            <td>PHP</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-            <div class="progress">
-                <div class="progress-bar progress-bar" id="pb2">
-                    Front End Development [HTML, CSS, Bootstrap, Javascript, JQuery]
+            <div data-toggle="collapse" data-target="#collapse2" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Libraries and Frameworks</h3>
+                </div>
+                <div id="collapse2" class="panel-collapse collapse in">
+                    <table class="table">
+                        <tr>
+                            <td>jQuery</td>
+                            <td>Bootstrap</td>
+                            <td>JavaFX</td>
+                            <td>Swing</td>
+                        </tr>
+                        <tr>
+                            <td>JUnit & PHPUnit</td>
+                            <td>Spring</td>
+                            <td>Maven</td>
+                            <td>Ivy</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-            <div class="progress">
-                <div class="progress-bar progress-bar" id="pb3">
-                    Back End Development [Java, PHP, Databases]
+            <div data-toggle="collapse" data-target="#collapse3" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Databases</h3>
+                </div>
+                <div id="collapse3" class="panel-collapse collapse in">
+                    <table class="table">
+                        <tr>
+                            <td>MySQL</td>
+                            <td>MongoDB</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-            <div class="progress">
-                <div class="progress-bar progress-bar" id="pb4">
-                    C
+            <div data-toggle="collapse" data-target="#collapse4" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Version Control</h3>
+                </div>
+                <div id="collapse4" class="panel-collapse collapse in">
+                    <table class="table">
+                        <tr>
+                            <td>Git/Github</td>
+                            <td>Subversion</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 text-left">
+        <div class="col-md-6 text-left" id="edu">
             <h2 class="rwtitle text-center">
                 <strong class="titleText">Education</strong>
             </h2>
@@ -227,7 +269,8 @@
                         to inject automatically
                     </p>
                     <p>
-                        <a target="_blank" href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US">Chrome
+                        <a target="_blank"
+                           href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US">Chrome
                             Store Link</a>
                     </p>
                     <p>
@@ -297,7 +340,8 @@
             <div class="col-md-12 text-center" id="githubButton" style="float:right">
                 <h3>
                     <a target="_blank" href="https://github.com/JoshWein"><span></span><img style="width:100px"
-                                                                            src="images/GitHub_Logo.png"/> </a>
+                                                                                            src="images/GitHub_Logo.png"/>
+                    </a>
                 </h3>
             </div>
         </div>
@@ -369,21 +413,21 @@
                 </dl>
                 <div class="list-group">
                     <h4 class="list-group-item-heading">
-                        CSE 110 - Introduction to Computer Science
+                        Introduction to Computer Science <small>CSE 110</small>
                     </h4>
                     <p>
                         Fundamentals of computer science; algorithmic design, problem-solving techniques for computer
                         programming, fundamentals of digital logic and computer organization.
                     </p>
                     <h4 class="list-group-item-heading">
-                        CSE 114 - Computer Science I
+                        Computer Science I <small>CSE 114</small>
                     </h4>
                     <p>
                         Program structure, conditional and iterative programming, procedures, arrays and records, object
                         classes, encapsulation, information hiding, inheritance, polymorphism, file I/O.
                     </p>
                     <h4 class="list-group-item-heading">
-                        CSE 214 - Computer Science II
+                        Computer Science II <small>CSE 214</small>
                     </h4>
                     <p>
                         Programming and applications of data structures; stacks, queues, lists, binary trees, heaps,
@@ -391,7 +435,7 @@
                         algorithms.
                     </p>
                     <h4 class="list-group-item-heading">
-                        CSE 215 - Foundations of Computer Science
+                        Foundations of Computer Science <small>CSE 215</small>
                     </h4>
                     <p>
                         Logic; functions, relations, and sets; recursion and functional programming; elementary logic;

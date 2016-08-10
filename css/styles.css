@@ -31,23 +31,18 @@
     margin-top: 10px
 }
 
-.progress {
-    height: 55px;
-}
-
-.progress-bar {
-    -webkit-transition: none !important;
-    transition: none !important;
-    background-color: rgb(114, 186, 247);
-    line-height: 55px;
-    font-size: 1.2em;
-    color: rgb(51, 51, 51);
-}
-
 .tagline {
     padding-bottom: 160px;
     color: #000 !important;
     text-decoration: none !important
+}
+
+td {
+    width: 2%;
+}
+
+.skill-panel:hover {
+    background-color: #c0ddec;
 }
 
 .edu {
