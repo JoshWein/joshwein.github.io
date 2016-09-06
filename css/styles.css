@@ -1,6 +1,10 @@
 .navbar-fixed-top {
-    background-color: #fff;
+    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
     box-shadow: 0 0.15em 0.35em 0 rgba(0, 0, 0, 0.135);
+}
+
+.container-fluid {
+    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
 }
 
 .name {
@@ -17,14 +21,25 @@
 }
 
 .nameB {
-    background: -webkit-gradient(linear, left top, left bottom, from(#62CE9B), to(#72D4A6));
-    background: -webkit-linear-gradient(top, #62CE9B 0, #72D4A6 100%);
-    background: -o-linear-gradient(top, #62CE9B 0, #72D4A6 100%);
-    background: linear-gradient(to bottom, #62CE9B 0, #72D4A6 100%);
     padding-right: 0;
     padding-left: 0;
-    padding-top: 50px
+    padding-top: 50px;
+    -webkit-animation: bg-trans 10s linear infinite alternate;
+    -webkit-transition: all 0.75s linear;
+    -moz-transition: all 0.75s linear;
+    -o-transition: all 0.75s linear;
+    transition: all 0.75s linear;
 }
+
+@-webkit-keyframes bg-trans {
+    from {
+        background-color: #62CE9B;
+    }
+    to {
+        background-color: #45ce93;
+    }
+}
+
 
 .tagline {
     padding: 0 0 30px;
@@ -116,4 +131,6 @@ li.page-scroll {
     padding-left: 15px;
     padding-bottom: 75px;
 }
+
+
 
