@@ -14,9 +14,9 @@
 			ga('send', 'pageview');
 		</script>
         <script src=
-        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" async></script> <!-- Javascript -->
+        "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> <!-- Javascript -->
          <script src=
-        "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
+        "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
         <link href=
         "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
         rel="stylesheet">
@@ -24,6 +24,17 @@
         <title>
             Josh Wein
         </title>
+        <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+        }
+        .container-fluid {
+            background: none;
+        }
+        </style>
     </head>
     <body>
         <nav class="navbar navbar-default navbar-fixed-top">
@@ -60,7 +71,7 @@
         </nav>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-8 col-sm-2 col-sm-offset-2 text-center" style="padding-top: 100px;">
+                <div class="col-lg-8 col-sm-12 col-lg-offset-2 text-center" style="padding-top: 100px;">
                     <h1>Contact Me</h1>
                     <div class="form-group">
                         <form action="http://formspree.io/Joshua.Wein@stonybrook.edu"  method="POST">
