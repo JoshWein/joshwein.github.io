@@ -16,7 +16,7 @@ window.onload = function() {
 }
 
 function loadPage(username) {
-	instruments = [[], [], [], [], [], [], [], []]; // Add a new slot for each instrument
+	instruments = []; // Add a new slot for each instrument
 	var insts = 8;
 	starterInst = Math.floor(Math.random() * insts) + 1;
 	colors = [];
@@ -24,21 +24,15 @@ function loadPage(username) {
 	ctx = canvas.getContext("2d");
 
 	/* Sounds */
-
-	var drum = new Howl({
-		urls: ['instruments/drum.ogg']
-	});
 	// Generate instruments
 	for(var i = 0; i < insts; i++) {
-		var count = 16;
-		for(var j = 1; j <= 16; j++) {
+		instruments.push([]);
+		for(var j = 16; j  >= 1; j--) {
 			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.mp3';
-			//console.log("Loading sound: " + path + " into: " + i + " " + j);
-			instruments[i][count--] = new Howl({
+			instruments[i].push(new Howl({
 				urls: [path],
 				volume: 0
-
-			});
+			}));
 		}
 	}
 	console.log("Sounds loaded.");
@@ -137,7 +131,7 @@ function start(username) {
 	  this.fill = colors[starterInst-1]; // color
 	  this.ins = instruments[starterInst-1];
 	  this.curIns = starterInst-1;
-	  this.currentNote = 1;
+	  this.currentNote = 0;
 	  this.dir = 1;
 	  this.str = 3;
 	  this.name = "";
@@ -147,6 +141,7 @@ function start(username) {
 	function mouseUp(e) {
 		mouseIsDown = 0;
 		cursors[0].setPlay = 0;
+		cursors[0].str = 3;
 		mouseXY(e);
 	}
 
@@ -159,6 +154,7 @@ function start(username) {
 	function mouseDown(e) {
 		mouseIsDown = 1;
 		cursors[0].setPlay = 1;
+		cursors[0].currentNote = calculateNote(cursors[0].x, cursors[0].y)[0];
 		mouseXY(e);
 	}
 
@@ -178,7 +174,6 @@ function start(username) {
 			mouse.x = newWidth - 20;
 		}
 		updateCursor(mouse.x, mouse.y - 70, mouseIsDown, id);
-		drawCursors();
 	}
 
 	function touchXY(e) {
@@ -192,7 +187,6 @@ function start(username) {
 			mouse.x = newWidth - 20;
 		}
 		updateCursor(mouse.x, mouse.y - 70, mouseIsDown, id);
-		drawCursors();
 	}
 
 	function calculateNote(x, y) {
@@ -200,10 +194,7 @@ function start(username) {
 		for(i = 0; y + 10 > xLines[i]; i++){
 
 		}
-		var note = Math.round(xLines[i]* (notes/newHeight));
-		if(note === 0) {
-			note = 1;
-		}
+		var note = Math.round(xLines[i] * (notes/newHeight)) - 1;
 		return [note, x * (1/newWidth)];
 	}
 
@@ -249,7 +240,6 @@ function start(username) {
 			if(cursors[i].md) {
 				cursors[i].str += cursors[i].dir
 				ctx.lineWidth = cursors[i].str;
-				//console.log(ctx.lineWidth);
 				if(cursors[i].str === 15) {
 					cursors[i].dir = -1;
 				} else if (cursors[i].str === 2) {
@@ -302,19 +292,10 @@ function start(username) {
 		cursors[i].ins = instruments[inst-1];
 		cursors[i].curIns = inst-1;
 		cursors[i].fill = colors[inst-1];
-		console.log("Changed " + i + " to instrument: " + inst);
 	}
 
 	resizeCanvas();
 	// Set tempo
-	var myVar = setInterval(playNotes, 250);
-	setInterval(pulse, 250);
-	function pulse () {
-		canvas.style.background = "linear-gradient(to bottom, rgba(242,242,244,1) 0%,rgba(232,238,242,1) 39%,rgba(232,232,232,1) 100%)";
-		setTimeout(dePulse, 125);
-	}
-
-	function dePulse () {
-		canvas.style.background = "linear-gradient(to bottom,  rgba(242,245,246,1) 0%,rgba(227,234,237,1) 37%,rgba(200,215,220,1) 100%)";
-	}
+	var myVar = setInterval(playNotes, 125);
+	setInterval(drawCursors, 30);
 }
