@@ -114,7 +114,8 @@ li.page-scroll {
 
 .projSquareInfo {
     display: table-cell;
-    vertical-align: middle;
+    padding-top: 10px;
+    text-align: left;
 }
 
 .projSquareInfo a {
