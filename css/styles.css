@@ -133,5 +133,11 @@ li.page-scroll {
     padding-bottom: 75px;
 }
 
+.social-media-link:hover {
+    text-decoration: none;
+    background: rgba(228, 228, 228, 0.06);
+}
 
-
+#contact-send-button:hover {
+    background: rgba(228, 228, 228, 0.06);
+}
