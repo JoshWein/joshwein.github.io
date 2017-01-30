@@ -141,3 +141,9 @@ li.page-scroll {
 #contact-send-button:hover {
     background: rgba(228, 228, 228, 0.06);
 }
+
+@media (max-width: 768px) {
+    .projSquare {
+        min-height: 200px;
+    }
+}
