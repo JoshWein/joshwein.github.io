@@ -1,19 +1,49 @@
 .navbar-fixed-top {
-    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+    background: #fff;
     box-shadow: 0 0.15em 0.35em 0 rgba(0, 0, 0, 0.135);
 }
 
+.navbar-default .navbar-nav>li>a:hover {
+    color: #333;
+    background-color: rgb(230, 230, 230);
+    border-radius: 2px;
+}
 .container-fluid {
     background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
 }
 
+#me_image {
+    top: 100px;
+    left: 53%;
+    width: 150px;
+    height: 150px;
+    display: block;
+    border: 3px solid #EEE;
+    overflow: hidden;
+    position: absolute;
+    border-radius: 20px 5px;
+}
+
+#me_image img {
+    position: relative !important;
+    display: inline !important;
+    top: -10px;
+    left: -25px;
+    height: auto;
+    width: auto;
+    max-width: 200px;
+    max-height: 200px;
+}
+
+#name_photo_container {
+    position: relative;
+}
+
 .name {
-    padding-top: 160px;
+    margin-right:330px;
+    padding-top: 120px;
     font-size: 5em;
-    background: -webkit-linear-gradient(top, #878787, #000);
-    background: linear-gradient(top, #878787, #000);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent
+    color: #fff;
 }
 
 #name {
@@ -23,7 +53,7 @@
 .nameB {
     padding-right: 0;
     padding-left: 0;
-    padding-top: 50px;
+    padding-top: 30px;
     -webkit-animation: bg-trans 10s linear infinite alternate;
     -webkit-transition: all 0.75s linear;
     -moz-transition: all 0.75s linear;
@@ -42,22 +72,36 @@
 
 
 .tagline {
-    padding: 0 0 30px;
-    margin-top: 10px
-}
-
-.tagline {
-    padding-bottom: 160px;
-    color: #000 !important;
-    text-decoration: none !important
+    margin-top: 20px;
+    margin-right: 220px;
+    padding-bottom: 100px;
+    color: #FFF;
+    text-decoration: none !important;
 }
 
 td {
     width: 2%;
 }
 
+#skills {
+    background-color: #222;
+    color: #EEE;
+}
+
+#skills span.btn {
+    cursor: default!important;
+}
+#skills span.btn:hover {
+    text-decoration: none;
+    color:#EEE;
+}
 .skill-panel:hover {
     background-color: #c0ddec;
+}
+
+#experience {
+    background-color: #222;
+    color: #EEE;
 }
 
 .edu {
@@ -146,4 +190,13 @@ li.page-scroll {
     .projSquare {
         min-height: 200px;
     }
+}
+
+body {
+    font-family: 'Lato',sans-serif;
+}
+
+#copyright {
+    background-color: #222;
+    color: #EEE;
 }

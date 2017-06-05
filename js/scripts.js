@@ -1,12 +1,12 @@
 $(function() {
     $('[class^="progress"]').bind('inview', function(event, visible) {
         if (visible === true) {
-            $('[class^="progress"]').animate({                
+            $('[class^="progress"]').animate({
                 width: [$('#prog').width(), "swing"]
             }, 1000);
             $('[class^="progress"]').unbind('inview');
             var handler = function() {
-                $('[class^="progress"]').animate({                
+                $('[class^="progress"]').animate({
                     width: [$('#prog').width(), "linear"]
                 }, 20);
             };
@@ -35,20 +35,20 @@ $('li > a').click(function() {
     $(this).parent().addClass('active');
 });
 /* Scroll fade funtion */
-$(function() {
-    $('[class^="row"]').each(function() {
-        $(this).css('opacity', 0) // immediately hide element
-            .waypoint(function(direction) {
-                if (direction === 'down') {
-                    $(this.element).animate({
-                        opacity: 1
-                    });
-                }
-            }, {
-                offset: '75%'
-            });
-    });
-});
+// $(function() {
+//     $('[class^="row"]').each(function() {
+//         $(this).css('opacity', 0) // immediately hide element
+//             .waypoint(function(direction) {
+//                 if (direction === 'down') {
+//                     $(this.element).animate({
+//                         opacity: 1
+//                     });
+//                 }
+//             }, {
+//                 offset: '75%'
+//             });
+//     });
+// });
 /**
  * author Remy Sharp
  * url http://remysharp.com/2009/01/26/element-in-view-event-plugin/
