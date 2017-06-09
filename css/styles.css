@@ -64,7 +64,6 @@
     transition: all 0.75s linear;
 }
 
-
 @-webkit-keyframes bg-trans {
     from {
         background-color: #62CE9B;
@@ -228,7 +227,11 @@ body {
     letter-spacing: 0.5px;
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
     margin-bottom: 30px;
 }
 
@@ -296,9 +299,7 @@ h1, h2, h3, h4, h5 {
     .exp_square {
         width: 90%;
     }
-
 }
-
 
 @media(min-width: 1100px) {
     .wrapper {
