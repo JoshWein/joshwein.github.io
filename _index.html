@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-US">
+
 <head>
     <meta charset="UTF-8">
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
@@ -7,7 +8,7 @@
     <meta name="description" content="Josh Wein | Software Developer">
     <meta name="author" content="Josh Wein">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<!--     <script async>
+    <!--     <script async>
         (function (i, s, o, g, r, a, m) {
             i['GoogleAnalyticsObject'] = r;
             i[r] = i[r] || function () {
@@ -29,115 +30,247 @@
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
     <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="theme-color" content="#e8d9d9">
-    <script src=
-                    "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> <!-- Javascript -->
-    <script src=
-                    "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Javascript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
     <script src="js/scripts.js" async></script>
     <script src="bower_components/waypoints/lib/jquery.waypoints.min.js"></script>
-    <link href=
-                  "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
-          rel="stylesheet">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
     <title>Josh Wein | Software Developer</title>
 </head>
+
 <body>
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header page-scroll">
-            <button class="navbar-toggle" data-target=
-                    "#bs-example-navbar-collapse-1" data-toggle="collapse"
-                    type="button"><span class="sr-only">Toggle
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button class="navbar-toggle" data-target="#bs-example-navbar-collapse-1" data-toggle="collapse" type="button"><span class="sr-only">Toggle
                     navigation</span> <span class="icon-bar"></span>
                 <span class="icon-bar"></span> <span class=
                                                              "icon-bar"></span></button>
-            <a class="navbar-brand" href=
-                    "contact.html">Contact</a>
-        </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id=
-                "bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav navbar-right">
-                <li class="hidden">
-                    <a href="#page-top"></a>
-                </li>
-                <li class="page-scroll">
-                    <a href="#about">About Me</a>
-                </li>
-                <li class="page-scroll">
-                    <a href="#prog">Skills</a>
-                </li>
-                <li class="page-scroll">
-                    <a href="#proj">Projects</a>
-                </li>
-                <li class="page-scroll">
-                    <a href="#exp">Experience</a>
-                </li>
-                <li class="page-scroll">
-                    <a onmouseover="this.innerHTML = 'Last Updated: 2/6/17'" onmouseout="this.innerHTML = 'Resume'"
-                       href="resume.pdf">
+                <a class="navbar-brand" href="contact.html">Contact</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#about">About Me</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#prog">Skills</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#proj">Projects</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#exp">Experience</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a onmouseover="this.innerHTML = 'Last Updated: 2/6/17'" onmouseout="this.innerHTML = 'Resume'" href="resume.pdf">
                         Resume
                     </a>
-                </li>
-                <li class="page-scroll">
-                    <a href="photores.html">Photo Restoration</a>
-                </li>
-                <li class="page-scroll">
-                    <a href="blog/">Blog</a>
-                </li>
-            </ul>
-        </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-</nav>
-<div class="container-fluid">
-    <div class="row" id="name">
-        <div class="col-md-12 text-center nameB">
-            <div id="name_photo_container">
-                <div id="me_image">
-                    <img src="./images/me.jpg" alt="">
+                    </li>
+                    <li class="page-scroll">
+                        <a href="photores.html">Photo Restoration</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="blog/">Blog</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <div class="container-fluid">
+        <div class="row" id="name">
+            <div class="col-md-12 text-center nameB">
+                <div id="name_photo_container">
+                    <div id="me_image">
+                        <img src="./images/me.jpg" alt="">
+                    </div>
+                    <h1 class="name">
+                        Josh Wein
+                    </h1>
+                    <h3 class="tagline">
+                        Software Developer
+                    </h3>
                 </div>
-                <h1 class="name">
-                    Josh Wein
-                </h1>
-                <h3 class="tagline">
-                    Software Developer
-                </h3>
             </div>
         </div>
+        <div class="row text-center" id="about">
+            <h2>About Me</h2>
+            <p>I'm a software developer currently based out of the North-East part of the US.</p>
+        </div>
+        <div class="row text-center" id="skills">
+            <h2>Skills</h2>
+            <span class="btn">JAVA</span>
+            <span class="btn">C</span>
+            <span class="btn">JAVASCRIPT</span>
+            <span class="btn">PYTHON</span>
+            <span class="btn">PHP</span>
+            <span class="btn">JQUERY</span>
+            <span class="btn">BOOTSTRAP</span>
+            <span class="btn">JAVAFX</span>
+            <span class="btn">SWING</span>
+            <span class="btn">JUnit</span>
+            <span class="btn">PHPUNIT</span>
+            <span class="btn">SPRING</span>
+            <span class="btn">MAVEN</span>
+            <span class="btn">IVY</span>
+            <span class="btn">MYSQL</span>
+            <span class="btn">MONGODB</span>
+        </div>
+        <div class="row text-center" id="projects">
+            <div class="row">
+                <h2>Projects</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center" id="project-list">
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4>
+                                International Klein Blue Life
+                            </h4>
+                            <p>
+                                Tower Defense Game with 40 levels and a built-in level editor. Built using Typescript.
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://ikblife-bd51a.firebaseapp.com/">Website</a>
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://github.com/JoshWein/TowerDefenseGame">View on
+                            Github</a>
+                            </p>
+                        </div>
+                        <a href="https://ikblife-bd51a.firebaseapp.com"><span class="link-spanner"></span></a>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                        <h4>Endless Trailers</h4>
+                            <p>
+                                Website where users can watch endless(80) amounts of trailers filtered by genre, actor and other filters.
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://endlesstrailers.com">Website</a>
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://github.com/JoshWein/EndlessTrailers">View on
+                            Github</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4><strong>
+                        Muse
+                    </strong></h4>
+                            <p>
+                                Cloud Computing Project - Muse is a realtime multiplayer music experience in the same vein as Plink. It was created mostly using Javascript, HTML5 Canvas, and NodeJS with Socket.IO for the realtime functionality as well as room seperation. The sounds were created in Ableton Live.
+                            </p>
+                            <p>
+                                <a target="_blank" href="muse/app.html">You can access a
+                            non
+                            multiplayer version of it here.</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4><strong>
+                        bootify
+                    </strong></h4>
+                            <p>
+                                Chrome extension that injects bootstrap style into any website. Allows the user to save websites to inject automatically
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US">Chrome
+                            Store Link</a>
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://github.com/JoshWein/bootify">View on
+                            Github</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4><strong>
+                        NLP Sentence Generator
+                    </strong></h4>
+                            <p>Cloud Computing Project - Generates sentences for a given topic using NLP techniques and backed by a 600,000 tweet corpus database.</p>
+                            <p>
+                                <a target="_blank" href="http://goo.gl/2ICPs9">View it here</a>
+                            </p>
+                            <p>
+                                <a target="_blank" href="http://tweetgenerator-jwein.rhcloud.com/Report.pdf">View paper</a>
+                            </p>
+                            <p>
+                                <small>*May take some time to start up. Hosted on OpenShift.</small>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4><strong>
+                        Key Rotation Decryptor/Encryptor
+                    </strong></h4>
+                            <p>JavaScript implementation of the <a target="_blank" href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère
+                        cipher/Key Rotation</a>.Decrypts and encrypts text based on the given key.
+                            </p>
+                            <p>
+                                <a target="_blank" href="http://www.joshwein.xyz/KeyRotation">View it here
+                        </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4><strong>
+                        Reddit Design Tutorials
+                    </strong></h4>
+                            <p>
+                                Ongoing project to create video tutorials focusing on specific aspects of designing subreddits on reddit.com using CSS.
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://goo.gl/1PAZNc">Currently has over
+                            100,000 views.</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="projSquare">
+                        <div class="projSquareInfo">
+                            <h4><strong>
+                        This Website
+                    </strong></h4>
+                            <p>
+                                This site was created using: HTML, CSS, Bootstrap, Javascript, and JQuery.
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://github.com/JoshWein/joshwein.github.io">View website on Github</a>
+                            </p>
+                            <p>
+                                The blog is generated using Jekyll.
+                            </p>
+                            <p>
+                                <a target="_blank" href="https://github.com/JoshWein/blog">View blog on Github</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row text-center" id="experience">
+            <h2>Experience</h2>
+        </div>
+        <div class="row text-center" id="copyright">
+            <p>© 2017 <em>Josh Wein</em></p>
+        </div>
     </div>
-    <div class="row text-center" id="about">
-        <h2>About Me</h2>
-        <p>I'm a software developer currently living in the tri-state area.</p>
-    </div>
-    <div class="row text-center" id="skills">
-        <h2>Skills</h2>
-        <span class="btn">JAVA</span>
-        <span class="btn">C</span>
-        <span class="btn">JAVASCRIPT</span>
-        <span class="btn">PYTHON</span>
-        <span class="btn">PHP</span>
-        <span class="btn">JQUERY</span>
-        <span class="btn">BOOTSTRAP</span>
-        <span class="btn">JAVAFX</span>
-        <span class="btn">SWING</span>
-        <span class="btn">JUnit</span>
-        <span class="btn">PHPUNIT</span>
-        <span class="btn">SPRING</span>
-        <span class="btn">MAVEN</span>
-        <span class="btn">IVY</span>
-        <span class="btn">MYSQL</span>
-        <span class="btn">MONGODB</span>
-    </div>
-    <div class="row text-center" id="projects">
-        <h2>Projects</h2>
-    </div>
-    <div class="row text-center" id="experience">
-        <h2>Experience</h2>
-    </div>
-    <div class="row text-center" id="copyright">
-        <p>© 2017 <em>Josh Wein</em></p>
-    </div>
-</div>
 </body>
+
 </html>
