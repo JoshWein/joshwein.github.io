@@ -64,6 +64,7 @@
     transition: all 0.75s linear;
 }
 
+
 @-webkit-keyframes bg-trans {
     from {
         background-color: #62CE9B;
@@ -125,41 +126,6 @@
     background-color: #DAD8D8 !important;
     color: #000
 }
-
-@media (min-width: 1920px) {
-    #skills {
-        padding: 20px 200px 40px 200px;
-    }
-    #project-list {
-        padding: 20px 200px 20px 200px;
-    }
-}
-
-@media (max-width: 1920px) {
-    #skills {
-        padding: 20px 200px 40px 200px;
-    }
-    #project-list {
-        padding: 20px 200px 20px 200px;
-    }
-}
-
-@media (max-width: 1100px) {
-    #skills {
-        padding: 0px 100px 20px 100px;
-    }
-    #project-list {
-        padding: 0px 50px 0px 50px;
-    }
-}
-
-@media (max-width: 767px) {
-    .skill_list_label,
-    .skill_list_items {
-        text-align: center
-    }
-}
-
 
 #projects {
     background-color: #EEE;
@@ -245,13 +211,6 @@
     margin: 0 auto;
 }
 
-@media(min-width: 1100px) {
-    .wrapper {
-        width: 1100px;
-        margin: auto;
-    }
-}
-
 .social-media-link:hover {
     text-decoration: none;
     background: rgba(228, 228, 228, 0.06);
@@ -276,4 +235,74 @@ h1, h2, h3, h4, h5 {
 #copyright {
     background-color: #222;
     color: #EEE;
+}
+
+@media (min-width: 1920px) {
+    #skills {
+        padding: 20px 200px 40px 200px;
+    }
+    #project-list {
+        padding: 20px 200px 20px 200px;
+    }
+}
+
+@media (max-width: 1920px) {
+    #skills {
+        padding: 20px 200px 40px 200px;
+    }
+    #project-list {
+        padding: 20px 200px 20px 200px;
+    }
+}
+
+@media (max-width: 1100px) {
+    #skills {
+        padding: 0px 100px 20px 100px;
+    }
+    #project-list {
+        padding: 0px 50px 0px 50px;
+    }
+}
+
+@media (max-width: 767px) {
+    .skill_list_label,
+    .skill_list_items {
+        text-align: center
+    }
+}
+
+@media (max-width: 500px) {
+    .name {
+        font-size: 45px;
+        margin-left: 50px;
+    }
+    .tagline {
+        margin: 0px 100px 0px 0px;
+        padding-top: 10px;
+        padding-bottom: 50px;
+    }
+    #me_image {
+        top: 80px;
+    }
+    #skills {
+        padding: 0px 30px 20px 30px;
+    }
+    #project-list {
+        padding: 0px 10px 0px 10px;
+    }
+    .projSquare {
+        width: 90%;
+    }
+    .exp_square {
+        width: 90%;
+    }
+
+}
+
+
+@media(min-width: 1100px) {
+    .wrapper {
+        width: 1100px;
+        margin: auto;
+    }
 }
