@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta name="description"
+          content="Josh Wein currently a student at Stony Brook University studying Computer Science.">
+    <script async>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                        (i[r].q = i[r].q || []).push(arguments)
+                    }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-68050416-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script src=
+                    "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> <!-- Javascript -->
+    <script src=
+                    "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
+    <script src="js/scripts.min.js" async></script>
+    <script src="bower_components/waypoints/lib/jquery.waypoints.min.js"></script>
+    <link href=
+                  "http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <title>
+        Josh Wein
+    </title>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button class="navbar-toggle" data-target=
+                    "#bs-example-navbar-collapse-1" data-toggle="collapse"
+                    type="button"><span class="sr-only">Toggle
+                    navigation</span> <span class="icon-bar"></span>
+                <span class="icon-bar"></span> <span class=
+                                                             "icon-bar"></span></button>
+            <a class="navbar-brand" href=
+                    "contact.html">Contact</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id=
+                "bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="hidden">
+                    <a href="#page-top"></a>
+                </li>
+                <li class="page-scroll">
+                    <a href="#prog">Programming</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="#edu">Education</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="#proj">Projects</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="#exp">Experience</a>
+                </li>
+                <li class="page-scroll">
+                    <a onmouseover="this.innerHTML = 'Last Updated: 2/6/17'" onmouseout="this.innerHTML = 'Resume'"
+                       href="resume.pdf">
+                        Resume
+                    </a>
+                </li>
+                <li class="page-scroll">
+                    <a href="photores.html">Photo Restoration</a>
+                </li>
+                <li class="page-scroll">
+                    <a href="blog/">Blog</a>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div class="container-fluid">
+    <div class="row" id="name">
+        <div class="col-md-12 text-center nameB">
+            <h1 class="name">
+                Josh Wein
+            </h1>
+            <h3 class="tagline">
+                Software Developer
+            </h3>
+        </div>
+    </div>
+    <div class="row edu">
+        <div class="col-md-6" id="prog">
+            <h2 class="rwtitle text-center">
+                <strong class="titleText">Programming Skills</strong>
+            </h2>
+            <br>
+            <div data-toggle="collapse" data-target="#collapse1" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Languages</h3>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse in">
+                    <table class="table" id="demo">
+                        <tr>
+                            <td>Java</td>
+                            <td>C</td>
+                            <td>JavaScript</td>
+                            <td>PHP</td>
+                            <td>Python</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div data-toggle="collapse" data-target="#collapse2" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Libraries and Frameworks</h3>
+                </div>
+                <div id="collapse2" class="panel-collapse collapse in">
+                    <table class="table">
+                        <tr>
+                            <td>jQuery</td>
+                            <td>Bootstrap</td>
+                            <td>JavaFX</td>
+                            <td>Swing</td>
+                        </tr>
+                        <tr>
+                            <td>JUnit & PHPUnit</td>
+                            <td>Spring</td>
+                            <td>Maven</td>
+                            <td>Ivy</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div data-toggle="collapse" data-target="#collapse3" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Databases</h3>
+                </div>
+                <div id="collapse3" class="panel-collapse collapse in">
+                    <table class="table">
+                        <tr>
+                            <td>MySQL</td>
+                            <td>MongoDB</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div data-toggle="collapse" data-target="#collapse4" class="panel panel-info text-center">
+                <div class="panel-heading skill-panel">
+                    <h3 class="panel-title">Version Control</h3>
+                </div>
+                <div id="collapse4" class="panel-collapse collapse in">
+                    <table class="table">
+                        <tr>
+                            <td>Git/Github</td>
+                            <td>Subversion</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 text-left" id="edu">
+            <h2 class="rwtitle text-center">
+                <strong class="titleText">Education</strong>
+            </h2>
+            <h4 class="text-center">
+                Currently on course to graduate from Stony Brook
+                University with a BS in Computer Science in 2017.
+            </h4>
+            <h3 class="text-center">
+                Courses
+            </h3>
+            <h4>
+                Algorithms
+                <small>- Big O Analysis, Dynamic Programming
+                </small>
+            </h4>
+            <h4>
+                Cloud Computing
+                <small>- HTML/CSS, Bootstrap, Javascript/JQuery, PHP, NGINX/Apache, RabbitMQ, MySQL/MongoDB, Linux
+                    Administration
+                </small>
+            </h4>
+            <h4>
+                Computer Music
+                <small>- Web Audio, Javascript</small>
+            </h4>
+            <h4>
+                Computer Science II
+                <small>- Java, Data Structures</small>
+            </h4>
+            <h4>
+                Computer Science III
+                <small>- Java, Javafx, Design Patterns</small>
+            </h4>
+            <h4>
+                Natural Language Processing
+                <small>- Language Modeling, Information Extraction, NLP Techniques</small>
+            </h4>
+            <h4>
+                Operating Systems
+                <small>- C, File Systems, CPU Scheduling</small>
+            </h4>
+            <h4>
+                Software Engineering
+                <small>
+                    - Software Design, SDLC, TypeScript
+                </small>
+            </h4>
+            <h4>
+                Systems Fundamentals I
+                <small>- MIPS, Computer Architecture</small>
+            </h4>
+            <h4>
+                Systems Fundamentals II
+                <small>- C, Version
+                    Control, Multi-Threaded Programming
+                </small>
+            </h4>
+        </div>
+
+    </div>
+    <div class="row proj" id="proj">
+        <div class="col-md-12 text-center">
+            <div class="row" style="padding-bottom: 20px">
+                <h2 class="rwtitle">
+                    <strong class="titleText" id="projectsTitle">Projects</strong>
+                </h2>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        International Klein Blue Life
+                    </strong></h4>
+                    <p>
+                        Tower Defense Game with 40 levels and a built-in level editor. Built using Typescript.
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://ikblife-bd51a.firebaseapp.com/">Website</a>
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://github.com/JoshWein/TowerDefenseGame">View on
+                            Github</a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        Endless Trailers
+                    </strong></h4>
+                    <p>
+                        Website where users can watch endless(80) amounts of trailers filtered by genre, actor and other filters.
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://endlesstrailers.com">Website</a>
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://github.com/JoshWein/EndlessTrailers">View on
+                            Github</a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        Muse
+                    </strong></h4>
+                    <p>
+                        Cloud Computing Project - Muse is a realtime multiplayer music experience in the same vein as
+                        Plink. It was created mostly
+                        using
+                        Javascript, HTML5 Canvas, and NodeJS with Socket.IO for the realtime functionality as well as
+                        room
+                        seperation. The sounds were created in Ableton Live.
+                    </p>
+                    <p>
+                        <a target="_blank" href="muse/app.html">You can access a
+                            non
+                            multiplayer version of it here.</a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        bootify
+                    </strong></h4>
+                    <p>
+                        Chrome extension that injects
+                        bootstrap style into any website.
+                        Allows the user to save websites
+                        to inject automatically
+                    </p>
+                    <p>
+                        <a target="_blank"
+                           href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US">Chrome
+                            Store Link</a>
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://github.com/JoshWein/bootify">View on
+                            Github</a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        NLP Sentence Generator
+                    </strong></h4>
+                    <p>Cloud Computing Project - Generates sentences for a given topic using
+                        NLP techniques and backed by a 600,000
+                        tweet corpus database.</p>
+                    <p>
+                        <a target="_blank" href="http://goo.gl/2ICPs9">View it here</a>
+                    </p>
+                    <p>
+                        <a target="_blank" href="http://tweetgenerator-jwein.rhcloud.com/Report.pdf">View paper</a>
+                    </p>
+                    <p>
+                        <small>*May take some time to start up. Hosted on OpenShift.</small>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        Key Rotation Decryptor/Encryptor
+                    </strong></h4>
+                    <p>JavaScript implementation of the <a target="_blank"
+                                                           href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère
+                        cipher/Key Rotation</a>.Decrypts and encrypts text based on the given key.
+                    </p>
+                    <p>
+                        <a target="_blank" href="http://www.joshwein.xyz/KeyRotation">View it here
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        Reddit Design Tutorials
+                    </strong></h4>
+                    <p>
+                        Ongoing project to create video tutorials focusing on
+                        specific aspects of designing subreddits on reddit.com
+                        using CSS.
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://goo.gl/1PAZNc">Currently has over
+                            100,000 views.</a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        This Website
+                    </strong></h4>
+                    <p>
+                        This site was created using: HTML, CSS, Bootstrap,
+                        Javascript, and JQuery.
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://github.com/JoshWein/joshwein.github.io">View website on Github</a>
+                    </p>
+                    <p>
+                        The blog is generated using Jekyll.
+                    </p>
+                    <p>
+                        <a target="_blank" href="https://github.com/JoshWein/blog">View blog on Github</a>
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        Editable Scalable Wiki
+                    </strong></h4>
+                    <p>
+                        Cloud Computing Project - Editable wiki created running on a full stack setup using: HTML, CSS,
+                        Bootstrap, Javascript,
+                        JQuery,
+                        Ajax, and PHP for the frontend; RabbitMQ for messaging; and a multi-server MongoDB sharded setup
+                        for
+                        the
+                        backend with REST API support.
+                    </p>
+                </div>
+            </div>
+            <div class="projSquare col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="projSquareInfo">
+                    <h4><strong>
+                        Journey Through Europe
+                    </strong></h4>
+                    <p>
+                        Computer Science III Project - Recreated the Journey Through Europe board game using
+                        JavaFX.
+                    </p>
+                    <p>
+                        Designed AI that could complete a 6 player game
+                        completely controlled by the AI.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="githubRow proj row">
+        <div class="col-md-12 text-center" id="githubButton" style="float:right">
+            <h3><a target="_blank" href="https://github.com/JoshWein"><span></span><img style="width:100px"
+                                                                                        src="images/GitHub_Logo.png"
+                                                                                        alt="Github"/>
+            </a></h3>
+        </div>
+    </div>
+
+    <div class="row" id="exp">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 class="rwtitle">
+                    <strong class="titleText">Experience</strong>
+                </h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h3 class="text-center" style="padding-bottom: 15px">
+                    Work Experience
+                </h3>
+                <div class="row">
+                	<div class="col-md-12">
+	                	<div class="list-group">
+	                		<h4 class="list-group-item-heading">
+	                            BlackRock Inc.
+	                            <small>June 2016 - July 2016</small>
+	                        </h4>
+	                        <p>Software Engineering Intern</p>
+	                        <h4 class="list-group-item-heading">
+	                            Viacom
+
+	                            <small>Jan 2016 - May 2016</small>
+	                        </h4>
+	                        <p>Multiplatform Engineering Intern</p>
+	                        <h4 class="list-group-item-heading">
+	                            Everest BBN
+
+	                            <small>Feb 2013 - Aug
+	                                2013
+	                            </small>
+	                        </h4>
+	                        <p>Network Intern</p>
+	                	</div>
+	                	<h3 class="text-center" style="padding-bottom: 15px">
+	                    	Teaching Assistant
+	                	</h3>
+	                	<div class="list-group">
+		                	<h4 class="list-group-item-heading">
+		                        Computer Science III
+		                        <small>CSE 219</small>
+		                    </h4>
+		                    <p>
+		                    Program design, coding, testing, and debugging. Application of these skills to the construction of robust programs of 1000 to 2000 lines of source code. Use of programming environments and tools to aid in the software development process.
+		                    </p>
+		                    <h4 class="list-group-item-heading">
+		                        Computer Music
+		                        <small>CSE 393</small>
+		                    </h4>
+		                    <p>
+		                    Concepts and technologies behind the representation, composition, processing and synthesis of digital music. Fundamental physical properties of sound, how those properties are represented digitally, how sound is generated and processed, digital sound and music formats used, and the languages, tools, and APIs used for compositing sound and music.
+		                    </p>
+	                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3 class="text-center">
+                    Tutoring
+                </h3>
+                <h4 class="text-center">
+                    Tutored the following courses for Stony Brook's
+                    Academic Success and Tutoring Department:
+                </h4>
+                <div class="list-group">
+                    <h4 class="list-group-item-heading">
+                        Introduction to Computer Science
+                        <small>CSE 110</small>
+                    </h4>
+                    <p>
+                        Fundamentals of computer science; algorithmic design, problem-solving techniques for computer
+                        programming, fundamentals of digital logic and computer organization.
+                    </p>
+                    <h4 class="list-group-item-heading">
+                        Computer Science I
+                        <small>CSE 114</small>
+                    </h4>
+                    <p>
+                        Program structure, conditional and iterative programming, procedures, arrays and records, object
+                        classes, encapsulation, information hiding, inheritance, polymorphism, file I/O.
+                    </p>
+                    <h4 class="list-group-item-heading">
+                        Computer Science II
+                        <small>CSE 214</small>
+                    </h4>
+                    <p>
+                        Programming and applications of data structures; stacks, queues, lists, binary trees, heaps,
+                        priority queues, balanced trees and graphs, recursive programming and sorting and searching
+                        algorithms.
+                    </p>
+                    <h4 class="list-group-item-heading">
+                        Foundations of Computer Science
+                        <small>CSE 215</small>
+                    </h4>
+                    <p>
+                        Logic; functions, relations, and sets; recursion and functional programming; elementary logic;
+                        and
+                        mathematical induction and other proof techniques.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
