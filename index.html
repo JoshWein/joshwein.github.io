@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en-US" data-bs-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -8,22 +8,14 @@
     <meta name="description" content="Josh Wein | Software Developer">
     <meta name="author" content="Josh Wein">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <script async>
-        (function(i, s, o, g, r, a, m) {
-            i['GoogleAnalyticsObject'] = r;
-            i[r] = i[r] || function() {
-                (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date();
-            a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            m.parentNode.insertBefore(a, m)
-        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-X0211WWCBC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-        ga('create', 'UA-68050416-1', 'auto');
-        ga('send', 'pageview');
-
+        gtag('config', 'G-X0211WWCBC');
     </script>
     <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
@@ -31,55 +23,57 @@
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
     <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="theme-color" content="#e8d9d9">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Javascript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
     <script src="js/scripts.js" async></script>
     <script src="bower_components/waypoints/lib/jquery.waypoints.min.js"></script>
-    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="css/styles.css" rel="stylesheet">
     <title>Josh Wein | Software Developer</title>
 </head>
 
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header page-scroll">
-                <button class="navbar-toggle" data-target="#bs-example-navbar-collapse-1" data-toggle="collapse" type="button"><span class="sr-only">Toggle
-                    navigation</span> <span class="icon-bar"></span>
-                <span class="icon-bar"></span> <span class=
-                                                             "icon-bar"></span></button>
-                <a class="navbar-brand" href="contact.html">Contact</a>
-            </div>
+    <nav class="navbar navbar-expand-lg fixed-top bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="contact.html">Contact</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav navbar-right">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ">
                     <li class="hidden">
                         <a href="#page-top"></a>
                     </li>
-                    <li class="page-scroll">
-                        <a href="#about">About Me</a>
+                    <li class="page-scroll nav-item">
+                        <a class="nav-link" href="#about">About Me</a>
+                    </li>
+                    <li class="page-scroll nav-item">
+                        <a class="nav-link" href="#skills">Skills</a>
+                    </li>
+                    <li class="page-scroll nav-item">
+                        <a class="nav-link" href="#projects">Projects</a>
+                    </li>
+                    <li class="page-scroll nav-item">
+                        <a class="nav-link" href="#experience">Experience</a>
                     </li>
                     <li class="page-scroll">
-                        <a href="#skills">Skills</a>
+                        <a class="nav-link" onmouseover="this.innerHTML = 'Last Updated: 2/6/17'"
+                            onmouseout="this.innerHTML = 'Resume'" href="resume.pdf">
+                            Resume
+                        </a>
                     </li>
                     <li class="page-scroll">
-                        <a href="#projects">Projects</a>
+                        <a class="nav-link" href="photores.html">Photo Restoration</a>
                     </li>
                     <li class="page-scroll">
-                        <a href="#experience">Experience</a>
-                    </li>
-                    <li class="page-scroll">
-                        <a onmouseover="this.innerHTML = 'Last Updated: 2/6/17'" onmouseout="this.innerHTML = 'Resume'" href="resume.pdf">
-                        Resume
-                    </a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="photores.html">Photo Restoration</a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="blog/">Blog</a>
+                        <a class="nav-link" href="blog/">Blog</a>
                     </li>
                 </ul>
             </div>
@@ -87,66 +81,68 @@
         </div>
         <!-- /.container-fluid -->
     </nav>
-    <div class="container-fluid">
+    <div class="container-fluid gy-2">
         <div class="row" id="name">
-            <div class="col-md-12 text-center nameB">
+            <div class="col-md-12 text-center nameB p-5">
                 <div id="name_photo_container">
-                    <div id="me_image">
-                        <img src="./images/me.jpg" alt="">
-                    </div>
                     <h1 class="name">
-                        Josh Wein
+                        Josh Wein<small class="text-body-secondary">
+                            Software Developer
+                        </small>
                     </h1>
-                    <h3 class="tagline">
-                        Software Developer
-                    </h3>
+
                 </div>
             </div>
         </div>
-        <div class="row text-center" id="about">
-            <h2>About Me</h2>
-            <p>I'm a software developer currently living in the North-Eastern part of the US. Check out what I'm <a target="_blank" href="https://open.spotify.com/user/g0u1d1e1/playlist/3bkHZLOB8D4zawAN1zME60">currently listening to.</a></p>
-            <p>I try to divide my time as equally as possible between tech, finding new books to read, finding new music to listen to, finding new food to eat, scuba diving, snowboarding and sleeping (otherwise known as the 3 S's).</p>
+        <div class="row text-center bg-body-tertiary p-3" id="about">
+            <div class="col">
+                <h2>About Me</h2>
+                <p>Software developer currently living in the North-Eastern part of the US. Focused on building
+                    <mark>scalable</mark>
+                    systems</p>
+                <p>I try to divide my time as equally as possible between tech, finding new books to read, finding new
+                    music
+                    to listen to, and finding new food to eat</p>
+            </div>
         </div>
-        <div class="row text-center" id="skills">
-            <h2>Skills</h2>
+        <div class="row text-center bg-body-primary p-3" id="skills">
             <div class="row">
-                <div class="skill_list_label col-sm-6">Languages</div>
-                <div class="skill_list_items col-sm-6">
-                    <span class="btn">ANGULARJS</span>
-                    <span class="btn">C</span>
-                    <span class="btn">C++</span>
-                    <span class="btn">CSS3</span>
-                    <span class="btn">HTML5</span>
-                    <span class="btn">JAVA</span>
-                    <span class="btn">JAVASCRIPT</span>
-                    <span class="btn">PHP</span>
-                    <span class="btn">PYTHON</span>
-                    <span class="btn">SQL</span>
-                    <span class="btn">TYPESCRIPT</span>
-                </div>
-                <div class="skill_list_label col-sm-6">Libraries &amp; Frameworks</div>
-                <div class="skill_list_items col-sm-6">
-                    <span class="btn">BOOTSTRAP</span>
-                    <span class="btn">IVY</span>
-                    <span class="btn">JAVAFX</span>
-                    <span class="btn">JQUERY</span>
-                    <span class="btn">JUNIT</span>
-                    <span class="btn">MAVEN</span>
-                    <span class="btn">NPM</span>
-                    <span class="btn">PHPUNIT</span>
-                    <span class="btn">SPRING</span>
-                    <span class="btn">SWING</span>
-                </div>
-                <div class="skill_list_label col-sm-6">Databases</div>
-                <div class="skill_list_items col-sm-6">
-                    <span class="btn">MONGODB</span>
-                    <span class="btn">MYSQL</span>
-                    <span class="btn">ORACLE</span>
+                <h2>Nonexhaustive Skill List (as of 2024)</h2>
+                <div class="row">
+                    <div class="skill_list_label col-sm-6">Focus Languages</div>
+                    <div class="skill_list_items col-sm-6">
+                        <span class="btn">JAVA</span>
+                        <span class="btn">JAVASCRIPT</span>
+                        <span class="btn">PYTHON</span>
+                        <span class="btn">C++</span>
+                        <span class="btn">SQL</span>
+                        <span class="btn">CSS</span>
+                        <span class="btn">HTML</span>
+                    </div>
+                    <div class="skill_list_label col-sm-6">Libraries &amp; Frameworks Spotlight</div>
+                    <div class="skill_list_items col-sm-6">
+                        <span class="btn">SPRING (most Spring Frameworks)</span>
+                        <span class="btn">ANGULAR/REACT/VUE</span>
+                        <span class="btn">BOOTSTRAP/NAIVEUI</span>
+                        <span class="btn">JQUERY</span>
+                        <span class="btn">JUNIT</span>
+                        <span class="btn">DOCKER</span>
+                        <span class="btn">MAVEN/GRADLE</span>
+                        <span class="btn">TERRAFORM</span>
+                    </div>
+                    <div class="skill_list_label col-sm-6">Datastores</div>
+                    <div class="skill_list_items col-sm-6">
+                        <span class="btn">POSTGRES</span>
+                        <span class="btn">ORACLE</span>
+                        <span class="btn">S3</span>
+                        <span class="btn">REDIS</span>
+                        <span class="btn">KAFKA</span>
+                        <span class="btn">RABBITMQ</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="row text-center" id="projects">
+        <div class="row text-center bg-body-secondary p-3" id="projects">
             <h2>Projects</h2>
             <div class="col-md-12 text-center" id="project-list">
                 <div class="projSquare">
@@ -159,7 +155,7 @@
                         </p>
                         <p>
                             <a target="_blank" href="https://github.com/JoshWein/TowerDefenseGame">View on
-                            Github</a>
+                                Github</a>
                         </p>
                     </div>
                     <a href="https://ikblife-bd51a.firebaseapp.com"><span class="link-spanner"></span></a>
@@ -168,11 +164,12 @@
                     <div class="projSquareInfo">
                         <h4>Endless Trailers</h4>
                         <p>
-                            Website where users can watch endless(80) amounts of trailers filtered by genre, actor and other filters.
+                            Website where users can watch endless(80) amounts of trailers filtered by genre, actor and
+                            other filters.
                         </p>
                         <p>
                             <a target="_blank" href="https://github.com/JoshWein/EndlessTrailers">View on
-                            Github</a>
+                                Github</a>
                         </p>
                     </div>
                     <a href="https://endlesstrailers.com"><span class="link-spanner"></span></a>
@@ -183,7 +180,10 @@
                             Muse
                         </h4>
                         <p>
-                            Cloud Computing Project - Muse is a realtime multiplayer music experience in the same vein as Plink. It was created mostly using Javascript, HTML5 Canvas, and NodeJS with Socket.IO for the realtime functionality as well as room seperation. The sounds were created in Ableton Live.
+                            Cloud Computing Project - Muse is a realtime multiplayer music experience in the same vein
+                            as Plink. It was created mostly using Javascript, HTML5 Canvas, and NodeJS with Socket.IO
+                            for the realtime functionality as well as room seperation. The sounds were created in
+                            Ableton Live.
                         </p>
                     </div>
                     <a href="muse/app.html"><span class="link-spanner"></span></a>
@@ -194,21 +194,25 @@
                             bootify
                         </h4>
                         <p>
-                            Chrome extension that injects bootstrap style into any website. Allows the user to save websites to inject automatically
+                            Chrome extension that injects bootstrap style into any website. Allows the user to save
+                            websites to inject automatically
                         </p>
                         <p>
                             <a target="_blank" href="https://github.com/JoshWein/bootify">View on
-                            Github</a>
+                                Github</a>
                         </p>
                     </div>
-                    <a href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US"><span class="link-spanner"></span></a>
+                    <a
+                        href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US"><span
+                            class="link-spanner"></span></a>
                 </div>
                 <div class="projSquare">
                     <div class="projSquareInfo">
                         <h4>
                             NLP Sentence Generator
                         </h4>
-                        <p>Cloud Computing Project - Generates sentences for a given topic using NLP techniques and backed by a 600,000 tweet corpus database.</p>
+                        <p>Cloud Computing Project - Generates sentences for a given topic using NLP techniques and
+                            backed by a 600,000 tweet corpus database.</p>
                         <p>
                             <a target="_blank" href="http://tweetgenerator-jwein.rhcloud.com/Report.pdf">View paper</a>
                         </p>
@@ -223,8 +227,9 @@
                         <h4>
                             Key Rotation Decryptor/Encryptor
                         </h4>
-                        <p>JavaScript implementation of the <a target="_blank" href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère
-                        cipher/Key Rotation</a>. Decrypts and encrypts text based on the given key.
+                        <p>JavaScript implementation of the <a target="_blank"
+                                href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère
+                                cipher/Key Rotation</a>. Decrypts and encrypts text based on the given key.
                         </p>
                     </div>
                     <a href="http://www.joshwein.xyz/KeyRotation"><span class="link-spanner"></span></a>
@@ -235,7 +240,8 @@
                             Reddit Design Tutorials
                         </h4>
                         <p>
-                            Ongoing project to create video tutorials focusing on specific aspects of designing subreddits on reddit.com using CSS.
+                            Ongoing project to create video tutorials focusing on specific aspects of designing
+                            subreddits on reddit.com using CSS.
                         </p>
                     </div>
                     <a href="https://goo.gl/1PAZNc"><span class="link-spanner"></span></a>
@@ -249,7 +255,8 @@
                             This site was created using: HTML, CSS, Bootstrap, Javascript, and JQuery.
                         </p>
                         <p>
-                            <a target="_blank" href="https://github.com/JoshWein/joshwein.github.io">View website on Github</a>
+                            <a target="_blank" href="https://github.com/JoshWein/joshwein.github.io">View website on
+                                Github</a>
                         </p>
                         <p>
                             The blog is generated using Jekyll.
@@ -262,40 +269,47 @@
                 </div>
             </div>
         </div>
-        <div class="row text-center" id="experience">
-            <div class="wrapper">
-                <div class="col-sm-10 col-sm-offset-1">
-                    <h2>Experience</h2>
-                    <div class="exp_date">September 2017 - Current</div>
-                    <div class="exp_square">
-                        <div class="exp_company">Bloomberg L.P.</div>
-                        <div class="exp_title">Software Developer</div>
-                        <div class="exp_description">Hopefully doing something important.</div>
-                    </div>
-                    <div class="exp_date">Summer 2016</div>
-                    <div class="exp_square">
-                        <div class="exp_company">BlackRock Inc.</div>
-                        <div class="exp_title">Software Engineering Intern</div>
-                        <div class="exp_description">Built the next version of a Java backend server for the Aladdin Product Group leveraging Spring, Maven, and Ivy. Brought the project from design through QA testing to a production release.</div>
-                    </div>
-                    <div class="exp_date">Jan 2016 - May 2016</div>
-                    <div class="exp_square">
-                        <div class="exp_company">Viacom</div>
-                        <div class="exp_title">Multiplatform Engineering Intern</div>
-                        <div class="exp_description">Led a team of developers in creating an internal web tool for automating configuration file generation. Involved in the full SDLC including project scheduling estimations, design, and development of the project.</div>
-                    </div>
-                    <div class="exp_date">2014 - 2015</div>
-                    <div class="exp_square">
-                        <div class="exp_company">Stony Brook University</div>
-                        <div class="exp_title">Teaching Assistant &amp; Tutor</div>
-                        <div class="exp_description">Held office hours each week to assist college students taking Computer Science III and Computer Music with course assignments and exam preparation. Assisted college students with computer science coursework and projects. Acted as a mentor for the students; teaching study habits and homework strategies. </div>
-                    </div>
-                    <div class="exp_date">2013</div>
-                    <div class="exp_square">
-                        <div class="exp_company">Everest BBN</div>
-                        <div class="exp_title">Network Intern</div>
-                        <div class="exp_description">Performed on-site maintenance and troubleshooting for servers and network issues. Set up networks for new businesses by running cable and setting up servers. Provided over the phone and on-site customer support. </div>
-                    </div>
+        <div class="row text-center p-3 wrapper" id="experience">
+            <div class="col-sm-12 col-sm-offset-1">
+                <h2>Experience</h2>
+                <div class="exp_date">September 2017 - Current</div>
+                <div class="exp_square">
+                    <div class="exp_company">Bloomberg L.P.</div>
+                    <div class="exp_title">Tech Lead/Software Developer</div>
+                    <div class="exp_description">Tech Lead in Bloomberg Law focused on the Litigation Solutions area (Dockets Product). Focused on designing and delivering long term scalable projects and mentoring engineers.</div>
+                </div>
+                <div class="exp_date">Summer 2016</div>
+                <div class="exp_square">
+                    <div class="exp_company">BlackRock Inc.</div>
+                    <div class="exp_title">Software Engineering Intern</div>
+                    <div class="exp_description">Built the next version of a Java backend server for the Aladdin
+                        Product Group leveraging Spring, Maven, and Ivy. Brought the project from design through QA
+                        testing to a production release.</div>
+                </div>
+                <div class="exp_date">Jan 2016 - May 2016</div>
+                <div class="exp_square">
+                    <div class="exp_company">Viacom</div>
+                    <div class="exp_title">Multiplatform Engineering Intern</div>
+                    <div class="exp_description">Led a team of developers in creating an internal web tool for
+                        automating configuration file generation. Involved in the full SDLC including project
+                        scheduling estimations, design, and development of the project.</div>
+                </div>
+                <div class="exp_date">2014 - 2015</div>
+                <div class="exp_square">
+                    <div class="exp_company">Stony Brook University</div>
+                    <div class="exp_title">Teaching Assistant &amp; Tutor</div>
+                    <div class="exp_description">Held office hours each week to assist college students taking
+                        Computer Science III and Computer Music with course assignments and exam preparation.
+                        Assisted college students with computer science coursework and projects. Acted as a mentor
+                        for the students; teaching study habits and homework strategies. </div>
+                </div>
+                <div class="exp_date">2013</div>
+                <div class="exp_square">
+                    <div class="exp_company">Everest BBN</div>
+                    <div class="exp_title">Network Intern</div>
+                    <div class="exp_description">Performed on-site maintenance and troubleshooting for servers and
+                        network issues. Set up networks for new businesses by running cable and setting up servers.
+                        Provided over the phone and on-site customer support. </div>
                 </div>
             </div>
         </div>

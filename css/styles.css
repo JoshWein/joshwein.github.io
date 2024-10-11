@@ -1,43 +1,3 @@
-.navbar-fixed-top {
-    background: #fff;
-    box-shadow: 0 0.15em 0.35em 0 rgba(0, 0, 0, 0.135);
-}
-
-.navbar-default .navbar-nav>li>a {
-    padding-left: 10px;
-}
-
-.navbar-default .navbar-nav>li>a:hover {
-    color: #333;
-    background-color: rgb(230, 230, 230);
-    border-radius: 2px;
-}
-
-#me_image {
-    top: 100px;
-    left: 53%;
-    width: 150px;
-    height: 150px;
-    display: block;
-    border: 3px solid #EEE;
-    overflow: hidden;
-    position: absolute;
-    border-radius: 20px 5px;
-    box-shadow: 5px 5px 20px #111;
-}
-
-#me_image img {
-    position: relative !important;
-    display: inline !important;
-    top: -10px;
-    left: -25px;
-    height: auto;
-    width: auto;
-    max-width: 200px;
-    max-height: 200px;
-    box-shadow: 100px 100px 15px #000;
-}
-
 #name_photo_container {
     position: relative;
 }
@@ -46,7 +6,7 @@
     margin-right: 330px;
     padding-top: 120px;
     font-size: 5em;
-    color: #fff;
+    color: #edffff;
 }
 
 #name {
@@ -66,7 +26,7 @@
 
 @-webkit-keyframes bg-trans {
     from {
-        background-color: #62CE9B;
+        background-color: #347859;
     }
     to {
         background-color: #45ce93;
@@ -78,17 +38,6 @@
     padding-bottom: 100px;
     color: #FFF;
     text-decoration: none !important;
-}
-
-#about {
-    padding-top: 15px;
-    padding-bottom: 35px;
-    background-color: #EEE;
-}
-
-#skills {
-    background-color: #222;
-    color: #EEE;
 }
 
 #skills span.btn {
@@ -113,28 +62,11 @@
     margin-bottom: 10px;
 }
 
-#experience {
-    background-color: #222;
-    color: #EEE;
-}
-
-.navbar-default .navbar-nav>.active>a,
-.navbar-default .navbar-nav>.active>a:focus,
-.navbar-default .navbar-nav>.active>a:hover {
-    -webkit-transition: background-color 700ms ease;
-    background-color: #DAD8D8 !important;
-    color: #000
-}
-
-#projects {
-    background-color: #EEE;
-    padding-top: 20px;
-}
 
 .projSquare {
     min-height: 250px;
     max-width: 470px;
-    background-color: #FFF;
+    background-color: #0000004f;
     border-radius: 10px;
     margin: 5px;
     display: inline-block;
@@ -143,7 +75,7 @@
 
 .projSquare:hover {
     transition-duration: 500ms;
-    background-color: #AAA;
+    background-color: #00000085;
 }
 
 .projSquareInfo {
@@ -176,10 +108,6 @@
     top: 0;
     left: 0;
     z-index: 1;
-}
-
-#experience {
-    padding: 20px 0px 40px 0px;
 }
 
 .exp_date {
@@ -221,19 +149,8 @@
 
 body {
     font-family: 'Lato', sans-serif;
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 25px;
-    letter-spacing: 0.5px;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-    margin-bottom: 30px;
-}
 
 #copyright {
     background-color: #222;
