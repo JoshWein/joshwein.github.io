@@ -45,11 +45,12 @@
     background-color: #62CE9B;
     margin: 5px;
     font-weight: bold;
+    color: #000000;
 }
 
 #skills span.btn:hover {
     text-decoration: none;
-    color: #EEE;
+    color: #7efffa;
 }
 
 .skill_list_label {
