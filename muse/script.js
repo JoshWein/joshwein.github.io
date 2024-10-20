@@ -30,7 +30,7 @@ function loadPage(username) {
 		for(var j = 16; j  >= 1; j--) {
 			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.mp3';
 			instruments[i].push(new Howl({
-				src: [path],
+				url: [path],
 				volume: 0
 			}));
 		}
