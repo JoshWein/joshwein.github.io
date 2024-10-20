@@ -30,7 +30,7 @@ function loadPage(username) {
 		for(var j = 16; j  >= 1; j--) {
 			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.mp3';
 			instruments[i].push(new Howl({
-				urls: [path],
+				src: [path],
 				volume: 0
 			}));
 		}
@@ -246,7 +246,7 @@ function start(username) {
 					cursors[i].dir = 1;
 				}
 			} else {
-				cursors[i].ins[cursors[i].currentNote].fadeOut(0, 1);
+				cursors[i].ins[cursors[i].currentNote].fade(0, 1);
 				ctx.lineWidth = 1;
 			}
 			ctx.strokeStyle = cursors[i].fill;
@@ -270,17 +270,17 @@ function start(username) {
 			if(cursors[i].setPlay) {
 				var note = calculateNote(cursors[i].x, cursors[i].y);
 				if(cursors[i].currentNote === note[0]) {
-					cursors[i].ins[cursors[i].currentNote].fadeOut(note[1], 1);
+					cursors[i].ins[cursors[i].currentNote].fade(note[1], 1);
 					cursors[i].ins[cursors[i].currentNote].play();
 				} else {
-					cursors[i].ins[cursors[i].currentNote].fadeOut(0, 1);
+					cursors[i].ins[cursors[i].currentNote].fade(0, 1);
 					cursors[i].currentNote = note[0];
 					cursors[i].ins[cursors[i].currentNote].volume(note[1]);
 					cursors[i].ins[cursors[i].currentNote].play();
 					cursors[i].setPlay = 0;
 				}
 			} else {
-				cursors[i].ins[cursors[i].currentNote].fadeOut(0, 1);
+				cursors[i].ins[cursors[i].currentNote].fade(0, 1);
 				cursors[i].setPlay = 0;
 				cursors[i].md = 0;
 			}
