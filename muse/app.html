@@ -29,7 +29,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="style.css?v=dev">
 	<!-- Google tag (gtag.js), the same property as the rest of the site -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-X0211WWCBC"></script>
 	<script>
@@ -39,8 +39,25 @@
 
 		gtag('config', 'G-X0211WWCBC');
 	</script>
-	<script src="howler/howler.core.min.js" defer></script>
-	<script src="script.js" type="module"></script>
+	<!-- Every Muse file is fetched with the same version, so a browser never
+	     mixes a cached old module with a new one (which stops the page from
+	     loading). The deploy workflow swaps "dev" for the commit. -->
+	<script type="importmap">
+	{
+		"imports": {
+			"./firebase-config.js": "./firebase-config.js?v=dev",
+			"./loop.js": "./loop.js?v=dev",
+			"./mixer.js": "./mixer.js?v=dev",
+			"./multiplayer.js": "./multiplayer.js?v=dev",
+			"./scales.js": "./scales.js?v=dev",
+			"./synth.js": "./synth.js?v=dev",
+			"./tempo.js": "./tempo.js?v=dev",
+			"./viz.js": "./viz.js?v=dev"
+		}
+	}
+	</script>
+	<script src="howler/howler.core.min.js?v=dev" defer></script>
+	<script src="script.js?v=dev" type="module"></script>
 </head>
 <body>
 	<header class="bar">
@@ -74,7 +91,8 @@
 	</main>
 
 	<div class="intro" id="intro">
-		<form class="card" id="join">
+		<!-- If script.js never ran (a failed download, say), say so instead of doing nothing. -->
+		<form class="card" id="join" onsubmit="if (!window.museReady) { event.preventDefault(); document.getElementById('status').textContent = 'Muse didn\'t finish loading. Please reload the page.'; }">
 			<h2>Muse</h2>
 			<p>A little instrument you play by drawing. Press and drag anywhere. Up is higher, right is louder.</p>
 			<label for="username">name</label>

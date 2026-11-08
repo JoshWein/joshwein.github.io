@@ -1131,3 +1131,4 @@ window.addEventListener("hashchange", () => {
 loadSounds();
 resize();
 requestAnimationFrame(draw);
+window.museReady = true; // app.html checks this before letting the start button do anything

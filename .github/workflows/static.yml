@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Version Muse files
+        # app.html asks for every Muse file with ?v=dev; use this commit
+        # instead, so browsers fetch a matching set after each deploy.
+        run: sed -i "s/?v=dev/?v=${GITHUB_SHA::8}/g" muse/app.html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
