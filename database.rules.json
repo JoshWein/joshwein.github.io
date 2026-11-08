@@ -20,6 +20,7 @@
               ".validate": "newData.val() === now"
             },
             "pointers": {
+              ".validate": "newData.hasChildren()",
               "$slot": {
                 ".validate": "$slot.matches(/^[0-4]$/) && newData.hasChildren(['x', 'y', 'down'])",
                 "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1" },

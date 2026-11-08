@@ -170,7 +170,9 @@ function applyRemotePlayers(players) {
 	const seen = new Set();
 	for (const [uid, player] of Object.entries(players)) {
 		const instrument = Number.isInteger(player.instrument) ? player.instrument : 0;
-		for (const [slot, ptr] of Object.entries(player.pointers || {})) {
+		const ptrs = player.pointers && typeof player.pointers === "object" ? player.pointers : {};
+		for (const [slot, ptr] of Object.entries(ptrs)) {
+			if (!ptr || !Number.isFinite(ptr.x) || !Number.isFinite(ptr.y)) continue;
 			const key = `${uid}:${slot}`;
 			seen.add(key);
 			let p = remotes.get(key);

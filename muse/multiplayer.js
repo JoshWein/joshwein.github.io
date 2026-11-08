@@ -12,10 +12,17 @@ import { firebaseConfig } from "./firebase-config.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/13.2.0";
 const SEND_INTERVAL_MS = 66; // about 15 updates a second
+const JOIN_TIMEOUT_MS = 6000; // give up and play solo if Firebase is unreachable
 export const MAX_SLOTS = 5;
 
 export function roomFromHash() {
-	const room = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 32);
+	let raw = location.hash.slice(1);
+	try {
+		raw = decodeURIComponent(raw);
+	} catch {
+		// malformed escapes like "#%": just use the raw text
+	}
+	const room = raw.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 32);
 	return room || "lobby";
 }
 
@@ -36,6 +43,19 @@ export async function joinRoom({ room, name, onPlayers, onStatus }) {
 		: firebaseConfig;
 	if (!config) return null;
 
+	let timedOut = false;
+	const timeout = new Promise((resolve) => setTimeout(() => {
+		timedOut = true;
+		resolve(null);
+	}, JOIN_TIMEOUT_MS));
+	return Promise.race([connect(config, emulator, { room, name, onPlayers, onStatus }, () => timedOut), timeout])
+		.then((session) => {
+			if (!session) onStatus?.("offline");
+			return session;
+		});
+}
+
+async function connect(config, emulator, { room, name, onPlayers, onStatus }, gaveUp) {
 	try {
 		const [{ initializeApp }, auth, db] = await Promise.all([
 			import(`${SDK}/firebase-app.js`),
@@ -51,11 +71,10 @@ export async function joinRoom({ room, name, onPlayers, onStatus }) {
 		}
 
 		const { user } = await auth.signInAnonymously(authInstance);
+		if (gaveUp()) return null; // too slow; the player is already playing solo
 		const uid = user.uid;
 		const roomRef = db.ref(database, `rooms/${room}/players`);
 		const meRef = db.ref(database, `rooms/${room}/players/${uid}`);
-
-		await db.onDisconnect(meRef).remove();
 
 		db.onValue(roomRef, (snap) => {
 			const others = {};
@@ -68,13 +87,21 @@ export async function joinRoom({ room, name, onPlayers, onStatus }) {
 			onStatus?.("offline");
 		});
 
-		db.onValue(db.ref(database, ".info/connected"), (snap) => {
-			onStatus?.(snap.val() ? "online" : "offline");
-		});
-
 		let pending = null;
 		let lastSent = "";
 		let timer = null;
+
+		// onDisconnect is one-shot, so re-arm it (and resend our state) after
+		// every reconnect; otherwise a dropped player could linger in the room.
+		db.onValue(db.ref(database, ".info/connected"), (snap) => {
+			const online = snap.val() === true;
+			onStatus?.(online ? "online" : "offline");
+			if (online) {
+				db.onDisconnect(meRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
+				lastSent = "";
+				if (pending && !timer) timer = setTimeout(flush, 0);
+			}
+		});
 
 		function flush() {
 			timer = null;
@@ -101,7 +128,6 @@ export async function joinRoom({ room, name, onPlayers, onStatus }) {
 		};
 	} catch (err) {
 		console.warn("Muse: multiplayer unavailable, playing solo", err);
-		onStatus?.("offline");
 		return null;
 	}
 }
