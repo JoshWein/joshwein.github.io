@@ -429,9 +429,14 @@ canvas.addEventListener("pointerleave", (e) => {
 // a step a moment ahead, so it reaches everyone before it takes over, and the
 // step count carries on so loops stay on their bar.
 const TEMPO_LEAD_MS = 500;
+// Clocks in the order they take over: the one running now first, then any
+// changes that start a moment from now. `clock` is the latest.
+let clocks = [DEFAULT_CLOCK];
 let clock = DEFAULT_CLOCK;
-let prevClock = null; // the clock still running until `clock.at`
-const runningClock = (t) => (prevClock && t < clock.at ? prevClock : clock);
+function runningClock(t) {
+	for (let i = clocks.length - 1; i > 0; i--) if (t >= clocks[i].at) return clocks[i];
+	return clocks[0];
+}
 const STEP_MS = () => stepMs(runningClock(roomTime()).bpm);
 const currentTick = () => {
 	const t = roomTime();
@@ -457,7 +462,10 @@ function showTempo() {
 function applyTempo(next) {
 	const changed = next.bpm !== clock.bpm || next.at !== clock.at || next.tick !== clock.tick;
 	if (changed) {
-		prevClock = runningClock(roomTime());
+		const t = roomTime();
+		// a change replaces any that would start at or after it; ones already running drop off
+		clocks = [...clocks.filter((c) => c.at < next.at), next];
+		while (clocks.length > 1 && clocks[1].at <= t) clocks.shift();
 		clock = next;
 		scheduleBeat();
 	}
@@ -476,7 +484,9 @@ function setTempo(bpm, share = false) {
 		const t = roomTime();
 		const bpm = wantBpm;
 		wantBpm = null;
-		applyTempo(changeTempo(runningClock(t), bpm, t, session ? TEMPO_LEAD_MS : 0));
+		const lead = session ? TEMPO_LEAD_MS : 0;
+		// build on whichever clock will be running when the change starts
+		applyTempo(changeTempo(runningClock(t + lead), bpm, t, lead));
 		session?.setTempo(clock);
 	}, 150);
 }
@@ -534,7 +544,7 @@ function scheduleBeat() {
 	clearTimeout(beatTimer);
 	const t = roomTime();
 	let next = nextBeatAt(runningClock(t), t);
-	if (prevClock && t < clock.at) next = Math.min(next, clock.at); // the new tempo's first step
+	for (const c of clocks) if (c.at > t) next = Math.min(next, c.at); // a new tempo's first step
 	beatTimer = setTimeout(beat, next - t + 1);
 }
 scheduleBeat();
