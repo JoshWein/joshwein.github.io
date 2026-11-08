@@ -60,6 +60,7 @@ body {
 
 .instruments {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 	margin-left: auto;
 }
@@ -232,8 +233,17 @@ body {
 
 @media (max-width: 560px) {
 	.bar h1 { display: none; }
-	.instruments { margin-left: 0; width: 100%; justify-content: space-between; }
-	.ins { width: 34px; height: 34px; }
+	/* 13 sounds: two rows of up to 7, each button still a comfortable tap */
+	.instruments {
+		margin-left: 0;
+		width: 100%;
+		display: grid;
+		grid-template-columns: repeat(7, 36px);
+		justify-content: space-between;
+		row-gap: 8px;
+		column-gap: 4px;
+	}
+	.ins { width: 36px; height: 36px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
