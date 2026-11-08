@@ -1,17 +1,33 @@
 var instruments, starterInst, colors, canvas, ctx, ready = 0;
 
+function fadeIn(el, ms) {
+	el.style.opacity = 0;
+	el.style.display = 'block';
+	void el.offsetWidth; // force reflow so the transition runs
+	el.style.transition = 'opacity ' + ms + 'ms';
+	el.style.opacity = 1;
+}
+
+function fadeOut(el, ms) {
+	ms = ms || 400;
+	el.style.transition = 'opacity ' + ms + 'ms';
+	el.style.opacity = 0;
+	setTimeout(function () {
+		el.style.display = 'none';
+	}, ms);
+}
+
 window.onload = function() {
-	$('#loading_wrap').fadeIn(1500);
-	$('#page').hide();
-	$('#target').submit(function () {
-		$('#page').show();
-		if($('#username').val() == "") {
-			loadPage("MuseMan");
-		} else {
-			loadPage($('#username').val());
-		}
-		$('#target').html("<h2>loading sounds...</h2>");
-		return false;
+	var target = document.getElementById('target');
+	var page = document.getElementById('page');
+	fadeIn(document.getElementById('loading_wrap'), 1500);
+	page.style.display = 'none';
+	target.addEventListener('submit', function (e) {
+		e.preventDefault();
+		page.style.display = '';
+		var username = document.getElementById('username').value;
+		loadPage(username === "" ? "MuseMan" : username);
+		target.innerHTML = "<h2>loading sounds...</h2>";
 	});
 }
 
@@ -44,7 +60,7 @@ function loadPage(username) {
 }
 
 function start(username) {
-	$('#target').html("<h2>Joining server...</h2>");
+	document.getElementById('target').innerHTML = "<h2>Joining server...</h2>";
 	var d = document.getElementById("messagePane");
 	// set up event handlers
 	window.addEventListener("resize", resizeCanvas, false);
@@ -55,11 +71,11 @@ function start(username) {
 	canvas.addEventListener("touchmove", touchXY, true);
 	canvas.addEventListener("touchstart", touchDown, false);
 	canvas.addEventListener("touchend", touchUp, false);
-	$('#gameCanvas').mouseleave(function (e) {
-		$('html').css({cursor: 'default'});
+	canvas.addEventListener('mouseleave', function () {
+		document.documentElement.style.cursor = 'default';
 	});
-	$('#gameCanvas').mouseenter(function (e) {
-		$('html').css({cursor: 'none'});
+	canvas.addEventListener('mouseenter', function () {
+		document.documentElement.style.cursor = 'none';
 	});
 
 	var newWidth,
@@ -94,19 +110,22 @@ function start(username) {
 	var cursors = [],
 	mouse = {},
 	mouseIsDown = 0;
-	$('#loading_wrap').fadeOut();
+	fadeOut(document.getElementById('loading_wrap'));
 	id="tester";
 	addCursor(0, 0, id);
 	cursors[0].name = username;
-	$('#'+starterInst+'.ins').addClass('activeIns');
+	var insButtons = document.querySelectorAll('.ins');
+	document.getElementById(String(starterInst)).classList.add('activeIns');
 
 	// instrument event handler
-	$('.ins').click(function(){
-		$(this).addClass('activeIns');
-		var self = this;
-		$('.ins').not(self).removeClass('activeIns');
-		//socket.emit('cInst', $(this).attr("id"));
-		changeInstrument(0, $(this).attr("id"));
+	insButtons.forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			insButtons.forEach(function (other) {
+				other.classList.toggle('activeIns', other === btn);
+			});
+			//socket.emit('cInst', btn.id);
+			changeInstrument(0, btn.id);
+		});
 	});
 	// End instrument event handler
 	function addMessage(msg, name) {
@@ -116,7 +135,9 @@ function start(username) {
 				break;
 			}
 		}
-		$('#messages').append($('<li>').text(name+ ": " + msg));
+		var li = document.createElement('li');
+		li.textContent = name + ": " + msg;
+		document.getElementById('messages').appendChild(li);
 		var element = document.getElementById("messagePane");
 		element.scrollTop = element.scrollHeight;
 	}
