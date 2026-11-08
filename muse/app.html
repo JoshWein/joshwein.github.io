@@ -42,11 +42,15 @@
 			<select id="key" aria-label="Key"></select>
 			<select id="scale" aria-label="Scale"></select>
 		</div>
+		<div class="tempo" role="group" aria-label="Tempo">
+			<button class="pill step" id="slower" type="button" title="Slower (-). Shift for 1 BPM." aria-label="Slower">&minus;</button>
+			<output id="bpm" aria-live="polite">100</output><span class="unit">bpm</span>
+			<button class="pill step" id="faster" type="button" title="Faster (+). Shift for 1 BPM." aria-label="Faster">+</button>
+			<button class="pill" id="tap" type="button" title="Tap along to set the tempo">tap</button>
+		</div>
 		<div class="loop" role="group" aria-label="Loop">
-			<button class="pill" id="rec" type="button" aria-pressed="false" title="Record a four-bar loop">rec</button>
-			<button class="pill" id="loop-play" type="button" aria-pressed="false" title="Play or pause your loop" hidden>loop</button>
-			<button class="pill" id="loop-share" type="button" title="Share your loop as a link" hidden>share</button>
-			<button class="pill" id="loop-clear" type="button" title="Delete your loop" aria-label="Delete loop" hidden>&times;</button>
+			<button class="pill" id="rec" type="button" aria-pressed="false" title="Record a new four-bar track">rec</button>
+			<button class="pill" id="loop-share" type="button" title="Share your tracks as a link" hidden>share</button>
 		</div>
 		<button class="viz-toggle" id="viz-toggle" type="button" aria-pressed="false" title="Visualizer">viz</button>
 		<div class="instruments" role="radiogroup" aria-label="Instrument">
@@ -55,8 +59,9 @@
 	</header>
 
 	<main class="stage">
+		<ol class="tracks" id="tracks" aria-label="Your tracks" hidden></ol>
 		<canvas id="stage" aria-label="Music canvas. Press and drag: height picks the note, left to right sets the volume."></canvas>
-		<p class="hint" id="hint">Press and drag. Higher is higher pitch, further right is louder. Keys 1 to 0, [ and ] switch instruments.</p>
+		<p class="hint" id="hint">Press and drag. Higher is higher pitch, further right is louder. Keys 1 to 0, [ and ] switch instruments; - and + change the tempo.</p>
 	</main>
 
 	<div class="intro" id="intro">
@@ -80,7 +85,7 @@
 			<p>Muse is a small instrument you play by drawing. Press and drag anywhere on the canvas: the height of your cursor or finger picks one of 16 notes, and the further right you go, the louder it plays. Hold still and the note repeats on the beat.</p>
 			<p>There are thirteen sounds to choose from: eight sampled ones (Bass, Shimmer, Pad, Tone, Breath, Warm, Pluck and Lead), a drum kit with a different drum on every row, and synthesized Piano, Marimba, Strings and Synth. Pick one with the buttons at the top, the 1 to 0 keys, or [ and ] to step through them all. It works with a mouse, a pen, or several fingers at once on a phone or tablet.</p>
 			<h3>Play together</h3>
-			<p>Pick a room, or name a new one, and share the link. Everyone in the same room sees each other's cursors and hears each other's notes live, locked to one shared beat. No account or install needed.</p>
+			<p>Pick a room, or name a new one, and share the link. Everyone in the same room sees each other's cursors and hears each other's notes live, locked to one shared beat. Anyone playing can speed it up or slow it down, or tap along to set it. Hit rec to record four bars: each recording gets its own track, and they all loop together, so you can lay down a beat and play over it. No account or install needed.</p>
 			<p class="credit">Made by <a href="../">Josh Wein</a>. Source on <a href="https://github.com/JoshWein/joshwein.github.io/tree/main/muse">GitHub</a>.</p>
 		</section>
 	</div>

@@ -72,6 +72,23 @@
             ".validate": false
           }
         },
+        "tempo": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms').child($room).child('members').child(auth.uid).exists()",
+          ".validate": "newData.hasChildren(['bpm', 'at', 'tick'])",
+          "bpm": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 60 && newData.val() <= 180"
+          },
+          "at": {
+            ".validate": "newData.isNumber() && newData.val() >= now - 600000 && newData.val() <= now + 600000"
+          },
+          "tick": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
         "loops": {
           ".read": "auth != null",
           "$uid": {

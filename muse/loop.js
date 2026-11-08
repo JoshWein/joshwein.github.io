@@ -8,6 +8,7 @@
 export const LOOP_STEPS = 32;
 export const MAX_LOOP_NOTES = 160;
 export const MAX_NOTES_PER_STEP = 8; // keeps a crafted loop from stacking hundreds of voices on one beat
+export const MAX_TRACKS = 4; // each recording is its own track, and they all play together
 
 export function encodeLoop(notes) {
 	return notes
@@ -33,6 +34,47 @@ export function decodeLoop(text, instrumentCount) {
 		notes.push({ step, lane, instrument, vol });
 	}
 	return notes;
+}
+
+/** Packs several tracks for a share link: one loop per track, joined by dots. */
+export function encodeTracks(tracks) {
+	return tracks.slice(0, MAX_TRACKS).map(encodeLoop).filter(Boolean).join(".");
+}
+
+/** Reads a share link's tracks. An older link with a single loop is one track. */
+export function decodeTracks(text, instrumentCount) {
+	if (typeof text !== "string") return [];
+	return text
+		.split(".")
+		.slice(0, MAX_TRACKS)
+		.map((part) => decodeLoop(part, instrumentCount))
+		.filter((notes) => notes.length > 0);
+}
+
+/**
+ * Everything a player shares with the room, as one loop: the tracks they
+ * have on, merged. The room's limit is one loop's worth of notes, so when the
+ * tracks hold more than that, notes are taken from every track in turn and
+ * the rest play only for this player.
+ */
+export function mergeTracks(tracks) {
+	const perStep = new Array(LOOP_STEPS).fill(0);
+	const seen = new Set();
+	const merged = [];
+	// take one note from each track in turn, so no track is dropped wholesale
+	const queues = tracks.map((notes) => [...notes]);
+	while (merged.length < MAX_LOOP_NOTES && queues.some((q) => q.length)) {
+		for (const q of queues) {
+			const n = q.shift();
+			if (!n || merged.length >= MAX_LOOP_NOTES) continue;
+			const key = `${n.step}:${n.lane}:${n.instrument}`;
+			if (seen.has(key) || perStep[n.step] >= MAX_NOTES_PER_STEP) continue;
+			seen.add(key);
+			perStep[n.step]++;
+			merged.push(n);
+		}
+	}
+	return merged;
 }
 
 /** Notes grouped by step, for quick lookup on each beat. */
