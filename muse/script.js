@@ -336,20 +336,90 @@ function playVoice(p) {
 }
 
 // Samples are C pentatonic; other keys and scales play the nearest one at a nudged rate.
+//
+// The sample files are short and most of them start and stop mid-waveform,
+// which clicks. So each note gets its own envelope on Howler's per-sound gain:
+// a few ms fade in, a short fade out before the file ends, and smooth volume
+// changes while you drag (a sudden gain step is a click too, and a run of
+// them sounds like static).
+const FADE_IN_S = 0.006;
+const FADE_OUT_S = 0.035;
+const GLIDE_S = 0.03;
+
 function sampleNote(instrument, lane, volume) {
 	const { sampleLane, rate } = pitchFor(lane, settings);
 	const howl = sounds[instrument][sampleLane];
 	if (howl.state() !== "loaded") return null; // failed sound: stay silent, don't queue
+	setupMixer();
 	const id = howl.play();
 	if (rate !== 1) howl.rate(rate, id);
 	howl.volume(volume, id);
+	const gain = Howler.ctx && howl._soundById(id)?._node?.gain;
+	if (!gain) {
+		// no Web Audio (HTML5 audio fallback): plain volume, as before
+		return {
+			setVolume: (v) => howl.volume(v, id),
+			playing: () => howl.playing(id),
+			release() {
+				if (!howl.playing(id)) return;
+				howl.fade(howl.volume(id), 0, RELEASE_MS, id);
+				howl.once("fade", () => howl.stop(id), id);
+			},
+		};
+	}
+
+	const ctx = Howler.ctx;
+	let end = Infinity;
+	let fadeOutAt = Infinity;
+	let level = volume;
+	let released = false;
+	// fade out just before the file runs out; it's re-added after each volume change
+	function tail() {
+		if (end === Infinity) return;
+		gain.setValueAtTime(level, fadeOutAt);
+		gain.linearRampToValueAtTime(0, end);
+	}
+	function envelope() {
+		if (released) return;
+		const start = ctx.currentTime;
+		end = start + howl.duration(id) / rate;
+		fadeOutAt = Math.max(start + FADE_IN_S, end - FADE_OUT_S);
+		// A reused sound can still hold automation from its last note: clear it first.
+		gain.cancelScheduledValues(start);
+		gain.setValueAtTime(0, start);
+		gain.linearRampToValueAtTime(level, start + FADE_IN_S);
+		tail();
+	}
+	// While the audio context wakes up, Howler holds the note (and its volume
+	// call) until it really starts; set the envelope then, not against a frozen clock.
+	if (howl._playLock || ctx.state !== "running") howl.once("play", envelope, id);
+	else envelope();
+
 	return {
-		setVolume: (v) => howl.volume(v, id),
-		playing: () => howl.playing(id),
+		setVolume(v) {
+			if (released || v === level) return;
+			const now = ctx.currentTime;
+			if (now >= fadeOutAt) return;
+			level = v;
+			const from = gain.value;
+			gain.cancelScheduledValues(now);
+			gain.setValueAtTime(from, now);
+			gain.linearRampToValueAtTime(level, Math.min(now + GLIDE_S, fadeOutAt));
+			tail();
+		},
+		playing: () => !released && howl.playing(id),
 		release() {
-			if (!howl.playing(id)) return;
-			howl.fade(howl.volume(id), 0, RELEASE_MS, id);
-			howl.once("fade", () => howl.stop(id), id);
+			if (released || !howl.playing(id)) return;
+			released = true;
+			const now = ctx.currentTime;
+			const from = gain.value;
+			gain.cancelScheduledValues(now);
+			gain.setValueAtTime(from, now);
+			// an exponential tail sounds like a natural decay; ~0.1% is left at the stop
+			gain.setTargetAtTime(0, now, RELEASE_MS / 6000);
+			setTimeout(() => {
+				if (howl.playing(id)) howl.stop(id);
+			}, RELEASE_MS + 30);
 		},
 	};
 }
