@@ -16,6 +16,7 @@ let analyser = null;
 let freq = null;
 let host = null;
 let running = false;
+let wanted = false; // last on/off request, so a slow load can't override a later "off"
 let lastTime = 0;
 let energy = 0; // fallback level when there is no analyser
 const accent = { r: 0.27, g: 0.81, b: 0.58 }; // site green, drifts toward recent notes
@@ -218,6 +219,7 @@ function frame(now) {
 /** Turns the visualizer on inside `container`. Returns false if WebGL is unavailable. */
 export async function startViz(container) {
 	host = container;
+	wanted = true;
 	if (!THREE) {
 		THREE = await import("./three/three.module.min.js");
 		matrix.m = new THREE.Matrix4();
@@ -226,6 +228,7 @@ export async function startViz(container) {
 		matrix.s = new THREE.Vector3();
 		tint.c = new THREE.Color();
 	}
+	if (!wanted) return true; // turned off while three.js was loading
 	if (!renderer) {
 		try {
 			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
@@ -251,6 +254,7 @@ export async function startViz(container) {
 }
 
 export function stopViz() {
+	wanted = false;
 	running = false;
 	renderer?.domElement.remove();
 }
