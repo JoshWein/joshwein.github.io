@@ -60,7 +60,7 @@
           <img class="before" src="images/recolor3a.jpg" alt="Family by Car (original)" width="3501" height="2351" loading="lazy">
           <span class="tag b">before</span><span class="tag a">after</span>
           <span class="handle" aria-hidden="true"></span>
-          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Family by Car">
+          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Family by Car" aria-valuetext="50% original">
         </div>
       </figure>
       <figure>
@@ -69,7 +69,7 @@
           <img class="before" src="images/removal1a.jpg" alt="Military (original)" width="1280" height="735" loading="lazy">
           <span class="tag b">before</span><span class="tag a">after</span>
           <span class="handle" aria-hidden="true"></span>
-          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Military">
+          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Military" aria-valuetext="50% original">
         </div>
       </figure>
       <figure class="narrow">
@@ -78,7 +78,7 @@
           <img class="before" src="images/recolor1a.jpg" alt="Portrait (original)" width="500" height="700" loading="lazy">
           <span class="tag b">before</span><span class="tag a">after</span>
           <span class="handle" aria-hidden="true"></span>
-          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Portrait">
+          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Portrait" aria-valuetext="50% original">
         </div>
       </figure>
     </div>
@@ -97,7 +97,10 @@
 <script>
   document.querySelectorAll('.compare').forEach(function (box) {
     var range = box.querySelector('input[type="range"]');
-    function update() { box.style.setProperty('--pos', range.value + '%'); }
+    function update() {
+      box.style.setProperty('--pos', range.value + '%');
+      range.setAttribute('aria-valuetext', range.value + '% original');
+    }
     range.addEventListener('input', update);
     update();
   });
