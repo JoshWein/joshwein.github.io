@@ -136,7 +136,10 @@ async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 		const meRef = db.ref(database, `rooms/${room}/players/${uid}`);
 		const lobbyRef = db.ref(database, `lobby/${room}/${uid}`);
 		const memberRef = db.ref(database, `rooms/${room}/members/${uid}`);
-		let role = "watch"; // until the queue says otherwise
+		let role = null; // unknown until our place in the queue is confirmed
+		let confirmed = false; // our member record (with its real server join time) exists
+		let online = false;
+		let members = [];
 
 		db.onValue(roomRef, (snap) => {
 			const others = {};
@@ -153,16 +156,33 @@ async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 		let lastSent = "";
 		let timer = null;
 
+		// Joining the queue is a transaction so the answer comes from the server,
+		// not a cache: it keeps our record (and place in line) after a short blip,
+		// and adds a fresh one after a real drop removed it. Until it commits we
+		// stay out of the queue, so an estimated join time can't jump the line.
+		let joining = false;
+		function ensureMember() {
+			if (joining) return;
+			joining = true;
+			db.runTransaction(memberRef, (current) => current ?? { name, joined: db.serverTimestamp() })
+				.then(() => {
+					confirmed = true;
+					updateRole();
+				})
+				.catch((err) => console.warn("Muse: couldn't join the queue", err))
+				.finally(() => { joining = false; });
+		}
+
 		// The queue: oldest members play, everyone else watches in join order.
-		db.onValue(db.ref(database, `rooms/${room}/members`), (snap) => {
-			const members = [];
-			snap.forEach((child) => {
-				const joined = child.child("joined").val();
-				members.push({ uid: child.key, joined: typeof joined === "number" ? joined : Infinity });
-			});
-			members.sort((a, b) => a.joined - b.joined || (a.uid < b.uid ? -1 : 1));
+		function updateRole() {
+			if (!confirmed) return;
 			const index = members.findIndex((m) => m.uid === uid);
-			if (index === -1) return; // our record is on its way
+			if (index === -1) {
+				// Our record vanished (say, a drop we haven't noticed yet): rejoin.
+				confirmed = false;
+				if (online) ensureMember();
+				return;
+			}
 			const next = index < MAX_PLAYERS ? "play" : "watch";
 			if (next !== role) {
 				role = next;
@@ -171,7 +191,7 @@ async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 					lastSent = "";
 					if (pending && !timer) timer = setTimeout(flush, 0);
 				} else {
-					db.remove(meRef);
+					db.remove(meRef).catch((err) => console.warn("Muse: couldn't step back", err));
 				}
 			}
 			onRoom?.({
@@ -180,22 +200,30 @@ async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 				players: Math.min(members.length, MAX_PLAYERS),
 				watchers: Math.max(0, members.length - MAX_PLAYERS),
 			});
+		}
+
+		db.onValue(db.ref(database, `rooms/${room}/members`), (snap) => {
+			members = [];
+			snap.forEach((child) => {
+				const joined = child.child("joined").val();
+				members.push({ uid: child.key, joined: typeof joined === "number" ? joined : Infinity });
+			});
+			members.sort((a, b) => a.joined - b.joined || (a.uid < b.uid ? -1 : 1));
+			updateRole();
 		}, (err) => console.warn("Muse: lost the queue", err));
 
 		// onDisconnect is one-shot, so re-arm it (and resend our state) after
 		// every reconnect; otherwise a dropped player could linger in the room.
 		db.onValue(db.ref(database, ".info/connected"), (snap) => {
-			const online = snap.val() === true;
+			online = snap.val() === true;
 			onStatus?.(online ? "online" : "offline");
 			if (online) {
 				db.onDisconnect(meRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
 				db.onDisconnect(lobbyRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
 				db.onDisconnect(memberRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
-				// Keep our place in line across a short blip; a real drop already removed us.
-				db.get(memberRef).then((snap) => {
-					if (!snap.exists()) return db.set(memberRef, { name, joined: db.serverTimestamp() });
-				}).catch((err) => console.warn("Muse: couldn't join the queue", err));
-				db.set(lobbyRef, role).catch((err) => console.warn("Muse: couldn't list the room", err));
+				ensureMember();
+				// A drop may have cleared our lobby entry; restore it once the role is known.
+				if (role) db.set(lobbyRef, role).catch((err) => console.warn("Muse: couldn't list the room", err));
 				lastSent = "";
 				if (pending && !timer) timer = setTimeout(flush, 0);
 			}
