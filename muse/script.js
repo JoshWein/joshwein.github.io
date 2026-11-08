@@ -45,6 +45,16 @@ const hint = document.getElementById("hint");
 let username = "MuseMan";
 let current = Math.floor(Math.random() * INSTRUMENTS.length);
 let playing = false;
+
+// Analytics: page views come from the Google tag in app.html; these are the
+// Muse moments worth counting. Nothing is sent if the tag is blocked.
+function logEvent(name, params = {}) {
+	try {
+		window.gtag?.("event", name, params);
+	} catch {
+		// analytics must never break playing
+	}
+}
 let session = null; // multiplayer session, or null when solo
 
 // sounds[instrument][lane]; lane 0 is the top of the canvas (note16, the highest)
@@ -558,6 +568,7 @@ function setTempo(bpm, share = false) {
 		// build on whichever clock will be running when the change starts
 		applyTempo(changeTempo(runningClock(t + lead), bpm, t, lead));
 		session?.setTempo(clock);
+		logEvent("muse_tempo_change", { bpm });
 	}, 150);
 }
 
@@ -676,8 +687,10 @@ function finishRecording(notes) {
 		hint.textContent = "Nothing was played in those four bars, so no track was made.";
 	} else if (into >= 0 && tracks[into]) {
 		tracks[into] = makeTrack(notes);
+		logEvent("muse_track_recorded", { notes: notes.length, rerecord: true });
 	} else if (tracks.length < MAX_TRACKS) {
 		tracks.push(makeTrack(notes));
+		logEvent("muse_track_recorded", { notes: notes.length, rerecord: false, tracks: tracks.length });
 	}
 	tracksChanged();
 }
@@ -849,6 +862,7 @@ shareBtn.addEventListener("click", async () => {
 	const url = new URL(location.href);
 	url.search = `?loop=${encodeTracks(tracks.filter((t) => t.on).map((t) => t.notes))}&bpm=${clock.bpm}`;
 	url.hash = session ? session.room : roomFromHash();
+	logEvent("muse_loop_share", { tracks: tracks.filter((t) => t.on).length });
 	try {
 		if (navigator.share) await navigator.share({ title: "A Muse loop", url: url.href });
 		else {
@@ -868,6 +882,7 @@ const sharedBpm = Number(new URLSearchParams(location.search).get("bpm"));
 {
 	const shared = decodeTracks(new URLSearchParams(location.search).get("loop") ?? "", INSTRUMENTS.length);
 	tracks = shared.map(makeTrack);
+	if (tracks.length) logEvent("muse_loop_opened", { tracks: tracks.length });
 	if (Number.isInteger(sharedBpm) && sharedBpm >= MIN_BPM && sharedBpm <= MAX_BPM) {
 		applyTempo(changeTempo(clock, sharedBpm, roomTime()));
 		linkBpm = sharedBpm;
@@ -1094,6 +1109,7 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		presence.classList.add("offline");
 	}
 
+	logEvent("muse_start", { mode: session ? "multiplayer" : "solo", role: session ? roomState.role : "play" });
 	playing = true;
 	const intro = document.getElementById("intro");
 	intro.classList.add("hidden");
