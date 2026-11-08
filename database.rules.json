@@ -14,7 +14,7 @@
               ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
             },
             "instrument": {
-              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 7"
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 12"
             },
             "t": {
               ".validate": "newData.val() === now"

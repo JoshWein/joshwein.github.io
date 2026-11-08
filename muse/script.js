@@ -4,8 +4,9 @@
 // Other players in the same room (see multiplayer.js) show up as cursors too.
 
 import { startViz, stopViz, vizNote } from "./viz.js";
+import { synthVoice } from "./synth.js";
 import { joinRoom, roomFromHash, cleanRoom, watchRooms, roomTime, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
-import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor } from "./scales.js";
+import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor, targetMidi } from "./scales.js";
 
 const NOTES = 16;
 const TEMPO_MS = 125; // a held note retriggers on this beat (16th notes at 120 BPM), shared by the room
@@ -22,7 +23,14 @@ const INSTRUMENTS = [
 	{ name: "Warm", color: "#FFFF99", icon: "M12 7a5 5 0 1 0 0 10 5 5 0 1 0 0-10M12 2v2m0 16v2M2 12h2m16 0h2" },
 	{ name: "Pluck", color: "#FFAF99", icon: "M2 12h7l2-6 2 12 2-6h7" },
 	{ name: "Lead", color: "#FF2B99", icon: "M3 16V8h6v8h6V8h6" },
+	// Synthesized in synth.js. Indexes are shared with the room, so only append.
+	{ name: "Drums", synth: "drums", color: "#F0A030", icon: "M4 9c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3m0 0v6c0 1.7 3.6 3 8 3s8-1.3 8-3V9M9 3l3 5m3-5-3 5" },
+	{ name: "Piano", synth: "piano", color: "#E8E2D0", icon: "M3 5h18v14H3zM8 5v14m5-14v14m5-14v14M6 5v7m4-7v7m5-7v7" },
+	{ name: "Marimba", synth: "marimba", color: "#B8733E", icon: "M3 6h3v12H3zm5 2h3v8H8zm5 1h3v6h-3zm5 1h3v4h-3z" },
+	{ name: "Strings", synth: "strings", color: "#4FA3E0", icon: "M5 3v18m4.5-18c-1 6 1 12 0 18M14.5 3c1 6-1 12 0 18M19 3v18" },
+	{ name: "Synth", synth: "synth", color: "#E05AD8", icon: "M12 4a8 8 0 1 0 0 16 8 8 0 1 0 0-16m0 8 4-5M4 21h16" },
 ];
+const SAMPLED = INSTRUMENTS.filter((inst) => !inst.synth).length;
 
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
@@ -38,7 +46,7 @@ let session = null; // multiplayer session, or null when solo
 const sounds = [];
 let loaded = 0;
 let failed = 0;
-const total = INSTRUMENTS.length * NOTES;
+const total = SAMPLED * NOTES;
 let resolveLoaded;
 const allLoaded = new Promise((resolve) => (resolveLoaded = resolve));
 
@@ -50,7 +58,7 @@ function onSoundSettled() {
 }
 
 function loadSounds() {
-	INSTRUMENTS.forEach((_, i) => {
+	INSTRUMENTS.slice(0, SAMPLED).forEach((_, i) => {
 		sounds.push([]);
 		for (let note = NOTES; note >= 1; note--) {
 			sounds[i].push(new Howl({
@@ -78,8 +86,9 @@ const buttons = INSTRUMENTS.map((inst, i) => {
 	b.type = "button";
 	b.className = "ins";
 	b.setAttribute("role", "radio");
-	b.setAttribute("aria-label", `${inst.name} (key ${i + 1})`);
-	b.title = `${inst.name} (key ${i + 1})`;
+	const key = i < 10 ? ` (key ${(i + 1) % 10})` : "";
+	b.setAttribute("aria-label", `${inst.name}${key}`);
+	b.title = `${inst.name}${key}`;
 	b.style.setProperty("--swatch", inst.color);
 	b.style.setProperty("--ink", inkFor(inst.color));
 	b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${inst.icon}"/></svg>`;
@@ -113,8 +122,15 @@ picker.addEventListener("keydown", (e) => {
 
 window.addEventListener("keydown", (e) => {
 	if (e.target instanceof HTMLInputElement || e.ctrlKey || e.metaKey || e.altKey) return;
-	const n = Number(e.key);
-	if (n >= 1 && n <= INSTRUMENTS.length) selectInstrument(n - 1);
+	// 1-9 and 0 pick the first ten; [ and ] step through all of them.
+	const count = INSTRUMENTS.length;
+	if (e.key === "[" || e.key === "]") {
+		selectInstrument((current + (e.key === "]" ? 1 : -1) + count) % count);
+		return;
+	}
+	if (!/^[0-9]$/.test(e.key)) return;
+	const n = e.key === "0" ? 10 : Number(e.key);
+	if (n <= count) selectInstrument(n - 1);
 });
 
 /* ---------- canvas sizing ---------- */
@@ -182,7 +198,8 @@ const remotes = new Map();
 function applyRemotePlayers(players) {
 	const seen = new Set();
 	for (const [uid, player] of Object.entries(players)) {
-		const instrument = Number.isInteger(player.instrument) ? player.instrument : 0;
+		// An index this version doesn't know (a newer client) falls back to the first sound.
+		const instrument = Number.isInteger(player.instrument) && INSTRUMENTS[player.instrument] ? player.instrument : 0;
 		const ptrs = player.pointers && typeof player.pointers === "object" ? player.pointers : {};
 		for (const [slot, ptr] of Object.entries(ptrs)) {
 			if (!ptr || !Number.isFinite(ptr.x) || !Number.isFinite(ptr.y)) continue;
@@ -264,31 +281,54 @@ function applyRoom(state) {
 
 // Each pointer keeps the voices it started (a held note retriggers, so
 // several overlap) so volume changes and releases reach all of them.
+// A voice is { setVolume, release, playing }, whether it's a sample or synthesized.
 function playVoice(p) {
-	const { sampleLane, rate } = pitchFor(p.lane, settings);
-	const howl = sounds[p.instrument][sampleLane];
-	if (howl.state() !== "loaded") return; // failed sound: stay silent, don't queue
-	const id = howl.play();
-	if (rate !== 1) howl.rate(rate, id);
+	const inst = INSTRUMENTS[p.instrument];
 	p.lastPlay = performance.now();
 	const volume = volumeFor(p.x);
+	const voice = inst.synth ? synthNote(inst.synth, p.lane, volume) : sampleNote(p.instrument, p.lane, volume);
+	if (!voice) return;
+	vizNote(p.x / width, p.y / height, inst.color, volume);
+	p.voices = p.voices.filter((v) => v.playing());
+	p.voices.push(voice);
+}
+
+// Samples are C pentatonic; other keys and scales play the nearest one at a nudged rate.
+function sampleNote(instrument, lane, volume) {
+	const { sampleLane, rate } = pitchFor(lane, settings);
+	const howl = sounds[instrument][sampleLane];
+	if (howl.state() !== "loaded") return null; // failed sound: stay silent, don't queue
+	const id = howl.play();
+	if (rate !== 1) howl.rate(rate, id);
 	howl.volume(volume, id);
-	vizNote(p.x / width, p.y / height, INSTRUMENTS[p.instrument].color, volume);
-	p.voices = p.voices.filter((v) => v.howl.playing(v.id));
-	p.voices.push({ howl, id });
+	return {
+		setVolume: (v) => howl.volume(v, id),
+		playing: () => howl.playing(id),
+		release() {
+			if (!howl.playing(id)) return;
+			howl.fade(howl.volume(id), 0, RELEASE_MS, id);
+			howl.once("fade", () => howl.stop(id), id);
+		},
+	};
+}
+
+// Synth voices join Howler's master gain, so the mute state and the visualizer's analyser cover them too.
+function synthNote(kind, lane, volume) {
+	if (!Howler.ctx || !Howler.masterGain) return null;
+	// Howler suspends the context after ~30s without a Howl playing and only wakes it for Howls.
+	if (Howler.ctx.state !== "running") Howler.ctx.resume();
+	// Melodic synths follow the room's key and scale; drums stay one sound per lane.
+	const midi = kind === "drums" ? undefined : targetMidi(lane, settings);
+	return synthVoice(Howler.ctx, Howler.masterGain, { instrument: kind, lane, midi, volume });
 }
 
 function setVoicesVolume(p) {
 	const vol = volumeFor(p.x);
-	for (const v of p.voices) v.howl.volume(vol, v.id);
+	for (const v of p.voices) v.setVolume(vol);
 }
 
 function releaseVoice(p) {
-	for (const { howl, id } of p.voices) {
-		if (!howl.playing(id)) continue;
-		howl.fade(howl.volume(id), 0, RELEASE_MS, id);
-		howl.once("fade", () => howl.stop(id), id);
-	}
+	for (const v of p.voices) v.release();
 	p.voices = [];
 }
 
@@ -346,6 +386,7 @@ function retrigger(p) {
 	if (performance.now() - (p.lastPlay ?? 0) > TEMPO_MS / 2) playVoice(p);
 }
 function beat() {
+	scheduleBeat(); // first, so one bad voice can't stop the beat
 	for (const p of pointers.values()) {
 		if (p.down) retrigger(p);
 	}
@@ -354,7 +395,6 @@ function beat() {
 			if (p.down && p.lane >= 0) retrigger(p);
 		}
 	}
-	scheduleBeat();
 }
 function scheduleBeat() {
 	const t = roomTime();
