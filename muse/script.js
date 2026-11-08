@@ -400,6 +400,11 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 	if (session) {
 		updatePresence(0);
 		publish();
+	} else {
+		// Couldn't join (or multiplayer is off): say so instead of showing nothing.
+		presence.hidden = false;
+		presence.textContent = "solo";
+		presence.classList.add("offline");
 	}
 
 	playing = true;
