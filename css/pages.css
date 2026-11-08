@@ -1,0 +1,51 @@
+/* Shared styles for the inner pages (contact, thanks, photo restoration, 404).
+   Loaded after home.css, which holds the colour tokens, top bar and footer. */
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+main { flex: 1 0 auto; }
+.bar nav a[aria-current="page"] { color: var(--green); }
+
+/* page heading: a smaller take on the homepage hero */
+.page-head { padding-top: 96px; padding-bottom: 48px; }
+.page-head h1 { font-size: clamp(40px, 7vw, 72px); line-height: 1; letter-spacing: -.02em; margin: 0; color: var(--ice); font-weight: 700; }
+.page-head .role { font-family: var(--mono); font-size: 16px; color: var(--muted); margin-top: 18px; }
+.page-head .role::before { content: "> "; color: var(--green); }
+.page-head .rule { height: 4px; width: min(280px, 60%); margin-top: 32px; border-radius: 2px; background: linear-gradient(90deg, var(--green-dark), var(--green), var(--green-dark)); background-size: 200% 100%; animation: slide 10s linear infinite alternate; }
+.page-body { padding: 48px 0 72px; border-top: 1px solid var(--line); }
+.page-body p { max-width: 40em; color: var(--muted); margin: 0 0 14px; }
+.page-body p.lead { font-size: 20px; color: var(--text); }
+
+/* contact form */
+.contact { display: grid; grid-template-columns: 200px 1fr; gap: 32px; }
+.contact form { display: grid; gap: 14px; max-width: 620px; }
+.contact label { font-family: var(--mono); font-size: 13px; color: var(--muted); display: grid; gap: 6px; }
+.contact textarea, .contact input[type="email"] { width: 100%; font: inherit; font-size: 16px; color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; }
+.contact textarea { resize: vertical; min-height: 160px; }
+.contact textarea:focus, .contact input[type="email"]:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(69,206,147,.18); }
+.contact ::placeholder { color: #66706b; }
+.btn { justify-self: start; font-family: var(--mono); font-size: 14px; font-weight: 500; padding: 10px 22px; border: 0; border-radius: 4px; background: var(--mint); color: #0d1f17; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn:hover { background: var(--green); color: #0d1f17; }
+.btn:focus-visible { outline: 2px solid var(--ice); outline-offset: 2px; }
+
+/* photo restoration before/after slider */
+.compare-list { display: grid; gap: 56px; }
+.compare-list figure { margin: 0; }
+.compare-list figcaption { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-top: 10px; }
+.compare-list figcaption::before { content: "// "; }
+.compare { --pos: 50%; position: relative; overflow: hidden; border-radius: 4px; border: 1px solid var(--line); background: var(--bg-2); user-select: none; touch-action: pan-y; }
+.compare img { display: block; width: 100%; height: auto; }
+.compare .before { position: absolute; inset: 0; height: 100%; object-fit: cover; clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.compare .handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px; background: var(--green); pointer-events: none; }
+.compare .handle::after { content: "⟷"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: 2px solid var(--green); color: var(--green); font: 16px/32px var(--mono); text-align: center; }
+.compare .tag { position: absolute; top: 12px; font-family: var(--mono); font-size: 12px; color: var(--ice); background: rgba(28,31,34,.75); padding: 3px 8px; border-radius: 3px; pointer-events: none; }
+.compare .tag.b { left: 12px; }
+.compare .tag.a { right: 12px; }
+.compare input[type="range"] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 3px; }
+.compare-list .narrow { max-width: 420px; }
+
+@media (max-width: 760px) {
+  .page-head { padding-top: 64px; padding-bottom: 36px; }
+  .contact { grid-template-columns: 1fr; gap: 8px; }
+}

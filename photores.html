@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
-    <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-X0211WWCBC"></script>
     <script>
@@ -13,88 +12,98 @@
 
         gtag('config', 'G-X0211WWCBC');
     </script>
-    <script src=
-                    "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> <!-- Javascript -->
-    <script src=
-                    "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" async></script>
-    <link href=
-                  "https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
-          rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-    <script src="js/jquery.event.move.js" type="text/javascript"></script>
-    <script src="js/jquery.twentytwenty.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="css/twentytwenty.css" type="text/css" media="screen"/>
-    <title>
-        Josh Wein
-    </title>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#1c1f22">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="/css/home.css" rel="stylesheet">
+    <link href="/css/pages.css" rel="stylesheet">
+    <title>Photo Restoration | Josh Wein</title>
 </head>
 <body>
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header page-scroll">
-            <button class="navbar-toggle" data-target=
-                    "#bs-example-navbar-collapse-1" data-toggle="collapse"
-                    type="button"><span class="sr-only">Toggle
-                    navigation</span> <span class="icon-bar"></span>
-                <span class="icon-bar"></span> <span class=
-                                                             "icon-bar"></span></button>
-            <a class="navbar-brand" href=
-                    "contact.html">Contact</a>
-        </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id=
-                "bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav navbar-right">
-                <li class="hidden">
-                    <a href="#page-top"></a>
-                </li>
-                <li class="page-scroll">
-                    <a href="/">Back to Main Page</a>
-                </li>
-            </ul>
-        </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-</nav>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12 text-center" style="padding-top: 50px;">
-            <h2>Photo Restoration</h2>
-            <p>One of my side projects is photo restoration. I do everything from simple fixes to salvaging old photos
-                to recolouring.</p>
-            <p>You can find samples of my work below</p>
-        </div>
+<header class="bar">
+  <div class="wrap">
+    <a class="home" href="/">josh<b>wein</b>.xyz</a>
+    <nav>
+      <a href="/#about">about</a>
+      <a href="/#skills">skills</a>
+      <a href="/#projects">projects</a>
+      <a href="/#experience">experience</a>
+      <a href="/resume.pdf">resume</a>
+      <a href="/photores.html" aria-current="page">photo restoration</a>
+      <a href="/blog/">blog</a>
+      <a href="/contact.html">contact</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap page-head">
+    <h1>Photo Restoration</h1>
+    <div class="rule" aria-hidden="true"></div>
+  </div>
+  <section class="page-body">
+    <div class="wrap">
+      <p class="lead">One of my side projects is photo restoration. I do everything from simple fixes to salvaging old photos to recolouring.</p>
+      <p>You can find samples of my work below</p>
     </div>
-    <div class="row text-center" style="padding-top: 50px;">
-        <div class="col-md-12 text-center">
-            <div class="picContainer twentytwenty-container">
-                <img src="images/recolor3a.jpg" alt="Family by Car">
-                <img src="images/recolor3b.jpg" alt="Family by Car">
-            </div>
+  </section>
+  <section>
+    <div class="wrap compare-list">
+      <figure>
+        <div class="compare">
+          <img class="after" src="images/recolor3b.jpg" alt="Family by Car (restored)" width="3501" height="2351" loading="lazy">
+          <img class="before" src="images/recolor3a.jpg" alt="Family by Car (original)" width="3501" height="2351" loading="lazy">
+          <span class="tag b">before</span><span class="tag a">after</span>
+          <span class="handle" aria-hidden="true"></span>
+          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Family by Car" aria-valuetext="50% original">
         </div>
-    </div>
-    <div class="row text-center" style="padding-top: 50px;">
-        <div class="col-md-12 text-center">
-            <div class="picContainer twentytwenty-container">
-                <img src="images/removal1a.jpg" alt="Miltary">
-                <img src="images/removal1b.jpg" alt="Miltary">
-            </div>
+      </figure>
+      <figure>
+        <div class="compare">
+          <img class="after" src="images/removal1b.jpg" alt="Military (restored)" width="1280" height="735" loading="lazy">
+          <img class="before" src="images/removal1a.jpg" alt="Military (original)" width="1280" height="735" loading="lazy">
+          <span class="tag b">before</span><span class="tag a">after</span>
+          <span class="handle" aria-hidden="true"></span>
+          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Military" aria-valuetext="50% original">
         </div>
-    </div>
-    <div class="row text-center">
-        <div class="col-md-12 text-center">
-            <div class="picContainer twentytwenty-container">
-                <img src="images/recolor1a.jpg">
-                <img src="images/recolor1b.jpg">
-            </div>
+      </figure>
+      <figure class="narrow">
+        <div class="compare">
+          <img class="after" src="images/recolor1b.jpg" alt="Portrait (restored)" width="500" height="700" loading="lazy">
+          <img class="before" src="images/recolor1a.jpg" alt="Portrait (original)" width="500" height="700" loading="lazy">
+          <span class="tag b">before</span><span class="tag a">after</span>
+          <span class="handle" aria-hidden="true"></span>
+          <input type="range" min="0" max="100" value="50" aria-label="Before/after: Portrait" aria-valuetext="50% original">
         </div>
+      </figure>
     </div>
-
-</div>
-</body>
+  </section>
+</main>
+<footer>
+  <div class="wrap">
+    <span>© 2049 <em>Josh Wein</em></span>
+    <nav>
+      <a href="https://github.com/JoshWein">github</a>
+      <a href="https://www.linkedin.com/in/joshwein1/">linkedin</a>
+      <a href="https://www.facebook.com/joswein/">facebook</a>
+    </nav>
+  </div>
+</footer>
 <script>
-    $(window).load(function () {
-        $(".picContainer").twentytwenty();
-    });
+  document.querySelectorAll('.compare').forEach(function (box) {
+    var range = box.querySelector('input[type="range"]');
+    function update() {
+      box.style.setProperty('--pos', range.value + '%');
+      range.setAttribute('aria-valuetext', range.value + '% original');
+    }
+    range.addEventListener('input', update);
+    update();
+  });
 </script>
+</body>
 </html>
