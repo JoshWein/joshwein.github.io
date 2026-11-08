@@ -118,6 +118,9 @@ a:hover { color: var(--red-ink); }
 	text-underline-offset: 4px;
 }
 .pill[hidden] { display: none; }
+.pill:disabled { opacity: .45; cursor: default; }
+#rec::before { content: "\25CF  "; color: var(--red); }
+#rec[aria-pressed="true"] { color: var(--red-ink); font-weight: 700; }
 
 /* instruments: a row of handwritten tabs, the picked one circled in red */
 .instruments {
