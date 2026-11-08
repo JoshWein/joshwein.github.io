@@ -137,7 +137,8 @@ body {
 }
 .tune select:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
 
-.viz-toggle {
+.loop { display: flex; gap: 6px; }
+.pill, .viz-toggle {
 	padding: 3px 10px;
 	font: 12px var(--mono);
 	color: var(--muted);
@@ -146,7 +147,12 @@ body {
 	border-radius: 999px;
 	cursor: pointer;
 }
-.viz-toggle:hover { color: var(--text); }
+.pill:hover, .viz-toggle:hover { color: var(--text); }
+.pill:disabled { opacity: .4; cursor: default; }
+.pill:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+#rec::before { content: "\25CF  "; color: #e05a5a; }
+#rec[aria-pressed="true"] { color: #e05a5a; border-color: #e05a5a; }
+.pill[aria-pressed="true"] { color: var(--green); border-color: var(--green); }
 .viz-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 .viz-toggle[aria-pressed="true"] { color: var(--green); border-color: var(--green); }
 .viz-toggle + .instruments { margin-left: 0; }
