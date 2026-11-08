@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.joshwein.xyz/sitemap.xml
+Sitemap: https://www.joshwein.xyz/blog/sitemap.xml
