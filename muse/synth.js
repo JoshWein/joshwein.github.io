@@ -9,7 +9,7 @@
 // Drum lanes go from cymbals at the top down to the kick at the bottom.
 
 const LANES = 16;
-const RELEASE_S = 0.12;
+const RELEASE_S = 0.45; // matches the sample fade-out in script.js
 const PENTATONIC = [0, 2, 4, 7, 9];
 
 export const DRUM_NAMES = [
@@ -138,8 +138,9 @@ function makeVoice(ctx, s, volume) {
 				const now = ctx.currentTime;
 				level.gain.cancelScheduledValues(now);
 				level.gain.setValueAtTime(level.gain.value, now);
-				level.gain.linearRampToValueAtTime(0, now + RELEASE_S);
-				const stopAt = now + RELEASE_S + 0.02;
+				// An exponential tail sounds like a natural decay, not a cut.
+				level.gain.setTargetAtTime(0, now, RELEASE_S / 6); // ~0.1% left at the hard stop, so no tick
+				const stopAt = now + RELEASE_S + 0.05;
 				if (stopAt < end) {
 					for (const src of sources) {
 						try { src.stop(stopAt); } catch { /* already stopped */ }
