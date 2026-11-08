@@ -1,7 +1,7 @@
-// Loops for Muse: record two bars, then they repeat on the room's beat.
+// Loops for Muse: record four bars, then they repeat on the room's beat.
 //
 // A loop is a list of { step, lane, instrument, vol } notes on a 32-step
-// grid (two bars of 16th notes). It packs into a short string, four
+// grid (four bars of 8th notes). It packs into a short string, four
 // characters per note, so it fits in a share link or one database value:
 //   step (base 36, 0..v)  lane (hex)  instrument (hex)  volume (0..9)
 
@@ -45,7 +45,7 @@ export function byStep(notes) {
 /**
  * Records what is held on each beat. arm() waits for the next loop start,
  * then capture(tick, held) is called every beat (tick = absolute beat number
- * on the room clock) until two bars of ticks have passed, even if the tab
+ * on the room clock) until four bars of ticks have passed, even if the tab
  * skipped some beats.
  */
 export class Recorder {
@@ -75,7 +75,7 @@ export class Recorder {
 		return this.state === "recording" ? Math.min(LOOP_STEPS, tick - this.startTick) : 0;
 	}
 
-	/** Called on each beat. Returns the finished notes once two bars are captured. */
+	/** Called on each beat. Returns the finished notes once the loop is captured. */
 	capture(tick, held) {
 		if (tick === this.lastTick) return null; // a timer fired twice in one beat
 		this.lastTick = tick;
