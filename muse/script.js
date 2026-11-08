@@ -24,6 +24,10 @@ window.onload = function() {
 	page.style.display = 'none';
 	target.addEventListener('submit', function (e) {
 		e.preventDefault();
+		// Browsers start the AudioContext suspended until a user gesture.
+		if (Howler.ctx && Howler.ctx.state === 'suspended') {
+			Howler.ctx.resume();
+		}
 		page.style.display = '';
 		var username = document.getElementById('username').value;
 		loadPage(username === "" ? "MuseMan" : username);
@@ -46,7 +50,7 @@ function loadPage(username) {
 		for(var j = 16; j  >= 1; j--) {
 			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.mp3';
 			instruments[i].push(new Howl({
-				url: [path],
+				urls: [path],
 				volume: 0
 			}));
 		}
