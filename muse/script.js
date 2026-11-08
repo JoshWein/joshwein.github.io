@@ -391,7 +391,7 @@ function retrigger(p) {
 }
 function beat() {
 	scheduleBeat(); // first, so one bad voice can't stop the beat
-	const step = Math.floor(roomTime() / TEMPO_MS) % LOOP_STEPS;
+	const tick = Math.floor(roomTime() / TEMPO_MS);
 	for (const p of pointers.values()) {
 		if (p.down) retrigger(p);
 	}
@@ -399,7 +399,7 @@ function beat() {
 		for (const p of remotes.values()) {
 			if (p.down && p.lane >= 0) retrigger(p);
 		}
-		loopBeat(step);
+		loopBeat(tick);
 	}
 }
 function scheduleBeat() {
@@ -428,23 +428,25 @@ function heldNote(p) {
 }
 
 function playLoopNote(n) {
+	if (!width || !height) return; // canvas hidden: nothing to place the note on
 	const v = Math.max(n.vol / 9, 0.05);
 	const p = { x: v * width, y: (n.lane + 0.5) * (height / NOTES), lane: n.lane, instrument: n.instrument, voices: [] };
 	playVoice(p);
 	setTimeout(() => releaseVoice(p), TEMPO_MS * 2);
 }
 
-function loopBeat(step) {
+function loopBeat(tick) {
+	const step = tick % LOOP_STEPS;
 	const held = [...taps];
 	taps = [];
 	for (const p of pointers.values()) {
 		if (p.down) held.push(heldNote(p));
 	}
-	const done = recorder.capture(step, held);
+	const done = recorder.capture(tick, held);
 	if (done) setLoop(done, true);
 	if (loopOn) mySteps[step].forEach(playLoopNote);
 	for (const steps of remoteLoops.values()) steps[step].forEach(playLoopNote);
-	updateLoopUI(step);
+	updateLoopUI(tick);
 }
 
 function setLoop(notes, on) {
@@ -467,14 +469,15 @@ function applyRemoteLoops(loops) {
 	}
 }
 
-function updateLoopUI(step) {
+function updateLoopUI(tick) {
+	const step = tick === undefined ? undefined : tick % LOOP_STEPS;
 	const watching = roomState.role === "watch";
 	recBtn.disabled = watching;
 	if (recorder.state === "armed") {
 		const wait = step === undefined ? "" : ` ${Math.ceil((LOOP_STEPS - step) / 4)}`;
 		recBtn.textContent = `ready${wait}`;
 	} else if (recorder.state === "recording") {
-		recBtn.textContent = `rec ${(recorder.taken / 4) | 0}/8`;
+		recBtn.textContent = `rec ${(recorder.progress(tick ?? recorder.startTick) / 4) | 0}/8`;
 	} else {
 		recBtn.textContent = "rec";
 	}
