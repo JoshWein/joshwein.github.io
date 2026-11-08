@@ -10,7 +10,10 @@ import { LOOP_STEPS, Recorder, encodeLoop, decodeLoop, byStep } from "./loop.js"
 import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor, targetMidi } from "./scales.js";
 
 const NOTES = 16;
-const TEMPO_MS = 125; // a held note retriggers on this beat (16th notes at 120 BPM), shared by the room
+const TEMPO_MS = 300; // one beat step: 8th notes at 100 BPM, shared by the room
+const STEPS_PER_BAR = 8;
+// How often a held note repeats, in steps: melodic notes every 8th, drums every quarter.
+const repeatEvery = (instrument) => (INSTRUMENTS[instrument]?.synth === "drums" ? 2 : 1);
 const RELEASE_MS = 120;
 
 // Names and icons describe how each sound behaves (picked by ear and from
@@ -403,18 +406,19 @@ canvas.addEventListener("pointerleave", (e) => {
 // The beat: a held note retriggers every TEMPO_MS, on boundaries of the
 // shared room clock, so everyone's held notes land together. A note that
 // was just struck skips the next beat instead of doubling up.
-function retrigger(p) {
+function retrigger(p, tick) {
+	if (tick % repeatEvery(p.instrument) !== 0) return;
 	if (performance.now() - (p.lastPlay ?? 0) > TEMPO_MS / 2) playVoice(p);
 }
 function beat() {
 	scheduleBeat(); // first, so one bad voice can't stop the beat
 	const tick = Math.floor(roomTime() / TEMPO_MS);
 	for (const p of pointers.values()) {
-		if (p.down) retrigger(p);
+		if (p.down) retrigger(p, tick);
 	}
 	if (playing) {
 		for (const p of remotes.values()) {
-			if (p.down && p.lane >= 0) retrigger(p);
+			if (p.down && p.lane >= 0) retrigger(p, tick);
 		}
 		loopBeat(tick);
 	}
@@ -427,7 +431,7 @@ scheduleBeat();
 
 /* ---------- loops ---------- */
 
-// Record two bars of what you play; it then repeats on the room's beat, and
+// Record four bars of what you play; it then repeats on the room's beat, and
 // everyone in the room hears it. Loops can also be shared as a link.
 const recorder = new Recorder();
 let taps = [];
@@ -457,7 +461,8 @@ function loopBeat(tick) {
 	const held = [...taps];
 	taps = [];
 	for (const p of pointers.values()) {
-		if (p.down) held.push(heldNote(p));
+		// record held notes at the rate they repeat live (drums on quarters)
+		if (p.down && tick % repeatEvery(p.instrument) === 0) held.push(heldNote(p));
 	}
 	const done = recorder.capture(tick, held);
 	if (done) setLoop(done, true);
@@ -491,10 +496,10 @@ function updateLoopUI(tick) {
 	const watching = roomState.role === "watch";
 	recBtn.disabled = watching;
 	if (recorder.state === "armed") {
-		const wait = step === undefined ? "" : ` ${Math.ceil((LOOP_STEPS - step) / 4)}`;
+		const wait = step === undefined ? "" : ` ${Math.ceil((LOOP_STEPS - step) / STEPS_PER_BAR)}`;
 		recBtn.textContent = `ready${wait}`;
 	} else if (recorder.state === "recording") {
-		recBtn.textContent = `rec ${(recorder.progress(tick ?? recorder.startTick) / 4) | 0}/8`;
+		recBtn.textContent = `rec ${(recorder.progress(tick ?? recorder.startTick) / STEPS_PER_BAR) | 0}/${LOOP_STEPS / STEPS_PER_BAR}`;
 	} else {
 		recBtn.textContent = "rec";
 	}
@@ -559,7 +564,7 @@ function draw(now) {
 	}
 
 	// ruled pitch lines, a touch darker on each quarter note so the shared beat is visible
-	const quarter = Math.floor(roomTime() / TEMPO_MS) % 4 === 0;
+	const quarter = Math.floor(roomTime() / TEMPO_MS) % 2 === 0;
 	ctx.strokeStyle = quarter ? "rgba(31, 58, 95, 0.34)" : "rgba(31, 58, 95, 0.22)";
 	ctx.lineWidth = 1;
 	ctx.beginPath();
