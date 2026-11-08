@@ -384,3 +384,112 @@ a:hover { color: var(--red-ink); }
 @media (prefers-reduced-motion: reduce) {
 	* { transition: none !important; }
 }
+
+/* ---------- tempo ---------- */
+
+.tempo {
+	display: flex;
+	align-items: center;
+	gap: 0;
+}
+.tempo .step { padding: 2px 8px; font-size: 20px; font-weight: 700; line-height: 1; }
+.tempo output {
+	min-width: 3ch;
+	font: 700 15px var(--mono);
+	text-align: right;
+}
+.tempo .unit { margin-left: 4px; font-size: 13px; color: var(--muted); }
+
+/* ---------- tracks: one line per recording, over the top of the page ---------- */
+
+.tracks {
+	position: absolute;
+	z-index: 2;
+	top: 8px;
+	left: calc(var(--margin) + 10px);
+	right: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	pointer-events: none;
+}
+.tracks[hidden] { display: none; }
+
+.track {
+	--pen: var(--ink);
+	--head: 0;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	max-width: 100%;
+	padding: 2px 4px 2px 2px;
+	background: rgba(246, 241, 228, .88);
+	border-left: 3px solid var(--pen);
+	box-shadow: 0 1px 0 #cfc6b2;
+	pointer-events: auto;
+}
+.track button {
+	min-width: 32px;
+	min-height: 32px;
+	padding: 0 6px;
+	font: 15px var(--mono);
+	color: var(--ink);
+	background: none;
+	border: 0;
+	cursor: pointer;
+}
+.track button:hover { color: var(--red-ink); }
+.track button:disabled { opacity: .4; cursor: default; }
+
+.track-on { font-weight: 700; min-width: 32px; text-align: center; }
+span.track-on { color: var(--red-ink); }
+.track button.track-on[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
+.track:has(.track-on[aria-pressed="false"]) .roll { opacity: .35; }
+
+/* the notes, drawn small, with a playhead that moves on the beat */
+.roll {
+	position: relative;
+	display: block;
+	width: 144px;
+	height: 32px;
+	flex: none;
+	image-rendering: pixelated;
+	background:
+		linear-gradient(90deg, var(--ink) 0 1px, transparent 1px) calc(var(--head) * 100%) 0 / 2px 100% no-repeat,
+		repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), var(--rule) calc(25% - 1px) 25%),
+		var(--paper);
+	border: 1px solid var(--rule);
+}
+.roll.progress i {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 0;
+	background: var(--pen);
+	opacity: .35;
+	transition: width .2s linear;
+}
+
+.track-name {
+	flex: none;
+	width: 11em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 13px;
+	color: var(--muted);
+}
+.track.recording .track-name { color: var(--red-ink); font-weight: 700; }
+
+.track-rec::before { content: "\25CF"; color: var(--red); }
+.track-rec[aria-pressed="true"]::before { content: "\25A0"; }
+.track.recording { border-left-color: var(--red); }
+
+@media (max-width: 560px) {
+	.tracks { left: calc(var(--margin) + 4px); right: 8px; }
+	.roll { width: 96px; }
+	.track-name { width: 7.5em; }
+}

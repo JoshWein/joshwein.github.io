@@ -15,7 +15,9 @@ To turn it on:
 5. From the repo root, apply the rules: `npx firebase-tools deploy --only database` (`.firebaserc` points at `muse-687b5`).
 6. Optional: Authentication > Settings > Authorized domains: make sure `www.joshwein.xyz` is listed.
 
-The rules in `database.rules.json` only let a signed-in player write their own record under `rooms/{room}/players/{uid}`, check every field's type and range, and block everything else. Records are removed when a player disconnects.
+The rules in `database.rules.json` only let a signed-in player write their own record under `rooms/{room}/players/{uid}`, check every field's type and range, and block everything else. Records are removed when a player disconnects. The room's tempo lives at `rooms/{room}/tempo` (`{ bpm, at, tick }`, see `tempo.js`), apart from the key and scale, so a database still on older rules keeps those working.
+
+Each recording is its own track (up to four). The room hears your tracks that are on, merged into one loop under `rooms/{room}/loops/{uid}`; share links carry every track, joined by dots, plus `&bpm=`.
 
 ### Local testing
 

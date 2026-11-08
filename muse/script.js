@@ -7,11 +7,11 @@ import { startViz, stopViz, vizNote } from "./viz.js";
 import { synthVoice } from "./synth.js";
 import { setupMixer } from "./mixer.js";
 import { joinRoom, roomFromHash, cleanRoom, watchRooms, roomTime, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
-import { LOOP_STEPS, Recorder, encodeLoop, decodeLoop, byStep } from "./loop.js";
+import { LOOP_STEPS, MAX_TRACKS, Recorder, encodeLoop, decodeLoop, encodeTracks, decodeTracks, mergeTracks, byStep } from "./loop.js";
+import { DEFAULT_CLOCK, MIN_BPM, MAX_BPM, TapTempo, stepMs, tickAt, nextBeatAt, changeTempo, cleanClock, clampBpm } from "./tempo.js";
 import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor, targetMidi } from "./scales.js";
 
 const NOTES = 16;
-const TEMPO_MS = 300; // one beat step: 8th notes at 100 BPM, shared by the room
 const STEPS_PER_BAR = 8;
 // How often a held note repeats, in steps: melodic notes every 8th, drums every quarter.
 const repeatEvery = (instrument) => (INSTRUMENTS[instrument]?.synth === "drums" ? 2 : 1);
@@ -148,6 +148,10 @@ window.addEventListener("keydown", (e) => {
 	const count = INSTRUMENTS.length;
 	if (e.key === "[" || e.key === "]") {
 		selectInstrument((current + (e.key === "]" ? 1 : -1) + count) % count);
+		return;
+	}
+	if (e.key === "-" || e.key === "=" || e.key === "+") {
+		nudge(e.key === "-" ? -1 : 1, false);
 		return;
 	}
 	if (!/^[0-9]$/.test(e.key)) return;
@@ -298,7 +302,19 @@ function applyRoom(state) {
 	}
 	canvas.classList.toggle("watching", state.role === "watch");
 	keySelect.disabled = scaleSelect.disabled = state.role === "watch"; // players set the scale
-	if (state.role === "watch") recorder.cancel();
+	if (state.role === "watch") {
+		recorder.cancel();
+		recInto = -1;
+	}
+	tapBtn.disabled = state.role === "watch";
+	showTempo(); // watchers can't change the tempo
+	if (state.role === "play" && linkBpm) {
+		// a shared link brings its tempo into the room
+		const bpm = linkBpm;
+		linkBpm = null;
+		setTempo(bpm, true);
+	}
+	renderTracks();
 	updateLoopUI();
 	updatePresence();
 }
@@ -407,16 +423,113 @@ canvas.addEventListener("pointerleave", (e) => {
 	}
 });
 
-// The beat: a held note retriggers every TEMPO_MS, on boundaries of the
-// shared room clock, so everyone's held notes land together. A note that
-// was just struck skips the next beat instead of doubling up.
+/* ---------- tempo ---------- */
+
+// The room shares one tempo; anyone playing can change it. A change starts on
+// a step a moment ahead, so it reaches everyone before it takes over, and the
+// step count carries on so loops stay on their bar.
+const TEMPO_LEAD_MS = 500;
+// Clocks in the order they take over: the one running now first, then any
+// changes that start a moment from now. `clock` is the latest.
+let clocks = [DEFAULT_CLOCK];
+let clock = DEFAULT_CLOCK;
+function runningClock(t) {
+	for (let i = clocks.length - 1; i > 0; i--) if (t >= clocks[i].at) return clocks[i];
+	return clocks[0];
+}
+const STEP_MS = () => stepMs(runningClock(roomTime()).bpm);
+const currentTick = () => {
+	const t = roomTime();
+	return tickAt(runningClock(t), t);
+};
+const bpmOut = document.getElementById("bpm");
+const slowerBtn = document.getElementById("slower");
+const fasterBtn = document.getElementById("faster");
+const tapBtn = document.getElementById("tap");
+const tapper = new TapTempo();
+let tempoSendTimer = null;
+let wantBpm = null; // our change, waiting for a burst of clicks to settle
+let linkBpm = null; // a shared link's tempo, waiting to be shared with the room
+
+const shownBpm = () => wantBpm ?? clock.bpm;
+function showTempo() {
+	const bpm = shownBpm();
+	bpmOut.textContent = String(bpm);
+	slowerBtn.disabled = bpm <= MIN_BPM || roomState.role === "watch";
+	fasterBtn.disabled = bpm >= MAX_BPM || roomState.role === "watch";
+}
+
+function applyTempo(next) {
+	const changed = next.bpm !== clock.bpm || next.at !== clock.at || next.tick !== clock.tick;
+	if (changed) {
+		const t = roomTime();
+		// a change replaces any that would start at or after it; ones already running drop off
+		clocks = [...clocks.filter((c) => c.at < next.at), next];
+		while (clocks.length > 1 && clocks[1].at <= t) clocks.shift();
+		clock = next;
+		scheduleBeat();
+	}
+	showTempo();
+}
+
+function setTempo(bpm, share = false) {
+	if (roomState.role === "watch") return;
+	bpm = clampBpm(bpm);
+	if (bpm === shownBpm() && !share) return;
+	wantBpm = bpm;
+	showTempo();
+	// a burst of clicks sends one change, built from the clock running when it's sent
+	clearTimeout(tempoSendTimer);
+	tempoSendTimer = setTimeout(() => {
+		const t = roomTime();
+		const bpm = wantBpm;
+		wantBpm = null;
+		const lead = session ? TEMPO_LEAD_MS : 0;
+		// build on whichever clock will be running when the change starts
+		applyTempo(changeTempo(runningClock(t + lead), bpm, t, lead));
+		session?.setTempo(clock);
+	}, 150);
+}
+
+// - and + move to the next multiple of 5 BPM; with Shift, by 1.
+function nudge(dir, fine) {
+	const bpm = shownBpm();
+	if (fine) return setTempo(bpm + dir);
+	setTempo(dir > 0 ? Math.floor(bpm / 5) * 5 + 5 : Math.ceil(bpm / 5) * 5 - 5);
+}
+
+// A tempo from the room, or null when the room hasn't picked one.
+function applyRoomTempo(raw) {
+	if (wantBpm !== null) return; // our own change is about to replace it
+	if (raw === null && linkBpm) return; // keep the link's tempo until we can share it
+	applyTempo(cleanClock(raw));
+}
+slowerBtn.addEventListener("click", (e) => nudge(-1, e.shiftKey));
+fasterBtn.addEventListener("click", (e) => nudge(1, e.shiftKey));
+tapBtn.addEventListener("click", () => {
+	const bpm = tapper.tap(performance.now());
+	if (bpm) setTempo(bpm);
+});
+showTempo();
+
+/* ---------- the beat ---------- */
+
+// The beat: a held note retriggers every step, on boundaries of the shared
+// room clock, so everyone's held notes land together. A note that was just
+// struck skips the next beat instead of doubling up.
 function retrigger(p, tick) {
 	if (tick % repeatEvery(p.instrument) !== 0) return;
-	if (performance.now() - (p.lastPlay ?? 0) > TEMPO_MS / 2) playVoice(p);
+	if (performance.now() - (p.lastPlay ?? 0) > STEP_MS() / 2) playVoice(p);
 }
+let lastBeat = -1;
+let beatTimer = null;
 function beat() {
 	scheduleBeat(); // first, so one bad voice can't stop the beat
-	const tick = Math.floor(roomTime() / TEMPO_MS);
+	const tick = currentTick();
+	// A tempo change can reschedule us onto the same step, and one that arrived
+	// late can step the count back a little: never play a step twice.
+	if (tick <= lastBeat && lastBeat - tick < 4) return;
+	lastBeat = tick;
 	for (const p of pointers.values()) {
 		if (p.down) retrigger(p, tick);
 	}
@@ -428,25 +541,28 @@ function beat() {
 	}
 }
 function scheduleBeat() {
+	clearTimeout(beatTimer);
 	const t = roomTime();
-	setTimeout(beat, TEMPO_MS - (t % TEMPO_MS) + 1);
+	let next = nextBeatAt(runningClock(t), t);
+	for (const c of clocks) if (c.at > t) next = Math.min(next, c.at); // a new tempo's first step
+	beatTimer = setTimeout(beat, next - t + 1);
 }
 scheduleBeat();
 
 /* ---------- loops ---------- */
 
-// Record four bars of what you play; it then repeats on the room's beat, and
-// everyone in the room hears it. Loops can also be shared as a link.
+// Record four bars of what you play. Each recording becomes its own track
+// (a line under the header), and every track that's on repeats on the room's
+// beat, so you can layer them: record a beat, then play a melody over it.
+// Everyone in the room hears them, and they can be shared as a link.
 const recorder = new Recorder();
 let taps = [];
-let myLoop = []; // notes
-let mySteps = byStep([]);
-let loopOn = false;
+let tracks = []; // { notes, steps, on }
+let recInto = -1; // the track being re-recorded, or -1 for a new one
 const remoteLoops = new Map(); // uid -> notes by step
 const recBtn = document.getElementById("rec");
-const loopBtn = document.getElementById("loop-play");
 const shareBtn = document.getElementById("loop-share");
-const clearBtn = document.getElementById("loop-clear");
+const trackList = document.getElementById("tracks");
 
 function heldNote(p) {
 	return { lane: p.lane, instrument: p.instrument, vol: Math.round(volumeFor(p.x) * 9) };
@@ -457,7 +573,7 @@ function playLoopNote(n) {
 	const v = Math.max(n.vol / 9, 0.05);
 	const p = { x: v * width, y: (n.lane + 0.5) * (height / NOTES), lane: n.lane, instrument: n.instrument, voices: [] };
 	playVoice(p);
-	setTimeout(() => releaseVoice(p), TEMPO_MS * 2);
+	setTimeout(() => releaseVoice(p), STEP_MS() * 2);
 }
 
 function loopBeat(tick) {
@@ -469,22 +585,42 @@ function loopBeat(tick) {
 		if (p.down && tick % repeatEvery(p.instrument) === 0) held.push(heldNote(p));
 	}
 	const done = recorder.capture(tick, held);
-	if (done) setLoop(done, true);
-	if (loopOn) mySteps[step].forEach(playLoopNote);
+	if (done) finishRecording(done);
+	for (let i = 0; i < tracks.length; i++) {
+		// the track being re-recorded stays quiet so the old take doesn't play over the new one
+		if (tracks[i].on && !(i === recInto && recorder.state === "recording")) tracks[i].steps[step].forEach(playLoopNote);
+	}
 	for (const steps of remoteLoops.values()) steps[step].forEach(playLoopNote);
 	updateLoopUI(tick);
 }
 
-function setLoop(notes, on) {
-	myLoop = notes;
-	mySteps = byStep(notes);
-	loopOn = on && notes.length > 0;
+function makeTrack(notes) {
+	return { notes, steps: byStep(notes), on: true };
+}
+
+function finishRecording(notes) {
+	const into = recInto;
+	recInto = -1;
+	if (!notes.length) {
+		hint.classList.remove("gone");
+		hint.textContent = "Nothing was played in those four bars, so no track was made.";
+	} else if (into >= 0 && tracks[into]) {
+		tracks[into] = makeTrack(notes);
+	} else if (tracks.length < MAX_TRACKS) {
+		tracks.push(makeTrack(notes));
+	}
+	tracksChanged();
+}
+
+function tracksChanged() {
 	publishLoop();
+	renderTracks();
 	updateLoopUI();
 }
 
 function publishLoop() {
-	session?.setLoop(loopOn ? encodeLoop(myLoop) : null);
+	const merged = mergeTracks(tracks.filter((t) => t.on).map((t) => t.notes));
+	session?.setLoop(merged.length ? encodeLoop(merged) : null);
 }
 
 function applyRemoteLoops(loops) {
@@ -495,41 +631,160 @@ function applyRemoteLoops(loops) {
 	}
 }
 
+function startRecording(into) {
+	recInto = into;
+	recorder.arm();
+	renderTracks();
+	updateLoopUI();
+}
+
+function stopRecording() {
+	recorder.cancel();
+	recInto = -1;
+	renderTracks();
+	updateLoopUI();
+}
+
+// One line per track: an on/off switch, a little picture of its notes with a
+// playhead, its instruments, and buttons to record it again or delete it.
+function trackLine(track, i) {
+	const li = document.createElement("li");
+	li.className = "track";
+	li.style.setProperty("--pen", PENS[track.notes[0]?.instrument ?? current]);
+	const recording = i === recInto && recorder.state !== "idle";
+	li.classList.toggle("recording", recording);
+
+	const toggle = document.createElement("button");
+	toggle.type = "button";
+	toggle.className = "track-on";
+	toggle.textContent = String(i + 1);
+	toggle.setAttribute("aria-pressed", String(track.on));
+	toggle.title = track.on ? `Mute track ${i + 1}` : `Play track ${i + 1}`;
+	toggle.addEventListener("click", () => {
+		track.on = !track.on;
+		tracksChanged();
+	});
+
+	const roll = document.createElement("canvas");
+	roll.className = "roll";
+	roll.width = LOOP_STEPS * 3;
+	roll.height = NOTES * 2;
+	roll.setAttribute("aria-hidden", "true");
+	drawRoll(roll, track.notes);
+
+	const names = [...new Set(track.notes.map((n) => INSTRUMENTS[n.instrument].name))];
+	const label = document.createElement("span");
+	label.className = "track-name";
+	label.textContent = recording ? "recording again..." : names.join(", ");
+
+	const again = document.createElement("button");
+	again.type = "button";
+	again.className = "track-rec";
+	again.title = recording ? `Stop recording track ${i + 1}` : `Record track ${i + 1} again`;
+	again.setAttribute("aria-label", again.title);
+	again.setAttribute("aria-pressed", String(recording));
+	again.disabled = roomState.role === "watch" || (recorder.state !== "idle" && !recording);
+	again.addEventListener("click", () => (recording ? stopRecording() : startRecording(i)));
+
+	const del = document.createElement("button");
+	del.type = "button";
+	del.className = "track-del";
+	del.textContent = "×";
+	del.title = `Delete track ${i + 1}`;
+	del.setAttribute("aria-label", del.title);
+	del.addEventListener("click", () => {
+		if (recInto === i) stopRecording();
+		else if (recInto > i) recInto--;
+		tracks.splice(i, 1);
+		tracksChanged();
+	});
+
+	li.append(toggle, roll, label, again, del);
+	return li;
+}
+
+// A new recording gets a placeholder line that fills in as the bars go by.
+function pendingLine() {
+	const li = document.createElement("li");
+	li.className = "track recording pending";
+	li.style.setProperty("--pen", PENS[current]);
+	const n = document.createElement("span");
+	n.className = "track-on";
+	n.textContent = String(tracks.length + 1);
+	const bar = document.createElement("span");
+	bar.className = "roll progress";
+	bar.append(document.createElement("i"));
+	const label = document.createElement("span");
+	label.className = "track-name";
+	li.append(n, bar, label);
+	return li;
+}
+
+function drawRoll(roll, notes) {
+	const c = roll.getContext("2d");
+	c.clearRect(0, 0, roll.width, roll.height);
+	for (const n of notes) {
+		c.fillStyle = PENS[n.instrument];
+		c.globalAlpha = 0.35 + 0.65 * (n.vol / 9);
+		c.fillRect(n.step * 3, n.lane * 2, 3, 2);
+	}
+	c.globalAlpha = 1;
+}
+
+function renderTracks() {
+	const lines = tracks.map(trackLine);
+	if (recorder.state !== "idle" && recInto < 0) lines.push(pendingLine());
+	trackList.replaceChildren(...lines);
+	trackList.hidden = lines.length === 0;
+}
+
 function updateLoopUI(tick) {
 	const step = tick === undefined ? undefined : tick % LOOP_STEPS;
 	const watching = roomState.role === "watch";
-	recBtn.disabled = watching;
+	const full = tracks.length >= MAX_TRACKS;
+	const busy = recorder.state !== "idle";
+	recBtn.disabled = watching || (!busy && full) || (busy && recInto >= 0);
+	recBtn.title = full && !busy ? `All ${MAX_TRACKS} tracks are used. Delete one to record a new one.` : "Record a new four-bar track";
+	let status = "";
 	if (recorder.state === "armed") {
 		const wait = step === undefined ? "" : ` ${Math.ceil((LOOP_STEPS - step) / STEPS_PER_BAR)}`;
-		recBtn.textContent = `ready${wait}`;
+		status = `ready${wait}`;
 	} else if (recorder.state === "recording") {
-		recBtn.textContent = `rec ${(recorder.progress(tick ?? recorder.startTick) / STEPS_PER_BAR) | 0}/${LOOP_STEPS / STEPS_PER_BAR}`;
-	} else {
-		recBtn.textContent = "rec";
+		status = `rec ${(recorder.progress(tick ?? recorder.startTick) / STEPS_PER_BAR) | 0}/${LOOP_STEPS / STEPS_PER_BAR}`;
 	}
-	recBtn.setAttribute("aria-pressed", String(recorder.state !== "idle"));
-	const has = myLoop.length > 0;
-	loopBtn.hidden = shareBtn.hidden = clearBtn.hidden = !has;
-	loopBtn.setAttribute("aria-pressed", String(loopOn));
+	recBtn.textContent = busy && recInto < 0 ? status : "rec";
+	recBtn.setAttribute("aria-pressed", String(busy && recInto < 0));
+	shareBtn.hidden = !tracks.some((t) => t.on);
+
+	// live parts of the lines: the playhead, the countdown, the progress bar
+	const lines = trackList.children;
+	for (let i = 0; i < lines.length; i++) {
+		const li = lines[i];
+		if (step !== undefined) li.style.setProperty("--head", String(step / LOOP_STEPS));
+		const name = li.querySelector(".track-name");
+		if (li.classList.contains("pending")) {
+			name.textContent = recorder.state === "armed" ? `starts in ${status.replace("ready", "").trim() || "a moment"}` : status.replace("rec", "recording");
+			li.querySelector(".progress i").style.width = `${(recorder.progress(tick ?? recorder.startTick) / LOOP_STEPS) * 100}%`;
+		} else if (i === recInto && busy) {
+			name.textContent = recorder.state === "armed" ? `starts in ${status.replace("ready", "").trim() || "a moment"}` : status.replace("rec", "recording");
+		}
+	}
 }
 
 recBtn.addEventListener("click", () => {
-	if (recorder.state === "idle") recorder.arm();
-	else recorder.cancel();
-	updateLoopUI();
+	if (recorder.state === "idle") startRecording(-1);
+	else stopRecording();
 });
-loopBtn.addEventListener("click", () => setLoop(myLoop, !loopOn));
-clearBtn.addEventListener("click", () => setLoop([], false));
 shareBtn.addEventListener("click", async () => {
 	const url = new URL(location.href);
-	url.search = `?loop=${encodeLoop(myLoop)}`;
+	url.search = `?loop=${encodeTracks(tracks.filter((t) => t.on).map((t) => t.notes))}&bpm=${clock.bpm}`;
 	url.hash = session ? session.room : roomFromHash();
 	try {
 		if (navigator.share) await navigator.share({ title: "A Muse loop", url: url.href });
 		else {
 			await navigator.clipboard.writeText(url.href);
 			hint.classList.remove("gone");
-			hint.textContent = "Loop link copied. Anyone who opens it hears your loop.";
+			hint.textContent = "Loop link copied. Anyone who opens it hears your tracks.";
 		}
 	} catch {
 		// share sheet dismissed, or clipboard blocked: show the link instead
@@ -538,14 +793,16 @@ shareBtn.addEventListener("click", async () => {
 	}
 });
 
-// A shared link: ?loop=... loads that loop, ready to play once you start.
+// A shared link: ?loop=... loads its tracks (and ?bpm= its tempo), ready to play once you start.
+const sharedBpm = Number(new URLSearchParams(location.search).get("bpm"));
 {
-	const shared = decodeLoop(new URLSearchParams(location.search).get("loop") ?? "", INSTRUMENTS.length);
-	if (shared.length) {
-		myLoop = shared;
-		mySteps = byStep(shared);
-		loopOn = true;
+	const shared = decodeTracks(new URLSearchParams(location.search).get("loop") ?? "", INSTRUMENTS.length);
+	tracks = shared.map(makeTrack);
+	if (Number.isInteger(sharedBpm) && sharedBpm >= MIN_BPM && sharedBpm <= MAX_BPM) {
+		applyTempo(changeTempo(clock, sharedBpm, roomTime()));
+		linkBpm = sharedBpm;
 	}
+	renderTracks();
 	updateLoopUI();
 }
 
@@ -568,7 +825,7 @@ function draw(now) {
 	}
 
 	// ruled pitch lines, a touch darker on each quarter note so the shared beat is visible
-	const quarter = Math.floor(roomTime() / TEMPO_MS) % 2 === 0;
+	const quarter = currentTick() % 2 === 0;
 	ctx.strokeStyle = quarter ? "rgba(31, 58, 95, 0.34)" : "rgba(31, 58, 95, 0.22)";
 	ctx.lineWidth = 1;
 	ctx.beginPath();
@@ -752,6 +1009,7 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		onPlayers: applyRemotePlayers,
 		onRoom: applyRoom,
 		onLoops: applyRemoteLoops,
+		onTempo: applyRoomTempo,
 		onSettings: (s) => applySettings(s ?? DEFAULT_SETTINGS),
 		onStatus: (s) => presence.classList.toggle("offline", s === "offline"),
 	});

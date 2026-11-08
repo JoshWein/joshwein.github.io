@@ -124,8 +124,9 @@ export function watchRooms(onRooms) {
  * role is "play" or "watch", and place is the watcher's spot in line (1 = next).
  * onSettings(settings) is called with the room's shared settings (scale, key) or null.
  * onLoops(map) is called with { uid: packedLoop } for the other players' loops.
+ * onTempo(clock) is called with the room's tempo clock (see tempo.js) or null.
  */
-export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onLoops, onStatus }) {
+export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onLoops, onTempo, onStatus }) {
 	if (!activeConfig()) return null;
 
 	let timedOut = false;
@@ -133,14 +134,14 @@ export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onLo
 		timedOut = true;
 		resolve(null);
 	}, JOIN_TIMEOUT_MS));
-	return Promise.race([connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onStatus }, () => timedOut), timeout])
+	return Promise.race([connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onTempo, onStatus }, () => timedOut), timeout])
 		.then((session) => {
 			if (!session) onStatus?.("offline");
 			return session;
 		});
 }
 
-async function connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onStatus }, gaveUp) {
+async function connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onTempo, onStatus }, gaveUp) {
 	try {
 		const { db, database, uid } = await firebase();
 		if (gaveUp()) return null; // too slow; the player is already playing solo
@@ -156,6 +157,18 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onS
 		const settingsRef = db.ref(database, `rooms/${room}/settings`);
 		db.onValue(settingsRef, (snap) => onSettings?.(snap.val()),
 			(err) => console.warn("Muse: couldn't read room settings", err));
+
+		// The tempo lives apart from the settings, so a room on older rules
+		// (which would refuse a settings record with a tempo in it) keeps its key and scale.
+		const tempoRef = db.ref(database, `rooms/${room}/tempo`);
+		let pendingTempo = null;
+		db.onValue(tempoRef, (snap) => onTempo?.(snap.val()),
+			(err) => console.warn("Muse: couldn't read the tempo", err));
+		function sendTempo() {
+			if (!pendingTempo || !confirmed || role !== "play") return;
+			db.set(tempoRef, pendingTempo).catch((err) => console.warn("Muse: couldn't change the tempo", err));
+			pendingTempo = null;
+		}
 
 		// Loops are written once and replayed by everyone on the shared beat.
 		const loopRef = db.ref(database, `rooms/${room}/loops/${uid}`);
@@ -222,6 +235,7 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onS
 					db.remove(meRef).catch((err) => console.warn("Muse: couldn't step back", err));
 				}
 				sendLoop();
+				sendTempo();
 			}
 			onRoom?.({
 				role,
@@ -293,6 +307,11 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onS
 			// Shared by everyone in the room; the last change wins.
 			setSettings(settings) {
 				db.set(settingsRef, settings).catch((err) => console.warn("Muse: couldn't change the room settings", err));
+			},
+			// clock: { bpm, at, tick } from tempo.js. Sent once we're playing; the last change wins.
+			setTempo(clock) {
+				pendingTempo = clock;
+				sendTempo();
 			},
 			get role() {
 				return role;
