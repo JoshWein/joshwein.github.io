@@ -76,12 +76,30 @@ function loadSounds() {
 
 const picker = document.querySelector(".instruments");
 
-// Dark or light icon, whichever reads better on the swatch.
-function inkFor(hex) {
+// The instrument's color as pen ink: same hue, dark enough to read on paper.
+function penFor(hex) {
 	const n = parseInt(hex.slice(1), 16);
-	const lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
-	return lum > 0.5 ? "#1c1f22" : "#f4fbf8";
+	const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => v / 255);
+	const max = Math.max(r, g, b);
+	const min = Math.min(r, g, b);
+	const d = max - min;
+	let h = 0;
+	if (d) {
+		if (max === r) h = ((g - b) / d) % 6;
+		else if (max === g) h = (b - r) / d + 2;
+		else h = (r - g) / d + 4;
+	}
+	const l = (max + min) / 2;
+	const sat = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+	return `hsl(${Math.round((h * 60 + 360) % 360)} ${Math.round(Math.min(Math.max(sat, 0.25), 0.7) * 100)}% ${Math.round(Math.min(l, 0.32) * 100)}%)`;
 }
+const PENS = INSTRUMENTS.map((inst) => penFor(inst.color));
+const PEN_HEX = INSTRUMENTS.map((_, i) => {
+	// the visualizer wants hex; let the browser convert the hsl
+	const c = document.createElement("canvas").getContext("2d");
+	c.fillStyle = PENS[i];
+	return c.fillStyle;
+});
 const buttons = INSTRUMENTS.map((inst, i) => {
 	const b = document.createElement("button");
 	b.type = "button";
@@ -90,9 +108,8 @@ const buttons = INSTRUMENTS.map((inst, i) => {
 	const key = i < 10 ? ` (key ${(i + 1) % 10})` : "";
 	b.setAttribute("aria-label", `${inst.name}${key}`);
 	b.title = `${inst.name}${key}`;
-	b.style.setProperty("--swatch", inst.color);
-	b.style.setProperty("--ink", inkFor(inst.color));
-	b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${inst.icon}"/></svg>`;
+	const num = i < 10 ? `<span class="n" aria-hidden="true">${(i + 1) % 10}</span>` : "";
+	b.innerHTML = `${num}${inst.name.toLowerCase()}`;
 	b.addEventListener("click", () => selectInstrument(i));
 	picker.appendChild(b);
 	return b;
@@ -291,7 +308,7 @@ function playVoice(p) {
 	const volume = volumeFor(p.x);
 	const voice = inst.synth ? synthNote(inst.synth, p.lane, volume) : sampleNote(p.instrument, p.lane, volume);
 	if (!voice) return;
-	vizNote(p.x / width, p.y / height, inst.color, volume);
+	vizNote(p.x / width, p.y / height, PEN_HEX[p.instrument], volume);
 	p.voices = p.voices.filter((v) => v.playing());
 	p.voices.push(voice);
 }
@@ -535,13 +552,15 @@ function draw(now) {
 	// lanes held right now
 	for (const p of everyone) {
 		if (!p.down) continue;
-		ctx.fillStyle = INSTRUMENTS[p.instrument].color + "22";
+		ctx.globalAlpha = 0.1;
+		ctx.fillStyle = PENS[p.instrument];
 		ctx.fillRect(0, p.lane * laneH, width, laneH);
+		ctx.globalAlpha = 1;
 	}
 
-	// pitch lines, a touch brighter on each quarter note so the shared beat is visible
+	// ruled pitch lines, a touch darker on each quarter note so the shared beat is visible
 	const quarter = Math.floor(roomTime() / TEMPO_MS) % 4 === 0;
-	ctx.strokeStyle = quarter ? "rgba(237, 255, 255, 0.13)" : "rgba(237, 255, 255, 0.08)";
+	ctx.strokeStyle = quarter ? "rgba(31, 58, 95, 0.34)" : "rgba(31, 58, 95, 0.22)";
 	ctx.lineWidth = 1;
 	ctx.beginPath();
 	for (let i = 1; i < NOTES; i++) {
@@ -552,18 +571,20 @@ function draw(now) {
 	ctx.stroke();
 
 	for (const p of everyone) {
-		const color = INSTRUMENTS[p.down || p.remote ? p.instrument ?? 0 : current].color;
+		const which = p.down || p.remote ? p.instrument ?? 0 : current;
+		const color = PENS[which];
 
 		// trail
 		p.trail = p.trail.filter((pt) => now - pt.t < 600);
 		if (p.trail.length > 1) {
 			ctx.strokeStyle = color;
 			ctx.lineCap = "round";
+			ctx.lineJoin = "round";
 			for (let i = 1; i < p.trail.length; i++) {
 				const a = p.trail[i - 1];
 				const b = p.trail[i];
 				ctx.globalAlpha = 1 - (now - b.t) / 600;
-				ctx.lineWidth = 3;
+				ctx.lineWidth = 2.5;
 				ctx.beginPath();
 				ctx.moveTo(a.x, a.y);
 				ctx.lineTo(b.x, b.y);
@@ -572,16 +593,25 @@ function draw(now) {
 			ctx.globalAlpha = 1;
 		}
 
-		// cursor: a square that pulses while held
-		const size = 20;
-		if (p.down) p.pulse = (p.pulse + 0.25) % (Math.PI * 2);
-		ctx.lineWidth = p.down ? 2 + 6 * (0.5 + 0.5 * Math.sin(p.pulse)) : 1.5;
-		ctx.strokeStyle = color;
-		ctx.strokeRect(p.x - size / 2, p.y - size / 2, size, size);
+		// cursor: a pen dot, with a ring that pulses while held
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+		ctx.fill();
+		if (p.down) {
+			p.pulse = (p.pulse + 0.25) % (Math.PI * 2);
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = color;
+			ctx.globalAlpha = 0.5;
+			ctx.beginPath();
+			ctx.arc(p.x, p.y, 9 + 5 * (0.5 + 0.5 * Math.sin(p.pulse)), 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.globalAlpha = 1;
+		}
 
-		ctx.fillStyle = "#dfe6e2";
-		ctx.font = '12px "IBM Plex Mono", monospace';
-		ctx.fillText(p.remote ? p.name : username, p.x + size / 2 + 6, p.y + 4);
+		// name in the margin-note hand, with the sound it's playing
+		ctx.font = '700 22px Caveat, "Segoe Print", cursive';
+		ctx.fillText(`${p.remote ? p.name : username} \u00b7 ${INSTRUMENTS[which].name.toLowerCase()}`, p.x + 16, p.y + 6);
 	}
 
 	requestAnimationFrame(draw);

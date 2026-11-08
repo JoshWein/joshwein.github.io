@@ -1,7 +1,8 @@
 // Muse visualizer: a three.js scene behind the drawing canvas.
 // A ring of bars follows the live audio spectrum (an AnalyserNode on Howler's
 // master output), and every note throws off a burst of sparks in its
-// instrument's color, right where it was played.
+// instrument's ink color, right where it was played. It's drawn like ink
+// on the paper page (normal alpha blending), not as light on a dark one.
 //
 // three.js is vendored in ./three and only loaded when the visualizer is on.
 
@@ -19,7 +20,7 @@ let running = false;
 let wanted = false; // last on/off request, so a slow load can't override a later "off"
 let lastTime = 0;
 let energy = 0; // fallback level when there is no analyser
-const accent = { r: 0.27, g: 0.81, b: 0.58 }; // site green, drifts toward recent notes
+const accent = { r: 0.12, g: 0.23, b: 0.37 }; // pen blue, drifts toward recent notes
 
 // Spark state lives in typed arrays; a ring buffer reuses old slots.
 let sparkPos, sparkVel, sparkCol, sparkBase, sparkAge;
@@ -45,15 +46,10 @@ function viewSize() {
 	return { w: h * camera.aspect, h };
 }
 
-// Adds light over the page without writing alpha, so with the transparent
-// canvas a faded (black) spark simply disappears.
+// Ink on paper: ordinary alpha blending, so marks show on the light page
+// and a spark fades out through its alpha.
 function glow(material) {
-	material.blending = THREE.CustomBlending;
-	material.blendEquation = THREE.AddEquation;
-	material.blendSrc = THREE.SrcAlphaFactor;
-	material.blendDst = THREE.OneFactor;
-	material.blendSrcAlpha = THREE.ZeroFactor;
-	material.blendDstAlpha = THREE.OneFactor;
+	material.blending = THREE.NormalBlending;
 	material.transparent = true;
 	material.depthWrite = false;
 	return material;
@@ -82,7 +78,7 @@ function build() {
 	// Spectrum ring
 	const geo = new THREE.BoxGeometry(0.16, 1, 0.16);
 	geo.translate(0, 0.5, 0); // grow outward from the ring
-	const mat = glow(new THREE.MeshBasicMaterial({ opacity: 0.45 }));
+	const mat = glow(new THREE.MeshBasicMaterial({ opacity: 0.2 }));
 	bars = new THREE.InstancedMesh(geo, mat, BARS);
 	bars.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 	const white = new THREE.Color(1, 1, 1);
@@ -95,17 +91,17 @@ function build() {
 	// Sparks
 	sparkPos = new Float32Array(MAX_SPARKS * 3);
 	sparkVel = new Float32Array(MAX_SPARKS * 3);
-	sparkCol = new Float32Array(MAX_SPARKS * 3);
+	sparkCol = new Float32Array(MAX_SPARKS * 4); // rgba: alpha fades with age
 	sparkBase = new Float32Array(MAX_SPARKS * 3);
 	sparkAge = new Float32Array(MAX_SPARKS).fill(SPARK_LIFE);
 	const sg = new THREE.BufferGeometry();
 	sg.setAttribute("position", new THREE.BufferAttribute(sparkPos, 3).setUsage(THREE.DynamicDrawUsage));
-	sg.setAttribute("color", new THREE.BufferAttribute(sparkCol, 3).setUsage(THREE.DynamicDrawUsage));
-	sparks = new THREE.Points(sg, glow(new THREE.PointsMaterial({ size: 0.3, map: dot, vertexColors: true })));
+	sg.setAttribute("color", new THREE.BufferAttribute(sparkCol, 4).setUsage(THREE.DynamicDrawUsage));
+	sparks = new THREE.Points(sg, glow(new THREE.PointsMaterial({ size: 0.26, map: dot, vertexColors: true })));
 	sparks.frustumCulled = false;
 	scene.add(sparks);
 
-	// A slow field of dim stars for depth
+	// A slow field of faint pencil specks for depth
 	const starPos = new Float32Array(600 * 3);
 	for (let i = 0; i < 600; i++) {
 		starPos[i * 3] = (Math.random() - 0.5) * 60;
@@ -114,7 +110,7 @@ function build() {
 	}
 	const stg = new THREE.BufferGeometry();
 	stg.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
-	stars = new THREE.Points(stg, glow(new THREE.PointsMaterial({ size: 0.14, map: dot, color: 0x8f9a95, opacity: 0.6 })));
+	stars = new THREE.Points(stg, glow(new THREE.PointsMaterial({ size: 0.12, map: dot, color: 0x56606f, opacity: 0.25 })));
 	scene.add(stars);
 }
 
@@ -185,14 +181,14 @@ function frame(now) {
 		s.set(1, 0.08 + level * 3.2, 1);
 		m.compose(p, q, s);
 		bars.setMatrixAt(i, m);
-		tint.c.setRGB(accent.r * (0.4 + level), accent.g * (0.4 + level), accent.b * (0.4 + level));
+		tint.c.setRGB(accent.r, accent.g, accent.b);
 		bars.setColorAt(i, tint.c);
 	}
 	bars.instanceMatrix.needsUpdate = true;
 	bars.instanceColor.needsUpdate = true;
 	ring.rotation.z = t * 0.05;
 
-	// Sparks: drift, slow down, fade to black (invisible with additive blending).
+	// Sparks: drift, slow down, and fade out.
 	for (let i = 0; i < MAX_SPARKS; i++) {
 		if (sparkAge[i] >= SPARK_LIFE) continue;
 		sparkAge[i] += dt;
@@ -201,8 +197,9 @@ function frame(now) {
 		for (let k = 0; k < 3; k++) {
 			sparkVel[i * 3 + k] *= drag;
 			sparkPos[i * 3 + k] += sparkVel[i * 3 + k] * dt;
-			sparkCol[i * 3 + k] = sparkBase[i * 3 + k] * life;
+			sparkCol[i * 4 + k] = sparkBase[i * 3 + k];
 		}
+		sparkCol[i * 4 + 3] = life * 0.85;
 	}
 	sparks.geometry.attributes.position.needsUpdate = true;
 	sparks.geometry.attributes.color.needsUpdate = true;
