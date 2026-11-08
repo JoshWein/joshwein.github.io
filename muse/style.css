@@ -109,6 +109,7 @@ body {
 	touch-action: none;
 	cursor: crosshair;
 }
+#stage.watching { cursor: default; }
 .stage { background: radial-gradient(ellipse at center, #22303a 0%, var(--bg) 75%); }
 
 /* three.js visualizer, behind the drawing canvas */

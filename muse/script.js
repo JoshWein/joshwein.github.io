@@ -4,7 +4,7 @@
 // Other players in the same room (see multiplayer.js) show up as cursors too.
 
 import { startViz, stopViz, vizNote } from "./viz.js";
-import { joinRoom, roomFromHash, cleanRoom, watchRooms, MAX_SLOTS } from "./multiplayer.js";
+import { joinRoom, roomFromHash, cleanRoom, watchRooms, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
 
 const NOTES = 16;
 const TEMPO_MS = 125; // a held note retriggers on this beat, like the original
@@ -219,7 +219,6 @@ function applyRemotePlayers(players) {
 			remotes.delete(key);
 		}
 	}
-	updatePresence(Object.keys(players).length);
 }
 
 function placeRemote(p) {
@@ -228,12 +227,37 @@ function placeRemote(p) {
 }
 
 const presence = document.getElementById("presence");
-function updatePresence(others) {
+let roomState = { role: "play", place: 0, players: 1, watchers: 0 };
+
+function updatePresence() {
 	if (!session) return;
-	presence.hidden = false;
-	presence.textContent = others === 0
+	const { role, place, players, watchers } = roomState;
+	let text = players <= 1 && watchers === 0
 		? `room ${session.room}: just you`
-		: `room ${session.room}: ${others + 1} playing`;
+		: `room ${session.room}: ${players}/${MAX_PLAYERS} playing`;
+	if (watchers > 0) text += `, ${watchers} watching`;
+	if (role === "watch") text += ` (you're #${place} in line)`;
+	presence.hidden = false;
+	presence.textContent = text;
+}
+
+// The room is full: watch and listen until a spot opens, then play.
+function applyRoom(state) {
+	const was = roomState.role;
+	roomState = state;
+	if (state.role === "watch") {
+		for (const p of pointers.values()) {
+			releaseVoice(p);
+			p.down = false;
+		}
+		hint.classList.remove("gone");
+		hint.textContent = `This room is full (${MAX_PLAYERS} players). You're watching, #${state.place} in line, and you'll start playing as soon as a spot opens.`;
+	} else if (was === "watch") {
+		hint.classList.remove("gone");
+		hint.textContent = "A spot opened up. You're playing now!";
+	}
+	canvas.classList.toggle("watching", state.role === "watch");
+	updatePresence();
 }
 
 // Each pointer keeps the voices it started (a held note retriggers, so
@@ -264,7 +288,7 @@ function releaseVoice(p) {
 }
 
 canvas.addEventListener("pointerdown", (e) => {
-	if (!playing) return;
+	if (!playing || roomState.role === "watch") return;
 	canvas.setPointerCapture(e.pointerId);
 	const p = pointerState(e);
 	p.down = true;
@@ -437,13 +461,14 @@ function markPicked() {
 }
 roomInput.addEventListener("input", markPicked);
 const stopWatchingRooms = watchRooms((rooms) => {
-	roomList.replaceChildren(...rooms.slice(0, 12).map(({ room, players }) => {
+	roomList.replaceChildren(...rooms.slice(0, 12).map(({ room, players, watchers }) => {
 		const li = document.createElement("li");
 		const b = document.createElement("button");
 		b.type = "button";
 		b.dataset.room = room;
-		b.textContent = `${room} · ${players}`;
-		b.setAttribute("aria-label", `${room}, ${players} playing`);
+		const full = players >= MAX_PLAYERS;
+		b.textContent = `${room} · ${players}/${MAX_PLAYERS}` + (watchers ? ` +${watchers}` : "");
+		b.setAttribute("aria-label", `${room}, ${players} playing` + (watchers ? `, ${watchers} watching` : "") + (full ? ", full: you'll watch until a spot opens" : ""));
 		b.addEventListener("click", () => {
 			roomInput.value = room;
 			markPicked();
@@ -483,10 +508,11 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		room,
 		name: username,
 		onPlayers: applyRemotePlayers,
+		onRoom: applyRoom,
 		onStatus: (s) => presence.classList.toggle("offline", s === "offline"),
 	});
 	if (session) {
-		updatePresence(0);
+		updatePresence();
 		publish();
 	} else {
 		// Couldn't join (or multiplayer is off): say so instead of showing nothing.

@@ -4,8 +4,13 @@
 //   rooms/{room}/players/{uid} = { name, instrument, t, pointers: { "0".."4": { x, y, down } } }
 // with x and y normalized to 0..1, so screens of any size line up.
 // Everyone listens to the room and plays the other players' notes locally.
-// Each player also marks lobby/{room}/{uid} = true, so the start screen can
-// list the active rooms without downloading everyone's cursors.
+// Everyone in a room also keeps rooms/{room}/members/{uid} = { name, joined }.
+// Sorting members by join time gives every client the same queue: the first
+// MAX_PLAYERS play, the rest watch, and when a player leaves the next watcher
+// moves up. Only players write cursor data, so a watcher downloads at most
+// MAX_PLAYERS cursor streams however big the crowd gets.
+// lobby/{room}/{uid} = "play" | "watch" lets the start screen list rooms
+// without downloading anyone's cursors.
 // database.rules.json (repo root) only lets a player write their own records.
 //
 // Multiplayer stays off until muse/firebase-config.js exports a config.
@@ -16,6 +21,7 @@ const SDK = "https://www.gstatic.com/firebasejs/13.2.0";
 const SEND_INTERVAL_MS = 66; // about 15 updates a second
 const JOIN_TIMEOUT_MS = 6000; // give up and play solo if Firebase is unreachable
 export const MAX_SLOTS = 5;
+export const MAX_PLAYERS = 8;
 
 // Room names: lowercase letters, digits and dashes, at most 32 characters.
 export function cleanRoom(raw) {
@@ -72,7 +78,7 @@ function firebase() {
 }
 
 /**
- * Calls onRooms([{ room, players }]) with the active rooms, busiest first,
+ * Calls onRooms([{ room, players, watchers }]) with the active rooms, busiest first,
  * whenever they change. Does nothing when multiplayer is off or unreachable.
  * Returns a function that stops watching.
  */
@@ -85,9 +91,13 @@ export function watchRooms(onRooms) {
 		stop = db.onValue(db.ref(database, "lobby"), (snap) => {
 			const rooms = [];
 			snap.forEach((child) => {
-				rooms.push({ room: child.key, players: child.size });
+				let watchers = 0;
+				child.forEach((m) => {
+					if (m.val() === "watch") watchers++;
+				});
+				rooms.push({ room: child.key, players: child.size - watchers, watchers });
 			});
-			rooms.sort((a, b) => b.players - a.players || a.room.localeCompare(b.room));
+			rooms.sort((a, b) => b.players + b.watchers - a.players - a.watchers || a.room.localeCompare(b.room));
 			onRooms(rooms);
 		}, (err) => console.warn("Muse: couldn't list rooms", err));
 	}).catch((err) => console.warn("Muse: multiplayer unavailable", err));
@@ -99,9 +109,11 @@ export function watchRooms(onRooms) {
 
 /**
  * Joins a room. Returns null when multiplayer isn't configured or can't connect.
- * onPlayers(map) is called with { uid: { name, instrument, pointers } } for everyone else.
+ * onPlayers(map) is called with { uid: { name, instrument, pointers } } for the other players.
+ * onRoom({ role, place, players, watchers }) is called when the queue changes:
+ * role is "play" or "watch", and place is the watcher's spot in line (1 = next).
  */
-export async function joinRoom({ room, name, onPlayers, onStatus }) {
+export async function joinRoom({ room, name, onPlayers, onRoom, onStatus }) {
 	if (!activeConfig()) return null;
 
 	let timedOut = false;
@@ -109,20 +121,25 @@ export async function joinRoom({ room, name, onPlayers, onStatus }) {
 		timedOut = true;
 		resolve(null);
 	}, JOIN_TIMEOUT_MS));
-	return Promise.race([connect({ room, name, onPlayers, onStatus }, () => timedOut), timeout])
+	return Promise.race([connect({ room, name, onPlayers, onRoom, onStatus }, () => timedOut), timeout])
 		.then((session) => {
 			if (!session) onStatus?.("offline");
 			return session;
 		});
 }
 
-async function connect({ room, name, onPlayers, onStatus }, gaveUp) {
+async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 	try {
 		const { db, database, uid } = await firebase();
 		if (gaveUp()) return null; // too slow; the player is already playing solo
 		const roomRef = db.ref(database, `rooms/${room}/players`);
 		const meRef = db.ref(database, `rooms/${room}/players/${uid}`);
 		const lobbyRef = db.ref(database, `lobby/${room}/${uid}`);
+		const memberRef = db.ref(database, `rooms/${room}/members/${uid}`);
+		let role = null; // unknown until our place in the queue is confirmed
+		let confirmed = false; // our member record (with its real server join time) exists
+		let online = false;
+		let members = [];
 
 		db.onValue(roomRef, (snap) => {
 			const others = {};
@@ -139,15 +156,74 @@ async function connect({ room, name, onPlayers, onStatus }, gaveUp) {
 		let lastSent = "";
 		let timer = null;
 
+		// Joining the queue is a transaction so the answer comes from the server,
+		// not a cache: it keeps our record (and place in line) after a short blip,
+		// and adds a fresh one after a real drop removed it. Until it commits we
+		// stay out of the queue, so an estimated join time can't jump the line.
+		let joining = false;
+		function ensureMember() {
+			if (joining) return;
+			joining = true;
+			db.runTransaction(memberRef, (current) => current ?? { name, joined: db.serverTimestamp() })
+				.then(() => {
+					confirmed = true;
+					updateRole();
+				})
+				.catch((err) => console.warn("Muse: couldn't join the queue", err))
+				.finally(() => { joining = false; });
+		}
+
+		// The queue: oldest members play, everyone else watches in join order.
+		function updateRole() {
+			if (!confirmed) return;
+			const index = members.findIndex((m) => m.uid === uid);
+			if (index === -1) {
+				// Our record vanished (say, a drop we haven't noticed yet): rejoin.
+				confirmed = false;
+				if (online) ensureMember();
+				return;
+			}
+			const next = index < MAX_PLAYERS ? "play" : "watch";
+			if (next !== role) {
+				role = next;
+				db.set(lobbyRef, role).catch((err) => console.warn("Muse: couldn't list the room", err));
+				if (role === "play") {
+					lastSent = "";
+					if (pending && !timer) timer = setTimeout(flush, 0);
+				} else {
+					db.remove(meRef).catch((err) => console.warn("Muse: couldn't step back", err));
+				}
+			}
+			onRoom?.({
+				role,
+				place: role === "watch" ? index - MAX_PLAYERS + 1 : 0,
+				players: Math.min(members.length, MAX_PLAYERS),
+				watchers: Math.max(0, members.length - MAX_PLAYERS),
+			});
+		}
+
+		db.onValue(db.ref(database, `rooms/${room}/members`), (snap) => {
+			members = [];
+			snap.forEach((child) => {
+				const joined = child.child("joined").val();
+				members.push({ uid: child.key, joined: typeof joined === "number" ? joined : Infinity });
+			});
+			members.sort((a, b) => a.joined - b.joined || (a.uid < b.uid ? -1 : 1));
+			updateRole();
+		}, (err) => console.warn("Muse: lost the queue", err));
+
 		// onDisconnect is one-shot, so re-arm it (and resend our state) after
 		// every reconnect; otherwise a dropped player could linger in the room.
 		db.onValue(db.ref(database, ".info/connected"), (snap) => {
-			const online = snap.val() === true;
+			online = snap.val() === true;
 			onStatus?.(online ? "online" : "offline");
 			if (online) {
 				db.onDisconnect(meRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
 				db.onDisconnect(lobbyRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
-				db.set(lobbyRef, true).catch((err) => console.warn("Muse: couldn't list the room", err));
+				db.onDisconnect(memberRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
+				ensureMember();
+				// A drop may have cleared our lobby entry; restore it once the role is known.
+				if (role) db.set(lobbyRef, role).catch((err) => console.warn("Muse: couldn't list the room", err));
 				lastSent = "";
 				if (pending && !timer) timer = setTimeout(flush, 0);
 			}
@@ -155,7 +231,7 @@ async function connect({ room, name, onPlayers, onStatus }, gaveUp) {
 
 		function flush() {
 			timer = null;
-			if (!pending) return;
+			if (!pending || role !== "play") return; // watchers don't send cursors
 			const json = JSON.stringify(pending);
 			if (json === lastSent) return;
 			lastSent = json;
@@ -172,9 +248,13 @@ async function connect({ room, name, onPlayers, onStatus }, gaveUp) {
 				pending = { name, instrument: state.instrument, pointers: state.pointers };
 				if (!timer) timer = setTimeout(flush, SEND_INTERVAL_MS);
 			},
+			get role() {
+				return role;
+			},
 			leave() {
 				db.remove(meRef);
 				db.remove(lobbyRef);
+				db.remove(memberRef);
 			},
 		};
 	} catch (err) {
