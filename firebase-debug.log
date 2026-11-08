@@ -1,0 +1,114 @@
+[debug] [2026-11-08T04:32:49.816Z] ----------------------------------------------------------------------
+[debug] [2026-11-08T04:32:49.819Z] Command:       /opt/node22/bin/node /home/user/towerdefensegame/node_modules/.bin/firebase emulators:start --only database --project demo-muse --debug
+[debug] [2026-11-08T04:32:49.819Z] CLI Version:   15.35.0
+[debug] [2026-11-08T04:32:49.820Z] Platform:      linux
+[debug] [2026-11-08T04:32:49.820Z] Node Version:  v22.23.4
+[debug] [2026-11-08T04:32:49.820Z] Detected Agent: claude-code_2-1-319_agent
+[debug] [2026-11-08T04:32:49.820Z] Time:          Sun Nov 08 2026 04:32:49 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-11-08T04:32:49.820Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-11-08T04:32:49.833Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-11-08T04:32:50.458Z] Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42943 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+
+[debug] [2026-11-08T04:32:50.503Z] openjdk version "21.0.12.1" 2026-08-18
+OpenJDK Runtime Environment (build 21.0.12.1+1-1-24.04.4-Ubuntu)
+
+[debug] [2026-11-08T04:32:50.503Z] OpenJDK 64-Bit Server VM (build 21.0.12.1+1-1-24.04.4-Ubuntu, mixed mode, sharing)
+
+[debug] [2026-11-08T04:32:50.508Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: database {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: database"}}
+[info] i  emulators: Detected demo project ID "demo-muse", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail. {"metadata":{"emulator":{"name":"hub"},"message":"Detected demo project ID \"demo-muse\", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail."}}
+[warn] ⚠  hub: Error when trying to check port 4400 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4400 {"metadata":{"emulator":{"name":"hub"},"message":"Error when trying to check port 4400 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4400"}}
+[warn] ⚠  hub: Port 4400 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"hub"},"message":"Port 4400 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  hub: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"hub"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \"host\": \"<ip address>\" instead of hostname in firebase.json"}}
+[warn] ⚠  logging: Error when trying to check port 4500 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4500 {"metadata":{"emulator":{"name":"logging"},"message":"Error when trying to check port 4500 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4500"}}
+[warn] ⚠  logging: Port 4500 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"logging"},"message":"Port 4500 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  logging: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"logging"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \"host\": \"<ip address>\" instead of hostname in firebase.json"}}
+[warn] ⚠  database: Error when trying to check port 9000 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:9000 {"metadata":{"emulator":{"name":"database"},"message":"Error when trying to check port 9000 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:9000"}}
+[warn] ⚠  database: Port 9000 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"database"},"message":"Port 9000 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  database: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"database"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \"host\": \"<ip address>\" instead of hostname in firebase.json"}}
+[debug] [2026-11-08T04:32:50.514Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"database":[{"address":"127.0.0.1","family":"IPv4","port":9000}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-11-08T04:32:50.517Z] Write emulator hub locator at /tmp/hub-demo-muse.json
+[debug] [2026-11-08T04:32:50.520Z] No OAuth tokens found
+[debug] [2026-11-08T04:32:50.520Z] No OAuth tokens found
+[debug] [2026-11-08T04:32:50.520Z] Unable to refresh auth: not yet authenticated.
+[debug] [2026-11-08T04:32:50.520Z] Failed to retrieve default database instance: Failed to get Firebase project demo-muse. Please make sure the project exists and your account has permission to access it. {"metadata":{"emulator":{"name":"database"},"message":"Failed to retrieve default database instance: Failed to get Firebase project demo-muse. Please make sure the project exists and your account has permission to access it."}}
+[debug] [2026-11-08T04:32:50.520Z] database rules config:  [{"instance":"demo-muse-default-rtdb","rules":"/home/user/joshwein.github.io/database.rules.json"}]
+[debug] [2026-11-08T04:32:50.522Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2026-11-08T04:32:50.522Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-11-08T04:32:50.522Z] Ignoring unsupported arg: rules {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: rules"}}
+[debug] [2026-11-08T04:32:50.522Z] Starting Database Emulator with command {"binary":"java","args":["-Duser.language=en","-jar","/root/.cache/firebase/emulators/firebase-database-emulator-v4.11.2.jar","--host","127.0.0.1","--port",9000,"--single_project_mode","Warning"],"optionalArgs":["port","host","functions_emulator_port","functions_emulator_host","single_project_mode"],"joinArgs":false,"shell":false,"port":9000} {"metadata":{"emulator":{"name":"database"},"message":"Starting Database Emulator with command {\"binary\":\"java\",\"args\":[\"-Duser.language=en\",\"-jar\",\"/root/.cache/firebase/emulators/firebase-database-emulator-v4.11.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",9000,\"--single_project_mode\",\"Warning\"],\"optionalArgs\":[\"port\",\"host\",\"functions_emulator_port\",\"functions_emulator_host\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":9000}"}}
+[info] i  database: Database Emulator logging to database-debug.log {"metadata":{"emulator":{"name":"database"},"message":"Database Emulator logging to database-debug.log"}}
+[debug] [2026-11-08T04:32:50.530Z] Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42943 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+ {"metadata":{"emulator":{"name":"database"},"message":"Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42943 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=\n"}}
+[debug] [2026-11-08T04:32:50.732Z] *** [apiv2] error from fetch(https://firebase-public.firebaseio.com/cli.json, {"headers":{},"method":"GET","dispatcher":{"_events":{},"_eventsCount":0}}): Error: Request was cancelled.
+[warn] ⚠  Unable to fetch the CLI MOTD and remote config. This is not a fatal error, but may indicate an issue with your network connection. 
+[debug] [2026-11-08T04:32:50.733Z] Failed to fetch MOTD FirebaseError: Failed to make request to https://firebase-public.firebaseio.com/cli.json
+[debug] [2026-11-08T04:32:51.444Z] 04:32:51.441 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+ {"metadata":{"emulator":{"name":"database"},"message":"04:32:51.441 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started\n"}}
+[debug] [2026-11-08T04:32:51.611Z] 04:32:51.610 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+ {"metadata":{"emulator":{"name":"database"},"message":"04:32:51.610 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000\n"}}
+[warn] ⚠  emulators: The Emulator UI is not starting because none of the running emulators have a UI component. {"metadata":{"emulator":{"name":"hub"},"message":"The Emulator UI is not starting because none of the running emulators have a UI component."}}
+[debug] [2026-11-08T04:32:51.744Z] >>> [apiv2][query] PUT http://127.0.0.1:9000/.settings/rules.json ns=demo-muse-default-rtdb
+[debug] [2026-11-08T04:32:51.744Z] >>> [apiv2][body] PUT http://127.0.0.1:9000/.settings/rules.json "{\n  \"rules\": {\n    \".read\": false,\n    \".write\": false,\n    \"rooms\": {\n      \"$room\": {\n        \".validate\": \"$room.matches(/^[a-z0-9-]{1,32}$/)\",\n        \"players\": {\n          \".read\": \"auth != null\",\n          \"$uid\": {\n            \".write\": \"auth != null && auth.uid === $uid\",\n            \".validate\": \"newData.hasChildren(['name', 'instrument', 't'])\",\n            \"name\": {\n              \".validate\": \"newData.isString() && newData.val().length >= 1 && newData.val().length <= 20\"\n            },\n            \"instrument\": {\n              \".validate\": \"newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 7\"\n            },\n            \"t\": {\n              \".validate\": \"newData.val() === now\"\n            },\n            \"pointers\": {\n              \"$slot\": {\n                \".validate\": \"$slot.matches(/^[0-4]$/) && newData.hasChildren(['x', 'y', 'down'])\",\n                \"x\": { \".validate\": \"newData.isNumber() && newData.val() >= 0 && newData.val() <= 1\" },\n                \"y\": { \".validate\": \"newData.isNumber() && newData.val() >= 0 && newData.val() <= 1\" },\n                \"down\": { \".validate\": \"newData.isBoolean()\" },\n                \"$other\": { \".validate\": false }\n              }\n            },\n            \"$other\": { \".validate\": false }\n          }\n        }\n      }\n    }\n  }\n}\n"
+[debug] [2026-11-08T04:32:51.998Z] <<< [apiv2][status] PUT http://127.0.0.1:9000/.settings/rules.json 403
+[debug] [2026-11-08T04:32:51.999Z] <<< [apiv2][body] PUT http://127.0.0.1:9000/.settings/rules.json "request blocked: no rule allows host \"127.0.0.1\""
+[warn] ⚠  database: database.rules.json:Unable to parse JSON: SyntaxError: Unexpected token 'r', "request bl"... is not valid JSON {"metadata":{"emulator":{"name":"database"},"message":"database.rules.json:Unable to parse JSON: SyntaxError: Unexpected token 'r', \"request bl\"... is not valid JSON"}}
+[warn] ⚠  database: Failed to update rules {"metadata":{"emulator":{"name":"database"},"message":"Failed to update rules"}}
+[debug] [2026-11-08T04:32:52.002Z] Could not find VSCode notification endpoint: TypeError: fetch failed. If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[info] i  emulators: Shutting down emulators. {"metadata":{"emulator":{"name":"hub"},"message":"Shutting down emulators."}}
+[info] i  database: Stopping Database Emulator {"metadata":{"emulator":{"name":"database"},"message":"Stopping Database Emulator"}}
+[debug] [2026-11-08T04:32:52.007Z] 04:32:52.006 [Thread-0] INFO com.firebase.server.forge.App$ - Attempting graceful shutdown.
+ {"metadata":{"emulator":{"name":"database"},"message":"04:32:52.006 [Thread-0] INFO com.firebase.server.forge.App$ - Attempting graceful shutdown.\n"}}
+[debug] [2026-11-08T04:32:52.009Z] 04:32:52.009 [Thread-0] INFO com.firebase.server.forge.App$ - Graceful shutdown complete.
+ {"metadata":{"emulator":{"name":"database"},"message":"04:32:52.009 [Thread-0] INFO com.firebase.server.forge.App$ - Graceful shutdown complete.\n"}}
+[info] i  hub: Stopping emulator hub {"metadata":{"emulator":{"name":"hub"},"message":"Stopping emulator hub"}}
+[info] i  logging: Stopping Logging Emulator {"metadata":{"emulator":{"name":"logging"},"message":"Stopping Logging Emulator"}}
+[debug] [2026-11-08T04:32:52.339Z] Could not find VSCode notification endpoint: TypeError: fetch failed. If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[error] 
+[error] Error: Failed to load initial Database Emulator rules:
+database.rules.json:Unable to parse JSON: SyntaxError: Unexpected token 'r', "request bl"... is not valid JSON
+[debug] [2026-11-08T04:32:52.606Z] Found emulator hub locator: {"version":"15.35.0","origins":["http://127.0.0.1:4400"],"pid":6958}
+[debug] [2026-11-08T04:33:02.743Z] ----------------------------------------------------------------------
+[debug] [2026-11-08T04:33:02.746Z] Command:       /opt/node22/bin/node /home/user/towerdefensegame/node_modules/.bin/firebase emulators:start --only auth --project demo-muse
+[debug] [2026-11-08T04:33:02.746Z] CLI Version:   15.35.0
+[debug] [2026-11-08T04:33:02.746Z] Platform:      linux
+[debug] [2026-11-08T04:33:02.746Z] Node Version:  v22.23.4
+[debug] [2026-11-08T04:33:02.747Z] Detected Agent: claude-code_2-1-319_agent
+[debug] [2026-11-08T04:33:02.747Z] Time:          Sun Nov 08 2026 04:33:02 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-11-08T04:33:02.747Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-11-08T04:33:02.759Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[info] i  emulators: Detected demo project ID "demo-muse", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail. {"metadata":{"emulator":{"name":"hub"},"message":"Detected demo project ID \"demo-muse\", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail."}}
+[warn] ⚠  hub: Error when trying to check port 4400 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4400 {"metadata":{"emulator":{"name":"hub"},"message":"Error when trying to check port 4400 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4400"}}
+[warn] ⚠  hub: Port 4400 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"hub"},"message":"Port 4400 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  hub: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"hub"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \"host\": \"<ip address>\" instead of hostname in firebase.json"}}
+[warn] ⚠  logging: Error when trying to check port 4500 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4500 {"metadata":{"emulator":{"name":"logging"},"message":"Error when trying to check port 4500 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:4500"}}
+[warn] ⚠  logging: Port 4500 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"logging"},"message":"Port 4500 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  logging: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"logging"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \"host\": \"<ip address>\" instead of hostname in firebase.json"}}
+[warn] ⚠  auth: Error when trying to check port 9099 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:9099 {"metadata":{"emulator":{"name":"auth"},"message":"Error when trying to check port 9099 on ::1: Error: listen EAFNOSUPPORT: address family not supported ::1:9099"}}
+[warn] ⚠  auth: Port 9099 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"auth"},"message":"Port 9099 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  auth: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"auth"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \"host\": \"<ip address>\" instead of hostname in firebase.json"}}
+[debug] [2026-11-08T04:33:03.556Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-11-08T04:33:03.560Z] Write emulator hub locator at /tmp/hub-demo-muse.json
+[warn] ⚠  emulators: The Emulator UI is not starting because none of the running emulators have a UI component. {"metadata":{"emulator":{"name":"hub"},"message":"The Emulator UI is not starting because none of the running emulators have a UI component."}}
+[debug] [2026-11-08T04:33:10.444Z] Could not find VSCode notification endpoint: TypeError: fetch failed. If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┐
+│ Emulator       │ Host:Port      │
+├────────────────┼────────────────┤
+│ Authentication │ 127.0.0.1:9099 │
+└────────────────┴────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2026-11-08T04:33:10.677Z] *** [apiv2] error from fetch(https://firebase-public.firebaseio.com/cli.json, {"headers":{},"method":"GET","dispatcher":{"_events":{},"_eventsCount":0}}): Error: Request was cancelled.
+[warn] ⚠  Unable to fetch the CLI MOTD and remote config. This is not a fatal error, but may indicate an issue with your network connection. 
+[debug] [2026-11-08T04:33:10.677Z] Failed to fetch MOTD FirebaseError: Failed to make request to https://firebase-public.firebaseio.com/cli.json

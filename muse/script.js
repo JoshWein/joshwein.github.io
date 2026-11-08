@@ -1,6 +1,9 @@
 // Muse: press and drag on the canvas to play.
 // Height picks one of 16 notes, left to right sets the volume.
 // Every pointer (mouse, pen, each finger) gets its own cursor and voice.
+// Other players in the same room (see multiplayer.js) show up as cursors too.
+
+import { joinRoom, roomFromHash, MAX_SLOTS } from "./multiplayer.js";
 
 const NOTES = 16;
 const TEMPO_MS = 125; // a held note retriggers on this beat, like the original
@@ -25,6 +28,7 @@ const hint = document.getElementById("hint");
 let username = "MuseMan";
 let current = Math.floor(Math.random() * INSTRUMENTS.length);
 let playing = false;
+let session = null; // multiplayer session, or null when solo
 
 // sounds[instrument][lane]; lane 0 is the top of the canvas (note16, the highest)
 const sounds = [];
@@ -73,6 +77,7 @@ const buttons = INSTRUMENTS.map((inst, i) => {
 
 function selectInstrument(i) {
 	current = i;
+	publish(); // no-op until a multiplayer session exists
 	buttons.forEach((b, j) => {
 		b.setAttribute("aria-checked", String(j === i));
 		b.tabIndex = j === i ? 0 : -1;
@@ -126,13 +131,95 @@ const volumeFor = (x) => Math.min(1, Math.max(0.05, x / width));
 function pointerState(e) {
 	let p = pointers.get(e.pointerId);
 	if (!p) {
-		p = { x: 0, y: 0, down: false, lane: -1, voices: [], pulse: 0, trail: [], type: e.pointerType };
+		p = { x: 0, y: 0, down: false, lane: -1, voices: [], pulse: 0, trail: [], type: e.pointerType, slot: freeSlot() };
 		pointers.set(e.pointerId, p);
 	}
 	const rect = canvas.getBoundingClientRect();
 	p.x = e.clientX - rect.left;
 	p.y = e.clientY - rect.top;
 	return p;
+}
+
+function freeSlot() {
+	const used = new Set([...pointers.values()].map((p) => p.slot));
+	for (let i = 0; i < MAX_SLOTS; i++) if (!used.has(i)) return i;
+	return null; // more fingers than slots: still plays locally, just isn't shared
+}
+
+// Sends this player's pointers to the room (throttled in multiplayer.js).
+function publish() {
+	if (!session || !width || !height) return;
+	const shared = {};
+	for (const p of pointers.values()) {
+		if (p.slot === null) continue;
+		shared[p.slot] = {
+			x: Math.min(1, Math.max(0, p.x / width)),
+			y: Math.min(1, Math.max(0, p.y / height)),
+			down: p.down,
+		};
+	}
+	session.update({ instrument: current, pointers: shared });
+}
+
+/* ---------- other players ---------- */
+
+// "uid:slot" -> pointer-shaped object (nx, ny normalized; x, y derived)
+const remotes = new Map();
+
+function applyRemotePlayers(players) {
+	const seen = new Set();
+	for (const [uid, player] of Object.entries(players)) {
+		const instrument = Number.isInteger(player.instrument) ? player.instrument : 0;
+		for (const [slot, ptr] of Object.entries(player.pointers || {})) {
+			const key = `${uid}:${slot}`;
+			seen.add(key);
+			let p = remotes.get(key);
+			if (!p) {
+				p = { nx: 0, ny: 0, x: 0, y: 0, down: false, lane: -1, voices: [], pulse: 0, trail: [], remote: true };
+				remotes.set(key, p);
+			}
+			p.name = String(player.name || "?").slice(0, 20);
+			p.nx = ptr.x;
+			p.ny = ptr.y;
+			placeRemote(p);
+			const wasDown = p.down;
+			p.down = ptr.down === true;
+			if (p.down) p.trail.push({ x: p.x, y: p.y, t: performance.now() });
+			const lane = laneFor(p.y);
+			if (p.down && (!wasDown || lane !== p.lane || instrument !== p.instrument)) {
+				releaseVoice(p);
+				p.instrument = instrument;
+				p.lane = lane;
+				if (playing) playVoice(p);
+			} else if (!p.down && wasDown) {
+				releaseVoice(p);
+			} else if (p.down) {
+				setVoicesVolume(p);
+			}
+			p.instrument = instrument;
+		}
+	}
+	for (const [key, p] of remotes) {
+		if (!seen.has(key)) {
+			releaseVoice(p);
+			remotes.delete(key);
+		}
+	}
+	updatePresence(Object.keys(players).length);
+}
+
+function placeRemote(p) {
+	p.x = p.nx * width;
+	p.y = p.ny * height;
+}
+
+const presence = document.getElementById("presence");
+function updatePresence(others) {
+	if (!session) return;
+	presence.hidden = false;
+	presence.textContent = others === 0
+		? `room ${session.room}: just you`
+		: `room ${session.room}: ${others + 1} playing`;
 }
 
 // Each pointer keeps the voices it started (a held note retriggers, so
@@ -170,6 +257,7 @@ canvas.addEventListener("pointerdown", (e) => {
 	p.pulse = 0;
 	playVoice(p);
 	hint.classList.add("gone");
+	publish();
 });
 
 canvas.addEventListener("pointermove", (e) => {
@@ -185,6 +273,7 @@ canvas.addEventListener("pointermove", (e) => {
 			setVoicesVolume(p);
 		}
 	}
+	publish();
 });
 
 function endPointer(e) {
@@ -194,17 +283,25 @@ function endPointer(e) {
 	p.down = false;
 	// Touch and pen cursors vanish when lifted; the mouse cursor stays visible.
 	if (e.type !== "pointerup" || p.type !== "mouse") pointers.delete(e.pointerId);
+	publish();
 }
 canvas.addEventListener("pointerup", endPointer);
 canvas.addEventListener("pointercancel", endPointer);
 canvas.addEventListener("pointerleave", (e) => {
-	if (!pointers.get(e.pointerId)?.down) pointers.delete(e.pointerId);
+	if (!pointers.get(e.pointerId)?.down) {
+		pointers.delete(e.pointerId);
+		publish();
+	}
 });
 
 // The beat: a held note retriggers every TEMPO_MS.
 setInterval(() => {
 	for (const p of pointers.values()) {
 		if (p.down) playVoice(p);
+	}
+	if (!playing) return;
+	for (const p of remotes.values()) {
+		if (p.down && p.lane >= 0) playVoice(p);
 	}
 }, TEMPO_MS);
 
@@ -214,8 +311,11 @@ function draw(now) {
 	ctx.clearRect(0, 0, width, height);
 	const laneH = height / NOTES;
 
+	for (const p of remotes.values()) placeRemote(p);
+	const everyone = [...remotes.values(), ...pointers.values()];
+
 	// lanes held right now
-	for (const p of pointers.values()) {
+	for (const p of everyone) {
 		if (!p.down) continue;
 		ctx.fillStyle = INSTRUMENTS[p.instrument].color + "22";
 		ctx.fillRect(0, p.lane * laneH, width, laneH);
@@ -232,8 +332,8 @@ function draw(now) {
 	}
 	ctx.stroke();
 
-	for (const p of pointers.values()) {
-		const color = INSTRUMENTS[p.down ? p.instrument : current].color;
+	for (const p of everyone) {
+		const color = INSTRUMENTS[p.down || p.remote ? p.instrument ?? 0 : current].color;
 
 		// trail
 		p.trail = p.trail.filter((pt) => now - pt.t < 600);
@@ -262,7 +362,7 @@ function draw(now) {
 
 		ctx.fillStyle = "#dfe6e2";
 		ctx.font = '12px "IBM Plex Mono", monospace';
-		ctx.fillText(username, p.x + size / 2 + 6, p.y + 4);
+		ctx.fillText(p.remote ? p.name : username, p.x + size / 2 + 6, p.y + 4);
 	}
 
 	requestAnimationFrame(draw);
@@ -288,6 +388,18 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		hint.textContent = `${failed} of ${total} sounds failed to load, so some notes will be silent. Try reloading.`;
 	}
 
+	statusEl.textContent = "Joining the room...";
+	session = await joinRoom({
+		room: roomFromHash(),
+		name: username,
+		onPlayers: applyRemotePlayers,
+		onStatus: (s) => presence.classList.toggle("offline", s === "offline"),
+	});
+	if (session) {
+		updatePresence(0);
+		publish();
+	}
+
 	playing = true;
 	const intro = document.getElementById("intro");
 	intro.classList.add("hidden");
@@ -300,6 +412,11 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 // While the intro is open, only the intro is reachable.
 document.querySelector(".bar").inert = true;
 document.querySelector(".stage").inert = true;
+
+// A different room in the URL means a different session; start fresh.
+window.addEventListener("hashchange", () => {
+	if (session) location.reload();
+});
 
 loadSounds();
 resize();

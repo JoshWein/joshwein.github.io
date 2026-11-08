@@ -1,0 +1,37 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".validate": "$room.matches(/^[a-z0-9-]{1,32}$/)",
+        "players": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['name', 'instrument', 't'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+            },
+            "instrument": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 7"
+            },
+            "t": {
+              ".validate": "newData.val() === now"
+            },
+            "pointers": {
+              "$slot": {
+                ".validate": "$slot.matches(/^[0-4]$/) && newData.hasChildren(['x', 'y', 'down'])",
+                "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1" },
+                "y": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1" },
+                "down": { ".validate": "newData.isBoolean()" },
+                "$other": { ".validate": false }
+              }
+            },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    }
+  }
+}
