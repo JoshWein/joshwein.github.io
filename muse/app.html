@@ -4,8 +4,27 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<meta name="theme-color" content="#1c1f22">
-	<title>Muse</title>
-	<meta name="description" content="Muse: draw music on a canvas. Pick an instrument, press and drag. Height picks the note, left to right sets the volume.">
+	<title>Muse: draw music together in your browser</title>
+	<meta name="description" content="Muse is a free browser instrument. Press and drag to play: height picks the note, left to right sets the volume. Eight sounds, multi-touch, and live rooms to jam with friends.">
+	<link rel="canonical" href="https://www.joshwein.xyz/muse/app.html">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Muse: draw music together in your browser">
+	<meta property="og:description" content="A free canvas instrument. Press and drag to play, pick from eight sounds, and jam live with friends in shared rooms.">
+	<meta property="og:url" content="https://www.joshwein.xyz/muse/app.html">
+	<meta name="twitter:card" content="summary">
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "WebApplication",
+		"name": "Muse",
+		"url": "https://www.joshwein.xyz/muse/app.html",
+		"description": "A free browser instrument: press and drag on a canvas to play notes, choose from eight sounds, and play together live in shared rooms.",
+		"applicationCategory": "MusicApplication",
+		"operatingSystem": "Any (web browser)",
+		"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+		"author": { "@type": "Person", "name": "Josh Wein", "url": "https://www.joshwein.xyz/" }
+	}
+	</script>
 	<link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +38,7 @@
 		<a class="home" href="../">josh<b>wein</b>.xyz</a>
 		<h1>Muse</h1>
 		<span class="presence" id="presence" aria-live="polite" hidden></span>
+		<button class="viz-toggle" id="viz-toggle" type="button" aria-pressed="false" title="Visualizer">viz</button>
 		<div class="instruments" role="radiogroup" aria-label="Instrument">
 			<!-- buttons are added by script.js -->
 		</div>
@@ -44,6 +64,15 @@
 			<button type="submit" id="start">Start playing</button>
 			<p class="status" id="status" aria-live="polite"></p>
 		</form>
+
+		<section class="about" aria-labelledby="about-title">
+			<h2 id="about-title">What is Muse?</h2>
+			<p>Muse is a small instrument you play by drawing. Press and drag anywhere on the canvas: the height of your cursor or finger picks one of 16 notes, and the further right you go, the louder it plays. Hold still and the note repeats on the beat.</p>
+			<p>There are eight sounds to choose from (Bass, Shimmer, Pad, Tone, Breath, Warm, Pluck and Lead), using the buttons at the top or the 1 to 8 keys. It works with a mouse, a pen, or several fingers at once on a phone or tablet.</p>
+			<h3>Play together</h3>
+			<p>Pick a room, or name a new one, and share the link. Everyone in the same room sees each other's cursors and hears each other's notes live. No account or install needed.</p>
+			<p class="credit">Made by <a href="../">Josh Wein</a>. Source on <a href="https://github.com/JoshWein/joshwein.github.io/tree/main/muse">GitHub</a>.</p>
+		</section>
 	</div>
 </body>
 </html>

@@ -3,21 +3,24 @@
 // Every pointer (mouse, pen, each finger) gets its own cursor and voice.
 // Other players in the same room (see multiplayer.js) show up as cursors too.
 
+import { startViz, stopViz, vizNote } from "./viz.js";
 import { joinRoom, roomFromHash, cleanRoom, watchRooms, MAX_SLOTS } from "./multiplayer.js";
 
 const NOTES = 16;
 const TEMPO_MS = 125; // a held note retriggers on this beat, like the original
 const RELEASE_MS = 120;
 
+// Names and icons describe how each sound behaves (picked by ear and from
+// its spectrum: pitch, brightness, attack); the files are just ins1..ins8.
 const INSTRUMENTS = [
-	{ name: "Instrument 1", color: "#A44444" },
-	{ name: "Instrument 2", color: "#00FFB8" },
-	{ name: "Instrument 3", color: "#700FD3" },
-	{ name: "Instrument 4", color: "#10F043" },
-	{ name: "Instrument 5", color: "#5a7a9e" },
-	{ name: "Instrument 6", color: "#FFFF99" },
-	{ name: "Instrument 7", color: "#FFAF99" },
-	{ name: "Instrument 8", color: "#FF2B99" },
+	{ name: "Bass", color: "#A44444", icon: "M3 16 9 8v8l6-8v8l6-8" },
+	{ name: "Shimmer", color: "#00FFB8", icon: "M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5m7 7L18 18M6 18l2.5-2.5m7-7L18 6" },
+	{ name: "Pad", color: "#700FD3", icon: "M2 9.5c3-4 6-4 10 0s7 4 10 0M2 15.5c3-4 6-4 10 0s7 4 10 0" },
+	{ name: "Tone", color: "#10F043", icon: "M2 12c2.5-7 7.5-7 10 0s7.5 7 10 0" },
+	{ name: "Breath", color: "#5a7a9e", icon: "M3 9h10a3 3 0 1 0-3-3M3 15h14a3 3 0 1 1-3 3" },
+	{ name: "Warm", color: "#FFFF99", icon: "M12 7a5 5 0 1 0 0 10 5 5 0 1 0 0-10M12 2v2m0 16v2M2 12h2m16 0h2" },
+	{ name: "Pluck", color: "#FFAF99", icon: "M2 12h7l2-6 2 12 2-6h7" },
+	{ name: "Lead", color: "#FF2B99", icon: "M3 16V8h6v8h6V8h6" },
 ];
 
 const canvas = document.getElementById("stage");
@@ -62,6 +65,13 @@ function loadSounds() {
 /* ---------- instrument picker ---------- */
 
 const picker = document.querySelector(".instruments");
+
+// Dark or light icon, whichever reads better on the swatch.
+function inkFor(hex) {
+	const n = parseInt(hex.slice(1), 16);
+	const lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+	return lum > 0.5 ? "#1c1f22" : "#f4fbf8";
+}
 const buttons = INSTRUMENTS.map((inst, i) => {
 	const b = document.createElement("button");
 	b.type = "button";
@@ -70,6 +80,8 @@ const buttons = INSTRUMENTS.map((inst, i) => {
 	b.setAttribute("aria-label", `${inst.name} (key ${i + 1})`);
 	b.title = `${inst.name} (key ${i + 1})`;
 	b.style.setProperty("--swatch", inst.color);
+	b.style.setProperty("--ink", inkFor(inst.color));
+	b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${inst.icon}"/></svg>`;
 	b.addEventListener("click", () => selectInstrument(i));
 	picker.appendChild(b);
 	return b;
@@ -230,7 +242,9 @@ function playVoice(p) {
 	const howl = sounds[p.instrument][p.lane];
 	if (howl.state() !== "loaded") return; // failed sound: stay silent, don't queue
 	const id = howl.play();
-	howl.volume(volumeFor(p.x), id);
+	const volume = volumeFor(p.x);
+	howl.volume(volume, id);
+	vizNote(p.x / width, p.y / height, INSTRUMENTS[p.instrument].color, volume);
 	p.voices = p.voices.filter((v) => v.howl.playing(v.id));
 	p.voices.push({ howl, id });
 }
@@ -369,6 +383,44 @@ function draw(now) {
 
 	requestAnimationFrame(draw);
 }
+
+/* ---------- visualizer ---------- */
+
+// On by default unless the viewer prefers less motion; the choice is remembered.
+const vizToggle = document.getElementById("viz-toggle");
+const stageEl = document.querySelector(".stage");
+function vizPref() {
+	try {
+		const saved = localStorage.getItem("muse-viz");
+		if (saved !== null) return saved === "on";
+	} catch {
+		// storage blocked: fall through to the default
+	}
+	return !matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+async function setViz(on, remember) {
+	vizToggle.setAttribute("aria-pressed", String(on));
+	if (remember) {
+		try {
+			localStorage.setItem("muse-viz", on ? "on" : "off");
+		} catch {
+			// not saved; fine
+		}
+	}
+	if (!on) return stopViz();
+	try {
+		if (!(await startViz(stageEl))) {
+			vizToggle.hidden = true;
+		}
+	} catch (err) {
+		console.warn("Muse: visualizer failed to load", err);
+		vizToggle.setAttribute("aria-pressed", "false");
+	}
+}
+vizToggle.addEventListener("click", () => {
+	setViz(vizToggle.getAttribute("aria-pressed") !== "true", true);
+});
+setViz(vizPref(), false);
 
 /* ---------- start ---------- */
 
