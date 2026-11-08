@@ -139,7 +139,7 @@ function makeVoice(ctx, s, volume) {
 				level.gain.cancelScheduledValues(now);
 				level.gain.setValueAtTime(level.gain.value, now);
 				// An exponential tail sounds like a natural decay, not a cut.
-				level.gain.setTargetAtTime(0, now, RELEASE_S / 4);
+				level.gain.setTargetAtTime(0, now, RELEASE_S / 6); // ~0.1% left at the hard stop, so no tick
 				const stopAt = now + RELEASE_S + 0.05;
 				if (stopAt < end) {
 					for (const src of sources) {
