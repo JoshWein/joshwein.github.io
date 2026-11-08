@@ -1,326 +1,306 @@
-var instruments, starterInst, colors, canvas, ctx, ready = 0;
+// Muse: press and drag on the canvas to play.
+// Height picks one of 16 notes, left to right sets the volume.
+// Every pointer (mouse, pen, each finger) gets its own cursor and voice.
 
-function fadeIn(el, ms) {
-	el.style.opacity = 0;
-	el.style.display = 'block';
-	void el.offsetWidth; // force reflow so the transition runs
-	el.style.transition = 'opacity ' + ms + 'ms';
-	el.style.opacity = 1;
+const NOTES = 16;
+const TEMPO_MS = 125; // a held note retriggers on this beat, like the original
+const RELEASE_MS = 120;
+
+const INSTRUMENTS = [
+	{ name: "Instrument 1", color: "#A44444" },
+	{ name: "Instrument 2", color: "#00FFB8" },
+	{ name: "Instrument 3", color: "#700FD3" },
+	{ name: "Instrument 4", color: "#10F043" },
+	{ name: "Instrument 5", color: "#5a7a9e" },
+	{ name: "Instrument 6", color: "#FFFF99" },
+	{ name: "Instrument 7", color: "#FFAF99" },
+	{ name: "Instrument 8", color: "#FF2B99" },
+];
+
+const canvas = document.getElementById("stage");
+const ctx = canvas.getContext("2d");
+const statusEl = document.getElementById("status");
+const hint = document.getElementById("hint");
+
+let username = "MuseMan";
+let current = Math.floor(Math.random() * INSTRUMENTS.length);
+let playing = false;
+
+// sounds[instrument][lane]; lane 0 is the top of the canvas (note16, the highest)
+const sounds = [];
+let loaded = 0;
+let failed = 0;
+const total = INSTRUMENTS.length * NOTES;
+let resolveLoaded;
+const allLoaded = new Promise((resolve) => (resolveLoaded = resolve));
+
+function onSoundSettled() {
+	if (loaded + failed === total) resolveLoaded();
+	if (!playing && statusEl.dataset.waiting) {
+		statusEl.textContent = `Loading sounds ${loaded}/${total}`;
+	}
 }
 
-function fadeOut(el, ms) {
-	ms = ms || 400;
-	el.style.transition = 'opacity ' + ms + 'ms';
-	el.style.opacity = 0;
-	setTimeout(function () {
-		el.style.display = 'none';
-	}, ms);
-}
-
-window.onload = function() {
-	var target = document.getElementById('target');
-	var page = document.getElementById('page');
-	fadeIn(document.getElementById('loading_wrap'), 1500);
-	page.style.display = 'none';
-	target.addEventListener('submit', function (e) {
-		e.preventDefault();
-		// Browsers start the AudioContext suspended until a user gesture.
-		if (Howler.ctx && Howler.ctx.state === 'suspended') {
-			Howler.ctx.resume();
-		}
-		page.style.display = '';
-		var username = document.getElementById('username').value;
-		loadPage(username === "" ? "MuseMan" : username);
-		target.innerHTML = "<h2>loading sounds...</h2>";
-	});
-}
-
-function loadPage(username) {
-	instruments = []; // Add a new slot for each instrument
-	var insts = 8;
-	starterInst = Math.floor(Math.random() * insts) + 1;
-	colors = [];
-	canvas = document.getElementById("gameCanvas");
-	ctx = canvas.getContext("2d");
-
-	/* Sounds */
-	// Generate instruments
-	for(var i = 0; i < insts; i++) {
-		instruments.push([]);
-		for(var j = 16; j  >= 1; j--) {
-			var path = 'instruments/' + 'ins' + (i+1) + '/note' + j + '.mp3';
-			instruments[i].push(new Howl({
-				urls: [path],
-				volume: 0
+function loadSounds() {
+	INSTRUMENTS.forEach((_, i) => {
+		sounds.push([]);
+		for (let note = NOTES; note >= 1; note--) {
+			sounds[i].push(new Howl({
+				src: [`instruments/ins${i + 1}/note${note}.mp3`],
+				preload: true,
+				onload() { loaded++; onSoundSettled(); },
+				onloaderror(_id, err) { failed++; console.warn("Muse: sound failed to load", err); onSoundSettled(); },
 			}));
 		}
-	}
-	console.log("Sounds loaded.");
-	// Generate Colors
-	colors = ['#A44444', '#00FFB8', '#700FD3', '#10F043', '#203043', '#ffff99', '#FFAF99', '#FF2B99'];
-	/* End Sounds */
-	start(username);
-	ready = 1;
+	});
 }
 
-function start(username) {
-	document.getElementById('target').innerHTML = "<h2>Joining server...</h2>";
-	var d = document.getElementById("messagePane");
-	// set up event handlers
-	window.addEventListener("resize", resizeCanvas, false);
-	window.addEventListener("orientationchange", resizeCanvas, false);
-	canvas.addEventListener("mousemove",mouseXY, false);
-	canvas.addEventListener('mousedown', mouseDown, false);
-	canvas.addEventListener("mouseup",mouseUp, false);
-	canvas.addEventListener("touchmove", touchXY, true);
-	canvas.addEventListener("touchstart", touchDown, false);
-	canvas.addEventListener("touchend", touchUp, false);
-	canvas.addEventListener('mouseleave', function () {
-		document.documentElement.style.cursor = 'default';
+/* ---------- instrument picker ---------- */
+
+const picker = document.querySelector(".instruments");
+const buttons = INSTRUMENTS.map((inst, i) => {
+	const b = document.createElement("button");
+	b.type = "button";
+	b.className = "ins";
+	b.setAttribute("role", "radio");
+	b.setAttribute("aria-label", `${inst.name} (key ${i + 1})`);
+	b.title = `${inst.name} (key ${i + 1})`;
+	b.style.setProperty("--swatch", inst.color);
+	b.addEventListener("click", () => selectInstrument(i));
+	picker.appendChild(b);
+	return b;
+});
+
+function selectInstrument(i) {
+	current = i;
+	buttons.forEach((b, j) => {
+		b.setAttribute("aria-checked", String(j === i));
+		b.tabIndex = j === i ? 0 : -1;
 	});
-	canvas.addEventListener('mouseenter', function () {
-		document.documentElement.style.cursor = 'none';
-	});
-
-	var newWidth,
-	newHeight,
-	xLines = [],
-	yLines = [],
-	newWidth = window.innerWidth,
-	newHeight = window.innerHeight
-	notes = 16;
-
-	function resizeCanvas() {
-		wWidth = window.innerWidth;
-		wHeight = window.innerHeight;
-		marginRight = document.getElementById("messagePane").clientWidth;
-		marginTop = document.getElementById("banner").clientHeight;
-        newWidth = wWidth - marginRight; // Width will be full size of screen minus the size of the chat window
-        newHeight = wHeight - marginTop; // Height will be full size of screen minus the header size
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        canvasHeight = canvas.clientHeight;
-        canvasWidth = canvas.clientWidth;
-       	// create pitch lines
-        xLineHeight = canvasHeight / notes; // Set space between each line drawn on the x-axis
-        xLines = [];
-        for (i = 0; i <= notes; i++) {
-        	xLines.push(parseInt(xLineHeight * i + 0.5, 10));
-        }
-        drawCursors();
-        drawLines();
-    }
-	// Variables for keeping track of everything
-	var cursors = [],
-	mouse = {},
-	mouseIsDown = 0;
-	fadeOut(document.getElementById('loading_wrap'));
-	id="tester";
-	addCursor(0, 0, id);
-	cursors[0].name = username;
-	var insButtons = document.querySelectorAll('.ins');
-	document.getElementById(String(starterInst)).classList.add('activeIns');
-
-	// instrument event handler
-	insButtons.forEach(function (btn) {
-		btn.addEventListener('click', function () {
-			insButtons.forEach(function (other) {
-				other.classList.toggle('activeIns', other === btn);
-			});
-			//socket.emit('cInst', btn.id);
-			changeInstrument(0, btn.id);
-		});
-	});
-	// End instrument event handler
-	function addMessage(msg, name) {
-		for (var i = 0; i < cursors.length; i++) {
-			if(cursors[i].id == name) {
-				name = cursors[i].name; // Replaces given id with username
-				break;
-			}
-		}
-		var li = document.createElement('li');
-		li.textContent = name + ": " + msg;
-		document.getElementById('messages').appendChild(li);
-		var element = document.getElementById("messagePane");
-		element.scrollTop = element.scrollHeight;
-	}
-
-	// Cursor object
-	function Cursor() {
-	  this.x = 0; // x position
-	  this.y = 0; // y position
-	  this.id = 0; // id
-	  this.md = 0; // mouse dow
-	  this.setPlay = 0;
-	  this.fill = colors[starterInst-1]; // color
-	  this.ins = instruments[starterInst-1];
-	  this.curIns = starterInst-1;
-	  this.currentNote = 0;
-	  this.dir = 1;
-	  this.str = 3;
-	  this.name = "";
-	}
-
-	// Event handlers
-	function mouseUp(e) {
-		mouseIsDown = 0;
-		cursors[0].setPlay = 0;
-		cursors[0].str = 3;
-		mouseXY(e);
-	}
-
-	function touchUp(e) {
-		mouseIsDown = 0;
-		cursors[0].setPlay = 0;
-		mouseXY(e);
-	}
-
-	function mouseDown(e) {
-		mouseIsDown = 1;
-		cursors[0].setPlay = 1;
-		cursors[0].currentNote = calculateNote(cursors[0].x, cursors[0].y)[0];
-		mouseXY(e);
-	}
-
-	function touchDown(e) {
-		mouseIsDown = 1;
-		cursors[0].setPlay = 1;
-		touchXY(e);
-	}
-
-	function mouseXY(e) {
-		mouse.x = e.pageX - canvas.offsetLeft;
-		mouse.y = e.pageY - canvas.offsetTop;
-		if(mouse.y > newHeight + 50) {
-			mouse.y = newHeight + 50;
-		}
-		if(mouse.x > newWidth - 20) {
-			mouse.x = newWidth - 20;
-		}
-		updateCursor(mouse.x, mouse.y - 70, mouseIsDown, id);
-	}
-
-	function touchXY(e) {
-		e.preventDefault();
-		mouse.x = e.targetTouches[0].pageX - canvas.offsetLeft;
-		mouse.y = e.targetTouches[0].pageY - canvas.offsetTop;
-		if(mouse.y > newHeight + 50) {
-			mouse.y = newHeight + 50;
-		}
-		if(mouse.x > newWidth - 20) {
-			mouse.x = newWidth - 20;
-		}
-		updateCursor(mouse.x, mouse.y - 70, mouseIsDown, id);
-	}
-
-	function calculateNote(x, y) {
-		var i, j;
-		for(i = 0; y + 10 > xLines[i]; i++){
-
-		}
-		var note = Math.round(xLines[i] * (notes/newHeight)) - 1;
-		return [note, x * (1/newWidth)];
-	}
-
-	function addCursor(x, y, id) {
-		console.log("Adding cursor: " + id);
-		var rect = new Cursor;
-		rect.x = x;
-		rect.y = y;
-		rect.id = id;
-		cursors.push(rect);
-	}
-
-	function removeCursor(id) {
-		console.log("Removing cursor: " + id);
-		for (var i = 0; i < cursors.length; i++) {
-			if(cursors[i].id == id) {
-				cursors.splice(i,1);
-				break;
-			}
-		}
-	}
-
-	function updateCursor(x, y, md, id) {
-		for (var i = 0; i < cursors.length; i++) {
-			if(cursors[i].id == id) {
-				cursors[i].x = x;
-				cursors[i].y = y;
-				cursors[i].md = md;
-				if(md === 1) {
-					cursors[i].setPlay = 1;
-				} else {
-					cursors[i].setPlay = 0;
-				}
-				break;
-			}
-		}
-	}
-
-	function drawCursors() {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		drawLines();
-		for (var i = 0; i < cursors.length; i++) {
-			if(cursors[i].md) {
-				cursors[i].str += cursors[i].dir
-				ctx.lineWidth = cursors[i].str;
-				if(cursors[i].str === 15) {
-					cursors[i].dir = -1;
-				} else if (cursors[i].str === 2) {
-					cursors[i].dir = 1;
-				}
-			} else {
-				cursors[i].ins[cursors[i].currentNote].fade(0, 1);
-				ctx.lineWidth = 1;
-			}
-			ctx.strokeStyle = cursors[i].fill;
-			ctx.strokeRect(cursors[i].x,cursors[i].y, 20, 20);
-			ctx.fillText(cursors[i].name, cursors[i].x + 25, cursors[i].y + 10);
-		}
-	}
-	function drawLines() {
-		ctx.beginPath();
-		ctx.lineWidth = 1;
-		for (i = 0; i < xLines.length; i++) {
-			ctx.moveTo(0, xLines[i]);
-			ctx.lineTo(newWidth, xLines[i]);
-		}
-		ctx.strokeStyle = '#000';
-		ctx.stroke();
-	}
-
-	function playNotes() {
-		for (var i = 0; i < cursors.length; i++) {
-			if(cursors[i].setPlay) {
-				var note = calculateNote(cursors[i].x, cursors[i].y);
-				if(cursors[i].currentNote === note[0]) {
-					cursors[i].ins[cursors[i].currentNote].fade(note[1], 1);
-					cursors[i].ins[cursors[i].currentNote].play();
-				} else {
-					cursors[i].ins[cursors[i].currentNote].fade(0, 1);
-					cursors[i].currentNote = note[0];
-					cursors[i].ins[cursors[i].currentNote].volume(note[1]);
-					cursors[i].ins[cursors[i].currentNote].play();
-					cursors[i].setPlay = 0;
-				}
-			} else {
-				cursors[i].ins[cursors[i].currentNote].fade(0, 1);
-				cursors[i].setPlay = 0;
-				cursors[i].md = 0;
-			}
-		}
-	}
-
-	// i = cursor to change, inst = instrument to set to
-	function changeInstrument(i, inst) {
-		cursors[i].ins = instruments[inst-1];
-		cursors[i].curIns = inst-1;
-		cursors[i].fill = colors[inst-1];
-	}
-
-	resizeCanvas();
-	// Set tempo
-	var myVar = setInterval(playNotes, 125);
-	setInterval(drawCursors, 30);
 }
+selectInstrument(current);
+
+picker.addEventListener("keydown", (e) => {
+	const n = INSTRUMENTS.length;
+	const next = {
+		ArrowRight: current + 1, ArrowDown: current + 1,
+		ArrowLeft: current - 1, ArrowUp: current - 1,
+		Home: 0, End: n - 1,
+	}[e.key];
+	if (next === undefined) return;
+	selectInstrument((next + n) % n);
+	buttons[current].focus();
+	e.preventDefault();
+});
+
+window.addEventListener("keydown", (e) => {
+	if (e.target instanceof HTMLInputElement || e.ctrlKey || e.metaKey || e.altKey) return;
+	const n = Number(e.key);
+	if (n >= 1 && n <= INSTRUMENTS.length) selectInstrument(n - 1);
+});
+
+/* ---------- canvas sizing ---------- */
+
+let width = 0;
+let height = 0;
+
+function resize() {
+	const rect = canvas.getBoundingClientRect();
+	const dpr = window.devicePixelRatio || 1;
+	width = rect.width;
+	height = rect.height;
+	canvas.width = Math.round(width * dpr);
+	canvas.height = Math.round(height * dpr);
+	ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+new ResizeObserver(resize).observe(canvas);
+
+/* ---------- pointers and voices ---------- */
+
+// pointerId -> { x, y, down, lane, instrument, voices, pulse, trail, type }
+const pointers = new Map();
+
+const laneFor = (y) => Math.min(NOTES - 1, Math.max(0, Math.floor((y / height) * NOTES)));
+const volumeFor = (x) => Math.min(1, Math.max(0.05, x / width));
+
+function pointerState(e) {
+	let p = pointers.get(e.pointerId);
+	if (!p) {
+		p = { x: 0, y: 0, down: false, lane: -1, voices: [], pulse: 0, trail: [], type: e.pointerType };
+		pointers.set(e.pointerId, p);
+	}
+	const rect = canvas.getBoundingClientRect();
+	p.x = e.clientX - rect.left;
+	p.y = e.clientY - rect.top;
+	return p;
+}
+
+// Each pointer keeps the voices it started (a held note retriggers, so
+// several overlap) so volume changes and releases reach all of them.
+function playVoice(p) {
+	const howl = sounds[p.instrument][p.lane];
+	if (howl.state() !== "loaded") return; // failed sound: stay silent, don't queue
+	const id = howl.play();
+	howl.volume(volumeFor(p.x), id);
+	p.voices = p.voices.filter((v) => v.howl.playing(v.id));
+	p.voices.push({ howl, id });
+}
+
+function setVoicesVolume(p) {
+	const vol = volumeFor(p.x);
+	for (const v of p.voices) v.howl.volume(vol, v.id);
+}
+
+function releaseVoice(p) {
+	for (const { howl, id } of p.voices) {
+		if (!howl.playing(id)) continue;
+		howl.fade(howl.volume(id), 0, RELEASE_MS, id);
+		howl.once("fade", () => howl.stop(id), id);
+	}
+	p.voices = [];
+}
+
+canvas.addEventListener("pointerdown", (e) => {
+	if (!playing) return;
+	canvas.setPointerCapture(e.pointerId);
+	const p = pointerState(e);
+	p.down = true;
+	p.instrument = current;
+	p.lane = laneFor(p.y);
+	p.pulse = 0;
+	playVoice(p);
+	hint.classList.add("gone");
+});
+
+canvas.addEventListener("pointermove", (e) => {
+	const p = pointerState(e);
+	if (p.down) {
+		p.trail.push({ x: p.x, y: p.y, t: performance.now() });
+		const lane = laneFor(p.y);
+		if (lane !== p.lane) {
+			releaseVoice(p);
+			p.lane = lane;
+			playVoice(p);
+		} else {
+			setVoicesVolume(p);
+		}
+	}
+});
+
+function endPointer(e) {
+	const p = pointers.get(e.pointerId);
+	if (!p) return;
+	releaseVoice(p);
+	p.down = false;
+	// Touch and pen cursors vanish when lifted; the mouse cursor stays visible.
+	if (e.type !== "pointerup" || p.type !== "mouse") pointers.delete(e.pointerId);
+}
+canvas.addEventListener("pointerup", endPointer);
+canvas.addEventListener("pointercancel", endPointer);
+canvas.addEventListener("pointerleave", (e) => {
+	if (!pointers.get(e.pointerId)?.down) pointers.delete(e.pointerId);
+});
+
+// The beat: a held note retriggers every TEMPO_MS.
+setInterval(() => {
+	for (const p of pointers.values()) {
+		if (p.down) playVoice(p);
+	}
+}, TEMPO_MS);
+
+/* ---------- drawing ---------- */
+
+function draw(now) {
+	ctx.clearRect(0, 0, width, height);
+	const laneH = height / NOTES;
+
+	// lanes held right now
+	for (const p of pointers.values()) {
+		if (!p.down) continue;
+		ctx.fillStyle = INSTRUMENTS[p.instrument].color + "22";
+		ctx.fillRect(0, p.lane * laneH, width, laneH);
+	}
+
+	// pitch lines
+	ctx.strokeStyle = "rgba(237, 255, 255, 0.08)";
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	for (let i = 1; i < NOTES; i++) {
+		const y = Math.round(i * laneH) + 0.5;
+		ctx.moveTo(0, y);
+		ctx.lineTo(width, y);
+	}
+	ctx.stroke();
+
+	for (const p of pointers.values()) {
+		const color = INSTRUMENTS[p.down ? p.instrument : current].color;
+
+		// trail
+		p.trail = p.trail.filter((pt) => now - pt.t < 600);
+		if (p.trail.length > 1) {
+			ctx.strokeStyle = color;
+			ctx.lineCap = "round";
+			for (let i = 1; i < p.trail.length; i++) {
+				const a = p.trail[i - 1];
+				const b = p.trail[i];
+				ctx.globalAlpha = 1 - (now - b.t) / 600;
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+				ctx.moveTo(a.x, a.y);
+				ctx.lineTo(b.x, b.y);
+				ctx.stroke();
+			}
+			ctx.globalAlpha = 1;
+		}
+
+		// cursor: a square that pulses while held
+		const size = 20;
+		if (p.down) p.pulse = (p.pulse + 0.25) % (Math.PI * 2);
+		ctx.lineWidth = p.down ? 2 + 6 * (0.5 + 0.5 * Math.sin(p.pulse)) : 1.5;
+		ctx.strokeStyle = color;
+		ctx.strokeRect(p.x - size / 2, p.y - size / 2, size, size);
+
+		ctx.fillStyle = "#dfe6e2";
+		ctx.font = '12px "IBM Plex Mono", monospace';
+		ctx.fillText(username, p.x + size / 2 + 6, p.y + 4);
+	}
+
+	requestAnimationFrame(draw);
+}
+
+/* ---------- start ---------- */
+
+document.getElementById("join").addEventListener("submit", async (e) => {
+	e.preventDefault();
+	username = document.getElementById("username").value.trim() || "MuseMan";
+	const start = document.getElementById("start");
+	start.disabled = true;
+
+	// Browsers keep audio locked until a user gesture; this click is one.
+	if (Howler.ctx && Howler.ctx.state === "suspended") Howler.ctx.resume();
+
+	if (loaded + failed < total) {
+		statusEl.dataset.waiting = "1";
+		statusEl.textContent = `Loading sounds ${loaded}/${total}`;
+		await allLoaded;
+	}
+	if (failed > 0) {
+		hint.textContent = `${failed} of ${total} sounds failed to load, so some notes will be silent. Try reloading.`;
+	}
+
+	playing = true;
+	const intro = document.getElementById("intro");
+	intro.classList.add("hidden");
+	intro.inert = true;
+	document.querySelector(".bar").inert = false;
+	document.querySelector(".stage").inert = false;
+	buttons[current].focus();
+});
+
+// While the intro is open, only the intro is reachable.
+document.querySelector(".bar").inert = true;
+document.querySelector(".stage").inert = true;
+
+loadSounds();
+resize();
+requestAnimationFrame(draw);
