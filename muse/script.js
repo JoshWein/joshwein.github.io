@@ -309,6 +309,8 @@ function sampleNote(instrument, lane, volume) {
 // Synth voices join Howler's master gain, so the mute state and the visualizer's analyser cover them too.
 function synthNote(kind, lane, volume) {
 	if (!Howler.ctx || !Howler.masterGain) return null;
+	// Howler suspends the context after ~30s without a Howl playing and only wakes it for Howls.
+	if (Howler.ctx.state !== "running") Howler.ctx.resume();
 	return synthVoice(Howler.ctx, Howler.masterGain, { instrument: kind, lane, volume });
 }
 

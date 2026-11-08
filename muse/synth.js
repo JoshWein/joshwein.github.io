@@ -66,14 +66,16 @@ function pluckBuffer(ctx, s, lane) {
 	const seconds = 2.4 - lane * 0.02; // low strings ring a bit longer
 	const len = Math.floor(rate * seconds);
 	const period = rate / f;
-	const n = Math.max(2, Math.floor(period));
-	const frac = period - n; // fractional delay keeps high notes in tune
+	// Loop delay = n taps + 0.5 (the averaging filter) + frac (the allpass).
+	// Keeping frac in [0.5, 1.5) keeps the allpass well behaved.
+	const n = Math.max(2, Math.floor(period - 1));
+	const frac = period - 0.5 - n;
 	buf = ctx.createBuffer(1, len, rate);
 	const out = buf.getChannelData(0);
 	// Excite with filtered noise so the attack isn't harsh.
-	const line = new Float32Array(n + 1);
+	const line = new Float32Array(n);
 	let last = 0;
-	for (let i = 0; i <= n; i++) {
+	for (let i = 0; i < n; i++) {
 		last = 0.6 * last + 0.4 * (Math.random() * 2 - 1);
 		line[i] = last;
 	}
@@ -90,7 +92,7 @@ function pluckBuffer(ctx, s, lane) {
 		ap = avg - c * y;
 		line[idx] = y;
 		out[i] = cur;
-		idx = idx === n ? 0 : idx + 1;
+		idx = idx === n - 1 ? 0 : idx + 1;
 	}
 	// Fade the tail so the buffer ends at silence.
 	const tail = Math.floor(rate * 0.05);
