@@ -1,8 +1,11 @@
 // The master chain under Howler: a short, soft reverb and a gentle
 // compressor, so note releases and changes blur together instead of
 // stopping dead, and many players at once don't clip.
-//   Howler.masterGain -> dry --------------> compressor -> speakers
+//   Howler.masterGain -> dry --------------> compressor -> limiter -> speakers
 //                     -> reverb -> wet ---/
+// The limiter is a fast, hard compressor just under full scale: when a lot
+// of notes land at once it turns them down instead of letting them clip,
+// which sounds like crackle.
 
 let ready = false;
 
@@ -40,6 +43,13 @@ export function setupMixer() {
 	master.connect(reverb);
 	reverb.connect(wet);
 	wet.connect(comp);
-	comp.connect(ctx.destination);
+	const limiter = ctx.createDynamicsCompressor();
+	limiter.threshold.value = -3;
+	limiter.knee.value = 0;
+	limiter.ratio.value = 20;
+	limiter.attack.value = 0.001;
+	limiter.release.value = 0.1;
+	comp.connect(limiter);
+	limiter.connect(ctx.destination);
 	ready = true;
 }
