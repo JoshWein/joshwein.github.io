@@ -1,13 +1,20 @@
+/* Muse: a page of graph paper you draw on with pens. */
 :root {
-	--bg: #1c1f22;
-	--bg-2: #24282c;
-	--line: #343a40;
-	--text: #dfe6e2;
-	--muted: #8f9a95;
-	--green: #45ce93;
-	--ice: #edffff;
-	--mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-	--sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--paper: #f6f1e4;
+	--paper-2: #ede5d3;
+	--grid: #dbe5ec;
+	--ink: #1f3a5f;
+	--ink-2: #3c5a7d;
+	--muted: #56606f;
+	--rule: #9fb1c2;
+	--red: #c8553d;
+	--red-ink: #a8412c;
+	--margin: 48px;
+	--mono: "Courier Prime", "Courier New", ui-monospace, monospace;
+	--hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+	/* a pen circle drawn around the picked instrument */
+	--circle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 40' preserveAspectRatio='none'%3E%3Cpath d='M10 8C30 0 70 2 76 18S48 40 22 36 0 22 8 12 30 4 44 5' fill='none' stroke='%23c8553d' stroke-width='2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+	--scribble: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 22' preserveAspectRatio='none'%3E%3Cpath d='M4 14c40-8 90-10 140-6s80 4 112-4M18 19c50-5 120-6 200-3' fill='none' stroke='%23c8553d' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; }
@@ -18,87 +25,152 @@ body {
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	background: var(--bg);
-	color: var(--text);
-	font: 16px/1.5 var(--sans);
+	background: var(--paper);
+	color: var(--ink);
+	font: 16px/1.5 var(--mono);
 	overflow: hidden;
 }
+
+a { color: var(--ink); }
+a:hover { color: var(--red-ink); }
+
+:focus-visible { outline: 2px dashed var(--red); outline-offset: 3px; }
+
+/* ---------- header ---------- */
 
 .bar {
 	display: flex;
 	align-items: center;
-	gap: 16px;
-	padding: 10px 16px;
-	padding-top: max(10px, env(safe-area-inset-top));
-	border-bottom: 1px solid var(--line);
+	gap: 6px 18px;
+	padding: 6px 16px;
+	padding-top: max(6px, env(safe-area-inset-top));
+	background: var(--paper);
+	border-bottom: 2px solid var(--ink);
 	flex-wrap: wrap;
 }
 
 .bar .home {
-	font-family: var(--mono);
-	font-size: 13px;
-	color: var(--ice);
+	font-size: 14px;
 	text-decoration: none;
+	color: var(--ink);
 }
-.bar .home b { color: var(--green); font-weight: 500; }
+.bar .home::before { content: "\2190  "; }
+.bar .home b { font-weight: 400; }
 
 .bar h1 {
 	margin: 0;
-	font-family: var(--mono);
-	font-size: 15px;
-	font-weight: 500;
-	color: var(--muted);
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -1px;
 }
 
 .presence {
-	font-family: var(--mono);
-	font-size: 12px;
-	color: var(--green);
+	font-family: var(--hand);
+	font-size: 22px;
+	line-height: 1;
+	color: var(--red-ink);
 }
 .presence.offline { color: var(--muted); }
 .presence.offline::after { content: " (offline)"; }
 
+.tune {
+	display: flex;
+	gap: 4px;
+	margin-left: auto;
+}
+.tune select {
+	min-height: 32px;
+	padding: 2px 4px;
+	font: 15px var(--mono);
+	color: var(--ink);
+	background: transparent;
+	border: 0;
+	border-bottom: 2px solid var(--ink);
+	border-radius: 0;
+	cursor: pointer;
+}
+.tune select:hover { border-bottom-color: var(--red); }
+
+/* small text buttons: loop recorder, visualizer */
+.loop {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+.pill,
+.viz-toggle {
+	min-height: 32px;
+	padding: 2px 8px;
+	font: 15px var(--mono);
+	color: var(--ink);
+	background: none;
+	border: 0;
+	cursor: pointer;
+}
+.pill:hover,
+.viz-toggle:hover { color: var(--red-ink); }
+.pill[aria-pressed="true"],
+.viz-toggle[aria-pressed="true"] {
+	text-decoration: underline;
+	text-decoration-color: var(--red);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 4px;
+}
+.pill[hidden] { display: none; }
+
+/* instruments: a row of handwritten tabs, the picked one circled in red */
 .instruments {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
 	margin-left: auto;
 }
+.viz-toggle + .instruments { margin-left: 0; }
 
 .ins {
-	width: 32px;
-	height: 32px;
-	padding: 0;
-	border-radius: 50%;
-	border: 2px solid var(--line);
-	background: var(--swatch);
+	position: relative;
+	min-height: 36px;
+	padding: 4px 7px;
+	font: 15px var(--mono);
+	color: var(--ink);
+	background: none;
+	border: 0;
 	cursor: pointer;
-	transition: transform .12s, border-color .12s;
+	white-space: nowrap;
 }
-.ins {
-	display: grid;
-	place-items: center;
+.ins .n { margin-right: 4px; color: var(--muted); font-size: 12px; }
+.ins:hover { color: var(--red-ink); }
+.ins[aria-checked="true"] { font-weight: 700; }
+.ins[aria-checked="true"]::after {
+	content: "";
+	position: absolute;
+	inset: 0 -3px;
+	background: var(--circle) center / 100% 100% no-repeat;
+	pointer-events: none;
 }
-.ins svg {
-	width: 60%;
-	height: 60%;
-	fill: none;
-	stroke: var(--ink);
-	stroke-width: 2.2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-}
-.ins:hover { transform: scale(1.08); }
-.ins:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-.ins[aria-checked="true"] {
-	border-color: var(--ice);
-	box-shadow: 0 0 0 3px rgba(237, 255, 255, .15);
-}
+
+/* ---------- the page you play on ---------- */
 
 .stage {
 	position: relative;
 	flex: 1;
 	min-height: 0;
+	background-color: var(--paper);
+	background-image:
+		linear-gradient(var(--grid) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+	background-size: 24px 24px;
+}
+/* the red margin line */
+.stage::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--margin);
+	width: 2px;
+	background: #d8806c;
+	pointer-events: none;
 }
 
 #stage {
@@ -111,7 +183,6 @@ body {
 	cursor: crosshair;
 }
 #stage.watching { cursor: default; }
-.stage { background: radial-gradient(ellipse at center, #22303a 0%, var(--bg) 75%); }
 
 /* three.js visualizer, behind the drawing canvas */
 .viz {
@@ -122,54 +193,21 @@ body {
 	pointer-events: none;
 }
 
-.tune {
-	display: flex;
-	gap: 6px;
-	margin-left: auto;
-}
-.tune select {
-	padding: 3px 6px;
-	font: 12px var(--mono);
-	color: var(--text);
-	background: var(--bg-2);
-	border: 1px solid var(--line);
-	border-radius: 6px;
-}
-.tune select:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
-
-.loop { display: flex; gap: 6px; }
-.pill, .viz-toggle {
-	padding: 3px 10px;
-	font: 12px var(--mono);
-	color: var(--muted);
-	background: none;
-	border: 1px solid var(--line);
-	border-radius: 999px;
-	cursor: pointer;
-}
-.pill:hover, .viz-toggle:hover { color: var(--text); }
-.pill:disabled { opacity: .4; cursor: default; }
-.pill:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-#rec::before { content: "\25CF  "; color: #e05a5a; }
-#rec[aria-pressed="true"] { color: #e05a5a; border-color: #e05a5a; }
-.pill[aria-pressed="true"] { color: var(--green); border-color: var(--green); }
-.viz-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-.viz-toggle[aria-pressed="true"] { color: var(--green); border-color: var(--green); }
-.viz-toggle + .instruments { margin-left: 0; }
-
 .hint {
 	position: absolute;
 	z-index: 2;
-	left: 16px;
+	left: calc(var(--margin) + 14px);
+	right: 16px;
 	bottom: max(10px, env(safe-area-inset-bottom));
 	margin: 0;
-	font-family: var(--mono);
-	font-size: 12px;
+	font-size: 13px;
 	color: var(--muted);
 	pointer-events: none;
 	transition: opacity .6s;
 }
 .hint.gone { opacity: 0; }
+
+/* ---------- start screen: a notebook page ---------- */
 
 .intro {
 	position: fixed;
@@ -177,93 +215,166 @@ body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 16px;
-	padding: 16px;
+	gap: 28px;
+	padding: 32px 16px;
 	overflow-y: auto;
-	background: rgba(28, 31, 34, .92);
-	backdrop-filter: blur(6px);
+	background: var(--paper-2);
 	transition: opacity .4s;
 	z-index: 10;
 }
 .intro.hidden { opacity: 0; pointer-events: none; }
 
+.card,
+.about {
+	position: relative;
+	width: min(600px, 100%);
+	padding: 40px 36px 32px calc(var(--margin) + 36px);
+	background-color: var(--paper);
+	background-image:
+		linear-gradient(var(--grid) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+	background-size: 24px 24px;
+	box-shadow: 0 1px 0 #cfc6b2, 0 18px 40px -24px rgba(60, 40, 10, .45);
+}
 .card {
 	margin-top: auto;
-	width: min(380px, 100%);
-	padding: 28px;
-	background: var(--bg-2);
-	border: 1px solid var(--line);
-	border-radius: 10px;
+	transform: rotate(-.6deg);
 }
-.card h2 { margin: 0 0 4px; font-size: 26px; color: var(--ice); }
-.card p { margin: 0 0 18px; color: var(--muted); }
-.card label { display: block; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.about { margin-bottom: auto; transform: rotate(.4deg); }
+
+/* margin line and punched holes */
+.card::before,
+.about::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--margin);
+	width: 2px;
+	background: #d8806c;
+}
+.card::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 15px;
+	width: 18px;
+	background:
+		radial-gradient(circle at 9px 15%, var(--paper-2) 8px, transparent 9px),
+		radial-gradient(circle at 9px 50%, var(--paper-2) 8px, transparent 9px),
+		radial-gradient(circle at 9px 85%, var(--paper-2) 8px, transparent 9px);
+}
+
+.card h2 {
+	margin: 0;
+	padding-bottom: 14px;
+	font-size: 72px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -2px;
+	background: var(--scribble) left bottom / 240px 20px no-repeat;
+}
+.card > p { margin: 14px 0 22px; font-size: 17px; max-width: 34ch; }
+
+.card label {
+	display: block;
+	margin-bottom: 2px;
+	font-size: 15px;
+	color: var(--muted);
+}
+.card label::after { content: ":"; }
 
 .card input {
 	width: 100%;
-	padding: 10px 12px;
-	margin-bottom: 14px;
-	font: inherit;
-	color: var(--text);
-	background: var(--bg);
-	border: 1px solid var(--line);
-	border-radius: 6px;
-}
-.card input:focus { outline: 2px solid var(--green); outline-offset: 1px; }
-
-.card button {
-	width: 100%;
-	padding: 10px 12px;
-	font: 500 15px var(--sans);
-	color: var(--bg);
-	background: var(--green);
+	padding: 4px 2px;
+	margin-bottom: 18px;
+	font: 20px var(--mono);
+	color: var(--ink);
+	background: transparent;
 	border: 0;
-	border-radius: 6px;
+	border-bottom: 2px solid var(--ink);
+	border-radius: 0;
+}
+.card input::placeholder { color: #8a93a0; }
+.card input:focus { outline: none; border-bottom-color: var(--red); }
+
+#start {
+	margin-top: 6px;
+	padding: 12px 22px;
+	min-height: 48px;
+	font: 700 18px var(--mono);
+	color: var(--paper);
+	background: var(--ink);
+	border: 0;
+	border-radius: 3px;
+	box-shadow: 3px 3px 0 var(--red);
+	transform: rotate(-1.2deg);
 	cursor: pointer;
 }
-.card button:disabled { opacity: .6; cursor: progress; }
-.about {
-	margin-bottom: auto;
-	width: min(380px, 100%);
-	font-size: 14px;
-	color: var(--muted);
+#start::after { content: " \2192"; }
+#start:hover { background: #17304f; }
+#start:disabled { opacity: .7; cursor: progress; }
+
+.card .status { margin: 14px 0 0; min-height: 1.5em; font-size: 13px; color: var(--muted); }
+
+/* rooms playing now, as a handwritten list */
+.rooms { margin: 0 0 18px; }
+.card .rooms-title {
+	margin: 0 0 4px;
+	font-family: var(--hand);
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--red-ink);
+	transform: rotate(-1.5deg);
+	transform-origin: left;
 }
-.about h2, .about h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; color: var(--text); }
-.about h3 { margin-top: 14px; }
-.about p { margin: 0 0 10px; }
-.about a { color: var(--green); }
-.about .credit { font-family: var(--mono); font-size: 12px; }
-
-.card .status { margin: 12px 0 0; min-height: 1.5em; font-family: var(--mono); font-size: 12px; }
-
-.rooms { margin: -4px 0 14px; }
-.card .rooms-title { margin: 0 0 6px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.rooms ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.rooms ul { list-style: none; margin: 0; padding: 0; }
 .card .rooms button {
-	width: auto;
-	padding: 4px 10px;
-	font: 12px var(--mono);
-	color: var(--text);
-	background: var(--bg);
-	border: 1px solid var(--line);
-	border-radius: 999px;
+	display: block;
+	width: 100%;
+	min-height: 40px;
+	padding: 8px 4px;
+	font: 16px var(--mono);
+	text-align: left;
+	color: var(--ink);
+	background: none;
+	border: 0;
+	border-bottom: 1px dashed var(--rule);
+	cursor: pointer;
 }
-.card .rooms button:hover { border-color: var(--green); }
-.card .rooms button[aria-pressed="true"] { border-color: var(--green); color: var(--green); }
+.card .rooms button:hover { color: var(--red-ink); }
+.card .rooms button[aria-pressed="true"] { font-weight: 700; }
+.card .rooms button[aria-pressed="true"]::before { content: "\2713  "; color: var(--red-ink); }
+
+.about { font-size: 14px; }
+.about h2, .about h3 {
+	margin: 0 0 6px;
+	font-family: var(--hand);
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--ink-2);
+}
+.about h3 { margin-top: 18px; }
+.about p { margin: 0 0 10px; }
+.about .credit { margin-top: 18px; font-size: 13px; color: var(--muted); }
 
 @media (max-width: 560px) {
-	.bar h1 { display: none; }
-	/* 13 sounds: two rows of up to 7, each button still a comfortable tap */
+	:root { --margin: 28px; }
+	.bar h1 { font-size: 22px; }
+	.tune { margin-left: 0; }
 	.instruments {
 		margin-left: 0;
 		width: 100%;
 		display: grid;
-		grid-template-columns: repeat(7, 36px);
-		justify-content: space-between;
-		row-gap: 8px;
-		column-gap: 4px;
+		grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
 	}
-	.ins { width: 36px; height: 36px; }
+	.ins { text-align: left; }
+	.card, .about { padding: 32px 20px 24px calc(var(--margin) + 16px); }
+	.card::after { left: 5px; }
+	.card h2 { font-size: 56px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

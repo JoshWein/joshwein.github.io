@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-	<meta name="theme-color" content="#1c1f22">
+	<meta name="theme-color" content="#f6f1e4">
 	<title>Muse: draw music together in your browser</title>
 	<meta name="description" content="Muse is a free browser instrument. Press and drag to play: height picks the note, left to right sets the volume. Thirteen sounds including a drum kit, multi-touch, and live rooms to jam with friends.">
 	<link rel="canonical" href="https://www.joshwein.xyz/muse/app.html">
@@ -28,7 +28,7 @@
 	<link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="style.css">
 	<script src="howler/howler.core.min.js" defer></script>
 	<script src="script.js" type="module"></script>
@@ -62,16 +62,16 @@
 	<div class="intro" id="intro">
 		<form class="card" id="join">
 			<h2>Muse</h2>
-			<p>A little canvas instrument. Pick a sound, press, and drag to play.</p>
-			<label for="username">Name</label>
+			<p>A little instrument you play by drawing. Press and drag anywhere. Up is higher, right is louder.</p>
+			<label for="username">name</label>
 			<input id="username" type="text" placeholder="MuseMan" maxlength="20" autocomplete="nickname">
-			<label for="room">Room</label>
+			<label for="room">room</label>
 			<input id="room" type="text" placeholder="lobby" maxlength="32" autocomplete="off" spellcheck="false">
 			<div class="rooms" id="rooms" hidden>
-				<p class="rooms-title">Playing now</p>
+				<p class="rooms-title">playing right now</p>
 				<ul id="room-list"></ul>
 			</div>
-			<button type="submit" id="start">Start playing</button>
+			<button type="submit" id="start">start playing</button>
 			<p class="status" id="status" aria-live="polite"></p>
 		</form>
 
