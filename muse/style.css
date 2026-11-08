@@ -374,7 +374,8 @@ a:hover { color: var(--red-ink); }
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
 	}
-	.ins { text-align: left; }
+	.ins { min-height: 32px; text-align: left; }
+	.tune select#scale { max-width: 130px; }
 	.card, .about { padding: 32px 20px 24px calc(var(--margin) + 16px); }
 	.card::after { left: 5px; }
 	.card h2 { font-size: 56px; }
