@@ -8,7 +8,7 @@
         "players": {
           ".read": "auth != null",
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid && (!newData.exists() || root.child('rooms').child($room).child('members').child($uid).exists())",
             ".validate": "newData.hasChildren(['name', 'instrument', 't'])",
             "name": {
               ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
@@ -41,6 +41,22 @@
               ".validate": false
             }
           }
+        },
+        "members": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['name', 'joined'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+            },
+            "joined": {
+              ".validate": "newData.val() === now || newData.val() === data.val()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
         }
       }
     },
@@ -50,7 +66,7 @@
         ".validate": "$room.matches(/^[a-z0-9-]{1,32}$/)",
         "$uid": {
           ".write": "auth != null && auth.uid === $uid",
-          ".validate": "newData.val() === true"
+          ".validate": "newData.val() === 'play' || newData.val() === 'watch'"
         }
       }
     }
