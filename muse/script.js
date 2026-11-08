@@ -6,6 +6,7 @@
 import { startViz, stopViz, vizNote } from "./viz.js";
 import { synthVoice } from "./synth.js";
 import { joinRoom, roomFromHash, cleanRoom, watchRooms, roomTime, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
+import { LOOP_STEPS, Recorder, encodeLoop, decodeLoop, byStep } from "./loop.js";
 import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor, targetMidi } from "./scales.js";
 
 const NOTES = 16;
@@ -276,6 +277,8 @@ function applyRoom(state) {
 	}
 	canvas.classList.toggle("watching", state.role === "watch");
 	keySelect.disabled = scaleSelect.disabled = state.role === "watch"; // players set the scale
+	if (state.role === "watch") recorder.cancel();
+	updateLoopUI();
 	updatePresence();
 }
 
@@ -339,6 +342,7 @@ canvas.addEventListener("pointerdown", (e) => {
 	p.down = true;
 	p.instrument = current;
 	p.lane = laneFor(p.y);
+	taps.push(heldNote(p)); // a quick tap between beats still lands in a recording
 	p.pulse = 0;
 	playVoice(p);
 	hint.classList.add("gone");
@@ -387,6 +391,7 @@ function retrigger(p) {
 }
 function beat() {
 	scheduleBeat(); // first, so one bad voice can't stop the beat
+	const tick = Math.floor(roomTime() / TEMPO_MS);
 	for (const p of pointers.values()) {
 		if (p.down) retrigger(p);
 	}
@@ -394,6 +399,7 @@ function beat() {
 		for (const p of remotes.values()) {
 			if (p.down && p.lane >= 0) retrigger(p);
 		}
+		loopBeat(tick);
 	}
 }
 function scheduleBeat() {
@@ -401,6 +407,121 @@ function scheduleBeat() {
 	setTimeout(beat, TEMPO_MS - (t % TEMPO_MS) + 1);
 }
 scheduleBeat();
+
+/* ---------- loops ---------- */
+
+// Record two bars of what you play; it then repeats on the room's beat, and
+// everyone in the room hears it. Loops can also be shared as a link.
+const recorder = new Recorder();
+let taps = [];
+let myLoop = []; // notes
+let mySteps = byStep([]);
+let loopOn = false;
+const remoteLoops = new Map(); // uid -> notes by step
+const recBtn = document.getElementById("rec");
+const loopBtn = document.getElementById("loop-play");
+const shareBtn = document.getElementById("loop-share");
+const clearBtn = document.getElementById("loop-clear");
+
+function heldNote(p) {
+	return { lane: p.lane, instrument: p.instrument, vol: Math.round(volumeFor(p.x) * 9) };
+}
+
+function playLoopNote(n) {
+	if (!width || !height) return; // canvas hidden: nothing to place the note on
+	const v = Math.max(n.vol / 9, 0.05);
+	const p = { x: v * width, y: (n.lane + 0.5) * (height / NOTES), lane: n.lane, instrument: n.instrument, voices: [] };
+	playVoice(p);
+	setTimeout(() => releaseVoice(p), TEMPO_MS * 2);
+}
+
+function loopBeat(tick) {
+	const step = tick % LOOP_STEPS;
+	const held = [...taps];
+	taps = [];
+	for (const p of pointers.values()) {
+		if (p.down) held.push(heldNote(p));
+	}
+	const done = recorder.capture(tick, held);
+	if (done) setLoop(done, true);
+	if (loopOn) mySteps[step].forEach(playLoopNote);
+	for (const steps of remoteLoops.values()) steps[step].forEach(playLoopNote);
+	updateLoopUI(tick);
+}
+
+function setLoop(notes, on) {
+	myLoop = notes;
+	mySteps = byStep(notes);
+	loopOn = on && notes.length > 0;
+	publishLoop();
+	updateLoopUI();
+}
+
+function publishLoop() {
+	session?.setLoop(loopOn ? encodeLoop(myLoop) : null);
+}
+
+function applyRemoteLoops(loops) {
+	remoteLoops.clear();
+	for (const [uid, packed] of Object.entries(loops)) {
+		const notes = decodeLoop(packed, INSTRUMENTS.length);
+		if (notes.length) remoteLoops.set(uid, byStep(notes));
+	}
+}
+
+function updateLoopUI(tick) {
+	const step = tick === undefined ? undefined : tick % LOOP_STEPS;
+	const watching = roomState.role === "watch";
+	recBtn.disabled = watching;
+	if (recorder.state === "armed") {
+		const wait = step === undefined ? "" : ` ${Math.ceil((LOOP_STEPS - step) / 4)}`;
+		recBtn.textContent = `ready${wait}`;
+	} else if (recorder.state === "recording") {
+		recBtn.textContent = `rec ${(recorder.progress(tick ?? recorder.startTick) / 4) | 0}/8`;
+	} else {
+		recBtn.textContent = "rec";
+	}
+	recBtn.setAttribute("aria-pressed", String(recorder.state !== "idle"));
+	const has = myLoop.length > 0;
+	loopBtn.hidden = shareBtn.hidden = clearBtn.hidden = !has;
+	loopBtn.setAttribute("aria-pressed", String(loopOn));
+}
+
+recBtn.addEventListener("click", () => {
+	if (recorder.state === "idle") recorder.arm();
+	else recorder.cancel();
+	updateLoopUI();
+});
+loopBtn.addEventListener("click", () => setLoop(myLoop, !loopOn));
+clearBtn.addEventListener("click", () => setLoop([], false));
+shareBtn.addEventListener("click", async () => {
+	const url = new URL(location.href);
+	url.search = `?loop=${encodeLoop(myLoop)}`;
+	url.hash = session ? session.room : roomFromHash();
+	try {
+		if (navigator.share) await navigator.share({ title: "A Muse loop", url: url.href });
+		else {
+			await navigator.clipboard.writeText(url.href);
+			hint.classList.remove("gone");
+			hint.textContent = "Loop link copied. Anyone who opens it hears your loop.";
+		}
+	} catch {
+		// share sheet dismissed, or clipboard blocked: show the link instead
+		hint.classList.remove("gone");
+		hint.textContent = url.href;
+	}
+});
+
+// A shared link: ?loop=... loads that loop, ready to play once you start.
+{
+	const shared = decodeLoop(new URLSearchParams(location.search).get("loop") ?? "", INSTRUMENTS.length);
+	if (shared.length) {
+		myLoop = shared;
+		mySteps = byStep(shared);
+		loopOn = true;
+	}
+	updateLoopUI();
+}
 
 /* ---------- drawing ---------- */
 
@@ -590,12 +711,14 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		name: username,
 		onPlayers: applyRemotePlayers,
 		onRoom: applyRoom,
+		onLoops: applyRemoteLoops,
 		onSettings: (s) => applySettings(s ?? DEFAULT_SETTINGS),
 		onStatus: (s) => presence.classList.toggle("offline", s === "offline"),
 	});
 	if (session) {
 		updatePresence();
 		publish();
+		publishLoop();
 	} else {
 		// Couldn't join (or multiplayer is off): say so instead of showing nothing.
 		presence.hidden = false;

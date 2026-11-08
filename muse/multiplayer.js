@@ -123,8 +123,9 @@ export function watchRooms(onRooms) {
  * onRoom({ role, place, players, watchers }) is called when the queue changes:
  * role is "play" or "watch", and place is the watcher's spot in line (1 = next).
  * onSettings(settings) is called with the room's shared settings (scale, key) or null.
+ * onLoops(map) is called with { uid: packedLoop } for the other players' loops.
  */
-export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onStatus }) {
+export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onLoops, onStatus }) {
 	if (!activeConfig()) return null;
 
 	let timedOut = false;
@@ -132,14 +133,14 @@ export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onSt
 		timedOut = true;
 		resolve(null);
 	}, JOIN_TIMEOUT_MS));
-	return Promise.race([connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, () => timedOut), timeout])
+	return Promise.race([connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onStatus }, () => timedOut), timeout])
 		.then((session) => {
 			if (!session) onStatus?.("offline");
 			return session;
 		});
 }
 
-async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, gaveUp) {
+async function connect({ room, name, onPlayers, onRoom, onSettings, onLoops, onStatus }, gaveUp) {
 	try {
 		const { db, database, uid } = await firebase();
 		if (gaveUp()) return null; // too slow; the player is already playing solo
@@ -155,6 +156,17 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, 
 		const settingsRef = db.ref(database, `rooms/${room}/settings`);
 		db.onValue(settingsRef, (snap) => onSettings?.(snap.val()),
 			(err) => console.warn("Muse: couldn't read room settings", err));
+
+		// Loops are written once and replayed by everyone on the shared beat.
+		const loopRef = db.ref(database, `rooms/${room}/loops/${uid}`);
+		let myLoop = null;
+		db.onValue(db.ref(database, `rooms/${room}/loops`), (snap) => {
+			const loops = {};
+			snap.forEach((child) => {
+				if (child.key !== uid) loops[child.key] = child.val();
+			});
+			onLoops?.(loops);
+		}, (err) => console.warn("Muse: couldn't read loops", err));
 
 		db.onValue(roomRef, (snap) => {
 			const others = {};
@@ -183,6 +195,7 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, 
 				.then(() => {
 					confirmed = true;
 					updateRole();
+					sendLoop(); // a drop removed it along with our member record
 				})
 				.catch((err) => console.warn("Muse: couldn't join the queue", err))
 				.finally(() => { joining = false; });
@@ -208,6 +221,7 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, 
 				} else {
 					db.remove(meRef).catch((err) => console.warn("Muse: couldn't step back", err));
 				}
+				sendLoop();
 			}
 			onRoom?.({
 				role,
@@ -236,6 +250,7 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, 
 				db.onDisconnect(meRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
 				db.onDisconnect(lobbyRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
 				db.onDisconnect(memberRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
+				db.onDisconnect(loopRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
 				ensureMember();
 				// A drop may have cleared our lobby entry; restore it once the role is known.
 				if (role) db.set(lobbyRef, role).catch((err) => console.warn("Muse: couldn't list the room", err));
@@ -243,6 +258,13 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, 
 				if (pending && !timer) timer = setTimeout(flush, 0);
 			}
 		});
+
+		// Only players share a loop; a watcher's waits until they're promoted.
+		function sendLoop() {
+			if (!confirmed) return;
+			const write = myLoop && role === "play" ? db.set(loopRef, myLoop) : db.remove(loopRef);
+			write.catch((err) => console.warn("Muse: couldn't share the loop", err));
+		}
 
 		function flush() {
 			timer = null;
@@ -262,6 +284,11 @@ async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, 
 			update(state) {
 				pending = { name, instrument: state.instrument, pointers: state.pointers };
 				if (!timer) timer = setTimeout(flush, SEND_INTERVAL_MS);
+			},
+			// packed: a loop from loop.js, or null to stop sharing it.
+			setLoop(packed) {
+				myLoop = packed || null;
+				sendLoop();
 			},
 			// Shared by everyone in the room; the last change wins.
 			setSettings(settings) {

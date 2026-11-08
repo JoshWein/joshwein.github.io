@@ -42,6 +42,12 @@
 			<select id="key" aria-label="Key"></select>
 			<select id="scale" aria-label="Scale"></select>
 		</div>
+		<div class="loop" role="group" aria-label="Loop">
+			<button class="pill" id="rec" type="button" aria-pressed="false" title="Record a two-bar loop">rec</button>
+			<button class="pill" id="loop-play" type="button" aria-pressed="false" title="Play or pause your loop" hidden>loop</button>
+			<button class="pill" id="loop-share" type="button" title="Share your loop as a link" hidden>share</button>
+			<button class="pill" id="loop-clear" type="button" title="Delete your loop" aria-label="Delete loop" hidden>&times;</button>
+		</div>
 		<button class="viz-toggle" id="viz-toggle" type="button" aria-pressed="false" title="Visualizer">viz</button>
 		<div class="instruments" role="radiogroup" aria-label="Instrument">
 			<!-- buttons are added by script.js -->

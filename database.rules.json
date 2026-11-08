@@ -71,6 +71,13 @@
           "$other": {
             ".validate": false
           }
+        },
+        "loops": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && (!newData.exists() || root.child('rooms').child($room).child('members').child($uid).exists())",
+            ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 640 && newData.val().matches(/^[0-9a-v]+$/)"
+          }
         }
       }
     },
