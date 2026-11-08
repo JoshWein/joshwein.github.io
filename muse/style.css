@@ -158,6 +158,21 @@ body {
 .card button:disabled { opacity: .6; cursor: progress; }
 .card .status { margin: 12px 0 0; min-height: 1.5em; font-family: var(--mono); font-size: 12px; }
 
+.rooms { margin: -4px 0 14px; }
+.card .rooms-title { margin: 0 0 6px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.rooms ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.card .rooms button {
+	width: auto;
+	padding: 4px 10px;
+	font: 12px var(--mono);
+	color: var(--text);
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 999px;
+}
+.card .rooms button:hover { border-color: var(--green); }
+.card .rooms button[aria-pressed="true"] { border-color: var(--green); color: var(--green); }
+
 @media (max-width: 560px) {
 	.bar h1 { display: none; }
 	.instruments { margin-left: 0; width: 100%; justify-content: space-between; }

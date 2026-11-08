@@ -3,7 +3,7 @@
 // Every pointer (mouse, pen, each finger) gets its own cursor and voice.
 // Other players in the same room (see multiplayer.js) show up as cursors too.
 
-import { joinRoom, roomFromHash, MAX_SLOTS } from "./multiplayer.js";
+import { joinRoom, roomFromHash, cleanRoom, watchRooms, MAX_SLOTS } from "./multiplayer.js";
 
 const NOTES = 16;
 const TEMPO_MS = 125; // a held note retriggers on this beat, like the original
@@ -372,6 +372,37 @@ function draw(now) {
 
 /* ---------- start ---------- */
 
+// Room picker: the URL hash fills it in, and active rooms are one tap away.
+const roomInput = document.getElementById("room");
+roomInput.value = location.hash ? roomFromHash() : "";
+const roomsBox = document.getElementById("rooms");
+const roomList = document.getElementById("room-list");
+function markPicked() {
+	const picked = cleanRoom(roomInput.value);
+	for (const b of roomList.querySelectorAll("button")) {
+		b.setAttribute("aria-pressed", String(b.dataset.room === picked));
+	}
+}
+roomInput.addEventListener("input", markPicked);
+const stopWatchingRooms = watchRooms((rooms) => {
+	roomList.replaceChildren(...rooms.slice(0, 12).map(({ room, players }) => {
+		const li = document.createElement("li");
+		const b = document.createElement("button");
+		b.type = "button";
+		b.dataset.room = room;
+		b.textContent = `${room} · ${players}`;
+		b.setAttribute("aria-label", `${room}, ${players} playing`);
+		b.addEventListener("click", () => {
+			roomInput.value = room;
+			markPicked();
+		});
+		li.append(b);
+		return li;
+	}));
+	roomsBox.hidden = rooms.length === 0;
+	markPicked();
+});
+
 document.getElementById("join").addEventListener("submit", async (e) => {
 	e.preventDefault();
 	username = document.getElementById("username").value.trim() || "MuseMan";
@@ -390,9 +421,14 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		hint.textContent = `${failed} of ${total} sounds failed to load, so some notes will be silent. Try reloading.`;
 	}
 
+	// Put the room in the URL so it can be shared.
+	const room = cleanRoom(roomInput.value);
+	history.replaceState(null, "", `#${room}`);
+	stopWatchingRooms();
+
 	statusEl.textContent = "Joining the room...";
 	session = await joinRoom({
-		room: roomFromHash(),
+		room,
 		name: username,
 		onPlayers: applyRemotePlayers,
 		onStatus: (s) => presence.classList.toggle("offline", s === "offline"),
