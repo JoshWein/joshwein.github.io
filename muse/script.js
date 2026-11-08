@@ -91,7 +91,7 @@ function penFor(hex) {
 	}
 	const l = (max + min) / 2;
 	const sat = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
-	return `hsl(${Math.round((h * 60 + 360) % 360)} ${Math.round(Math.min(Math.max(sat, 0.25), 0.7) * 100)}% ${Math.round(Math.min(l, 0.36) * 100)}%)`;
+	return `hsl(${Math.round((h * 60 + 360) % 360)} ${Math.round(Math.min(Math.max(sat, 0.25), 0.7) * 100)}% ${Math.round(Math.min(l, 0.32) * 100)}%)`;
 }
 const PENS = INSTRUMENTS.map((inst) => penFor(inst.color));
 const PEN_HEX = INSTRUMENTS.map((_, i) => {
