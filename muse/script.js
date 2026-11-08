@@ -369,21 +369,31 @@ function sampleNote(instrument, lane, volume) {
 	}
 
 	const ctx = Howler.ctx;
-	const start = ctx.currentTime;
-	const end = start + howl.duration(id) / rate;
-	const fadeOutAt = Math.max(start + FADE_IN_S, end - FADE_OUT_S);
+	let end = Infinity;
+	let fadeOutAt = Infinity;
 	let level = volume;
 	let released = false;
 	// fade out just before the file runs out; it's re-added after each volume change
 	function tail() {
+		if (end === Infinity) return;
 		gain.setValueAtTime(level, fadeOutAt);
 		gain.linearRampToValueAtTime(0, end);
 	}
-	// A reused sound can still hold automation from its last note: clear it first.
-	gain.cancelScheduledValues(start);
-	gain.setValueAtTime(0, start);
-	gain.linearRampToValueAtTime(level, start + FADE_IN_S);
-	tail();
+	function envelope() {
+		if (released) return;
+		const start = ctx.currentTime;
+		end = start + howl.duration(id) / rate;
+		fadeOutAt = Math.max(start + FADE_IN_S, end - FADE_OUT_S);
+		// A reused sound can still hold automation from its last note: clear it first.
+		gain.cancelScheduledValues(start);
+		gain.setValueAtTime(0, start);
+		gain.linearRampToValueAtTime(level, start + FADE_IN_S);
+		tail();
+	}
+	// While the audio context wakes up, Howler holds the note (and its volume
+	// call) until it really starts; set the envelope then, not against a frozen clock.
+	if (howl._playLock || ctx.state !== "running") howl.once("play", envelope, id);
+	else envelope();
 
 	return {
 		setVolume(v) {
