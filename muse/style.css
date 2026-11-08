@@ -122,8 +122,22 @@ body {
 	pointer-events: none;
 }
 
-.viz-toggle {
+.tune {
+	display: flex;
+	gap: 6px;
 	margin-left: auto;
+}
+.tune select {
+	padding: 3px 6px;
+	font: 12px var(--mono);
+	color: var(--text);
+	background: var(--bg-2);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+}
+.tune select:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+
+.viz-toggle {
 	padding: 3px 10px;
 	font: 12px var(--mono);
 	color: var(--muted);

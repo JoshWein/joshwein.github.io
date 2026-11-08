@@ -57,6 +57,20 @@
               ".validate": false
             }
           }
+        },
+        "settings": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms').child($room).child('members').child(auth.uid).exists()",
+          ".validate": "newData.hasChildren(['scale', 'key'])",
+          "scale": {
+            ".validate": "newData.isString() && newData.val().matches(/^(pentatonic|minorpent|major|minor|dorian|blues)$/)"
+          },
+          "key": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 11"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     },

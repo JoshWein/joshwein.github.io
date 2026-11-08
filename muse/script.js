@@ -5,10 +5,11 @@
 
 import { startViz, stopViz, vizNote } from "./viz.js";
 import { synthVoice } from "./synth.js";
-import { joinRoom, roomFromHash, cleanRoom, watchRooms, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
+import { joinRoom, roomFromHash, cleanRoom, watchRooms, roomTime, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
+import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor, targetMidi } from "./scales.js";
 
 const NOTES = 16;
-const TEMPO_MS = 125; // a held note retriggers on this beat, like the original
+const TEMPO_MS = 125; // a held note retriggers on this beat (16th notes at 120 BPM), shared by the room
 const RELEASE_MS = 120;
 
 // Names and icons describe how each sound behaves (picked by ear and from
@@ -274,6 +275,7 @@ function applyRoom(state) {
 		hint.textContent = "A spot opened up. You're playing now!";
 	}
 	canvas.classList.toggle("watching", state.role === "watch");
+	keySelect.disabled = scaleSelect.disabled = state.role === "watch"; // players set the scale
 	updatePresence();
 }
 
@@ -282,6 +284,7 @@ function applyRoom(state) {
 // A voice is { setVolume, release, playing }, whether it's a sample or synthesized.
 function playVoice(p) {
 	const inst = INSTRUMENTS[p.instrument];
+	p.lastPlay = performance.now();
 	const volume = volumeFor(p.x);
 	const voice = inst.synth ? synthNote(inst.synth, p.lane, volume) : sampleNote(p.instrument, p.lane, volume);
 	if (!voice) return;
@@ -290,10 +293,13 @@ function playVoice(p) {
 	p.voices.push(voice);
 }
 
+// Samples are C pentatonic; other keys and scales play the nearest one at a nudged rate.
 function sampleNote(instrument, lane, volume) {
-	const howl = sounds[instrument][lane];
+	const { sampleLane, rate } = pitchFor(lane, settings);
+	const howl = sounds[instrument][sampleLane];
 	if (howl.state() !== "loaded") return null; // failed sound: stay silent, don't queue
 	const id = howl.play();
+	if (rate !== 1) howl.rate(rate, id);
 	howl.volume(volume, id);
 	return {
 		setVolume: (v) => howl.volume(v, id),
@@ -311,7 +317,9 @@ function synthNote(kind, lane, volume) {
 	if (!Howler.ctx || !Howler.masterGain) return null;
 	// Howler suspends the context after ~30s without a Howl playing and only wakes it for Howls.
 	if (Howler.ctx.state !== "running") Howler.ctx.resume();
-	return synthVoice(Howler.ctx, Howler.masterGain, { instrument: kind, lane, volume });
+	// Melodic synths follow the room's key and scale; drums stay one sound per lane.
+	const midi = kind === "drums" ? undefined : targetMidi(lane, settings);
+	return synthVoice(Howler.ctx, Howler.masterGain, { instrument: kind, lane, midi, volume });
 }
 
 function setVoicesVolume(p) {
@@ -371,16 +379,28 @@ canvas.addEventListener("pointerleave", (e) => {
 	}
 });
 
-// The beat: a held note retriggers every TEMPO_MS.
-setInterval(() => {
+// The beat: a held note retriggers every TEMPO_MS, on boundaries of the
+// shared room clock, so everyone's held notes land together. A note that
+// was just struck skips the next beat instead of doubling up.
+function retrigger(p) {
+	if (performance.now() - (p.lastPlay ?? 0) > TEMPO_MS / 2) playVoice(p);
+}
+function beat() {
+	scheduleBeat(); // first, so one bad voice can't stop the beat
 	for (const p of pointers.values()) {
-		if (p.down) playVoice(p);
+		if (p.down) retrigger(p);
 	}
-	if (!playing) return;
-	for (const p of remotes.values()) {
-		if (p.down && p.lane >= 0) playVoice(p);
+	if (playing) {
+		for (const p of remotes.values()) {
+			if (p.down && p.lane >= 0) retrigger(p);
+		}
 	}
-}, TEMPO_MS);
+}
+function scheduleBeat() {
+	const t = roomTime();
+	setTimeout(beat, TEMPO_MS - (t % TEMPO_MS) + 1);
+}
+scheduleBeat();
 
 /* ---------- drawing ---------- */
 
@@ -398,8 +418,9 @@ function draw(now) {
 		ctx.fillRect(0, p.lane * laneH, width, laneH);
 	}
 
-	// pitch lines
-	ctx.strokeStyle = "rgba(237, 255, 255, 0.08)";
+	// pitch lines, a touch brighter on each quarter note so the shared beat is visible
+	const quarter = Math.floor(roomTime() / TEMPO_MS) % 4 === 0;
+	ctx.strokeStyle = quarter ? "rgba(237, 255, 255, 0.13)" : "rgba(237, 255, 255, 0.08)";
 	ctx.lineWidth = 1;
 	ctx.beginPath();
 	for (let i = 1; i < NOTES; i++) {
@@ -444,6 +465,29 @@ function draw(now) {
 
 	requestAnimationFrame(draw);
 }
+
+/* ---------- room scale ---------- */
+
+// Everyone in a room plays in the same key and scale; anyone can change it.
+let settings = { ...DEFAULT_SETTINGS };
+const keySelect = document.getElementById("key");
+const scaleSelect = document.getElementById("scale");
+keySelect.append(...KEYS.map((k, i) => new Option(k, String(i))));
+scaleSelect.append(...Object.entries(SCALES).map(([id, s]) => new Option(s.name, id)));
+
+function applySettings(next) {
+	settings = cleanSettings(next);
+	keySelect.value = String(settings.key);
+	scaleSelect.value = settings.scale;
+}
+applySettings(settings);
+
+function changeSettings() {
+	applySettings({ key: Number(keySelect.value), scale: scaleSelect.value });
+	if (session && roomState.role === "play") session.setSettings(settings);
+}
+keySelect.addEventListener("change", changeSettings);
+scaleSelect.addEventListener("change", changeSettings);
 
 /* ---------- visualizer ---------- */
 
@@ -546,6 +590,7 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		name: username,
 		onPlayers: applyRemotePlayers,
 		onRoom: applyRoom,
+		onSettings: (s) => applySettings(s ?? DEFAULT_SETTINGS),
 		onStatus: (s) => presence.classList.toggle("offline", s === "offline"),
 	});
 	if (session) {

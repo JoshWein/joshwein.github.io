@@ -53,6 +53,13 @@ function activeConfig() {
 	return config ? { config, emulator } : null;
 }
 
+// The shared clock: Firebase reports how far this device's clock is from the
+// server's, so every player can line their beat up with everyone else's.
+let serverOffset = 0;
+export function roomTime() {
+	return Date.now() + serverOffset;
+}
+
 // Loads the SDK and signs in once; the room list and joinRoom share it.
 let firebasePromise = null;
 function firebase() {
@@ -70,6 +77,9 @@ function firebase() {
 			auth.connectAuthEmulator(authInstance, "http://127.0.0.1:9099", { disableWarnings: true });
 			db.connectDatabaseEmulator(database, "127.0.0.1", 9000);
 		}
+		db.onValue(db.ref(database, ".info/serverTimeOffset"), (snap) => {
+			serverOffset = Number(snap.val()) || 0;
+		});
 		const { user } = await auth.signInAnonymously(authInstance);
 		return { db, database, uid: user.uid };
 	})();
@@ -112,8 +122,9 @@ export function watchRooms(onRooms) {
  * onPlayers(map) is called with { uid: { name, instrument, pointers } } for the other players.
  * onRoom({ role, place, players, watchers }) is called when the queue changes:
  * role is "play" or "watch", and place is the watcher's spot in line (1 = next).
+ * onSettings(settings) is called with the room's shared settings (scale, key) or null.
  */
-export async function joinRoom({ room, name, onPlayers, onRoom, onStatus }) {
+export async function joinRoom({ room, name, onPlayers, onRoom, onSettings, onStatus }) {
 	if (!activeConfig()) return null;
 
 	let timedOut = false;
@@ -121,14 +132,14 @@ export async function joinRoom({ room, name, onPlayers, onRoom, onStatus }) {
 		timedOut = true;
 		resolve(null);
 	}, JOIN_TIMEOUT_MS));
-	return Promise.race([connect({ room, name, onPlayers, onRoom, onStatus }, () => timedOut), timeout])
+	return Promise.race([connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, () => timedOut), timeout])
 		.then((session) => {
 			if (!session) onStatus?.("offline");
 			return session;
 		});
 }
 
-async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
+async function connect({ room, name, onPlayers, onRoom, onSettings, onStatus }, gaveUp) {
 	try {
 		const { db, database, uid } = await firebase();
 		if (gaveUp()) return null; // too slow; the player is already playing solo
@@ -140,6 +151,10 @@ async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 		let confirmed = false; // our member record (with its real server join time) exists
 		let online = false;
 		let members = [];
+
+		const settingsRef = db.ref(database, `rooms/${room}/settings`);
+		db.onValue(settingsRef, (snap) => onSettings?.(snap.val()),
+			(err) => console.warn("Muse: couldn't read room settings", err));
 
 		db.onValue(roomRef, (snap) => {
 			const others = {};
@@ -247,6 +262,10 @@ async function connect({ room, name, onPlayers, onRoom, onStatus }, gaveUp) {
 			update(state) {
 				pending = { name, instrument: state.instrument, pointers: state.pointers };
 				if (!timer) timer = setTimeout(flush, SEND_INTERVAL_MS);
+			},
+			// Shared by everyone in the room; the last change wins.
+			setSettings(settings) {
+				db.set(settingsRef, settings).catch((err) => console.warn("Muse: couldn't change the room settings", err));
 			},
 			get role() {
 				return role;

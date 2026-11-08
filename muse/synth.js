@@ -57,12 +57,12 @@ function noiseBuffer(ctx, s) {
 	return s.noise;
 }
 
-// Karplus-Strong plucked string, rendered once per lane and cached.
-function pluckBuffer(ctx, s, lane) {
-	let buf = s.plucks.get(lane);
+// Karplus-Strong plucked string, rendered once per pitch and cached.
+function pluckBuffer(ctx, s, lane, midi) {
+	let buf = s.plucks.get(midi);
 	if (buf) return buf;
 	const rate = ctx.sampleRate;
-	const f = hz(laneMidi(lane));
+	const f = hz(midi);
 	const seconds = 2.4 - lane * 0.02; // low strings ring a bit longer
 	const len = Math.floor(rate * seconds);
 	const period = rate / f;
@@ -97,7 +97,7 @@ function pluckBuffer(ctx, s, lane) {
 	// Fade the tail so the buffer ends at silence.
 	const tail = Math.floor(rate * 0.05);
 	for (let i = 0; i < tail; i++) out[len - 1 - i] *= i / tail;
-	s.plucks.set(lane, buf);
+	s.plucks.set(midi, buf);
 	return buf;
 }
 
@@ -169,9 +169,9 @@ function osc(ctx, type, freq) {
 
 /* ---------- melodic instruments ---------- */
 
-function piano(ctx, v, lane) {
+function piano(ctx, v, lane, s, midi) {
 	const t = v.t;
-	const f = hz(laneMidi(lane));
+	const f = hz(midi);
 	const decay = 1.1 + lane * 0.1; // high notes (low lane numbers) fade faster
 	const amp = ctx.createGain();
 	env(amp.gain, t, 0.5, 0.004, decay);
@@ -191,9 +191,9 @@ function piano(ctx, v, lane) {
 	});
 }
 
-function marimba(ctx, v, lane) {
+function marimba(ctx, v, lane, s, midi) {
 	const t = v.t;
-	const f = hz(laneMidi(lane) + 12); // marimba sits an octave up
+	const f = hz(midi + 12); // marimba sits an octave up
 	const decay = 1.1 - (15 - lane) * 0.04;
 	const amp = ctx.createGain();
 	amp.connect(v.level);
@@ -215,10 +215,10 @@ function marimba(ctx, v, lane) {
 	v.add(over2, t, t + 0.08);
 }
 
-function strings(ctx, v, lane, s) {
+function strings(ctx, v, lane, s, midi) {
 	const t = v.t;
 	const src = ctx.createBufferSource();
-	src.buffer = pluckBuffer(ctx, s, lane);
+	src.buffer = pluckBuffer(ctx, s, lane, midi);
 	const tone = ctx.createBiquadFilter();
 	tone.type = "lowpass";
 	tone.frequency.value = 6000;
@@ -228,9 +228,9 @@ function strings(ctx, v, lane, s) {
 	v.add(src, t, t + src.buffer.duration);
 }
 
-function warmSynth(ctx, v, lane) {
+function warmSynth(ctx, v, lane, s, midi) {
 	const t = v.t;
-	const f = hz(laneMidi(lane));
+	const f = hz(midi);
 	const length = 0.9;
 	const amp = ctx.createGain();
 	amp.gain.setValueAtTime(0.0001, t);
@@ -348,13 +348,14 @@ export const SYNTH_KINDS = ["drums", ...Object.keys(MELODIC)];
 /**
  * Starts one note (or drum hit) now. Returns { setVolume(v), release(), playing() }.
  * instrument: "drums" | "piano" | "marimba" | "strings" | "synth"
+ * midi: the pitch for melodic instruments (the room's scale); defaults to the lane's pentatonic note.
  */
-export function synthVoice(ctx, destination, { instrument, lane, volume = 1 }) {
+export function synthVoice(ctx, destination, { instrument, lane, midi, volume = 1 }) {
 	const s = bus(ctx, destination);
 	const v = makeVoice(ctx, s, volume);
 	lane = Math.min(LANES - 1, Math.max(0, lane | 0));
 	if (instrument === "drums") DRUMS[lane](ctx, v, s);
-	else (MELODIC[instrument] || piano)(ctx, v, lane, s);
+	else (MELODIC[instrument] || piano)(ctx, v, lane, s, Number.isFinite(midi) ? midi : laneMidi(lane));
 	v.finish();
 	return v.api;
 }
