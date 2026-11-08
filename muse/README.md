@@ -1,6 +1,6 @@
 # Muse
 
-A canvas instrument: height picks one of 16 notes, left to right sets the volume. Keys 1 to 8 switch instruments.
+A canvas instrument: height picks one of 16 notes, left to right sets the volume. Keys 1 to 0 pick the first ten instruments, and [ and ] step through all thirteen. Drums, Piano, Marimba, Strings and Synth are synthesized in `synth.js` (Web Audio, no sample files).
 
 ## Multiplayer
 
