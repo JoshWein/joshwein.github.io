@@ -4,7 +4,9 @@
 //   rooms/{room}/players/{uid} = { name, instrument, t, pointers: { "0".."4": { x, y, down } } }
 // with x and y normalized to 0..1, so screens of any size line up.
 // Everyone listens to the room and plays the other players' notes locally.
-// database.rules.json (repo root) only lets a player write their own record.
+// Each player also marks lobby/{room}/{uid} = true, so the start screen can
+// list the active rooms without downloading everyone's cursors.
+// database.rules.json (repo root) only lets a player write their own records.
 //
 // Multiplayer stays off until muse/firebase-config.js exports a config.
 
@@ -15,6 +17,12 @@ const SEND_INTERVAL_MS = 66; // about 15 updates a second
 const JOIN_TIMEOUT_MS = 6000; // give up and play solo if Firebase is unreachable
 export const MAX_SLOTS = 5;
 
+// Room names: lowercase letters, digits and dashes, at most 32 characters.
+export function cleanRoom(raw) {
+	const room = String(raw).trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 32);
+	return room || "lobby";
+}
+
 export function roomFromHash() {
 	let raw = location.hash.slice(1);
 	try {
@@ -22,8 +30,7 @@ export function roomFromHash() {
 	} catch {
 		// malformed escapes like "#%": just use the raw text
 	}
-	const room = raw.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 32);
-	return room || "lobby";
+	return cleanRoom(raw);
 }
 
 // Local testing against the Firebase emulators: app.html?emulator on localhost.
@@ -32,31 +39,19 @@ function emulatorMode() {
 	return local && new URLSearchParams(location.search).has("emulator");
 }
 
-/**
- * Joins a room. Returns null when multiplayer isn't configured or can't connect.
- * onPlayers(map) is called with { uid: { name, instrument, pointers } } for everyone else.
- */
-export async function joinRoom({ room, name, onPlayers, onStatus }) {
+function activeConfig() {
 	const emulator = emulatorMode();
 	const config = emulator
 		? { apiKey: "demo-key", projectId: "demo-muse", databaseURL: "http://127.0.0.1:9000/?ns=demo-muse" }
 		: firebaseConfig;
-	if (!config) return null;
-
-	let timedOut = false;
-	const timeout = new Promise((resolve) => setTimeout(() => {
-		timedOut = true;
-		resolve(null);
-	}, JOIN_TIMEOUT_MS));
-	return Promise.race([connect(config, emulator, { room, name, onPlayers, onStatus }, () => timedOut), timeout])
-		.then((session) => {
-			if (!session) onStatus?.("offline");
-			return session;
-		});
+	return config ? { config, emulator } : null;
 }
 
-async function connect(config, emulator, { room, name, onPlayers, onStatus }, gaveUp) {
-	try {
+// Loads the SDK and signs in once; the room list and joinRoom share it.
+let firebasePromise = null;
+function firebase() {
+	firebasePromise ??= (async () => {
+		const { config, emulator } = activeConfig();
 		const [{ initializeApp }, auth, db] = await Promise.all([
 			import(`${SDK}/firebase-app.js`),
 			import(`${SDK}/firebase-auth.js`),
@@ -69,12 +64,65 @@ async function connect(config, emulator, { room, name, onPlayers, onStatus }, ga
 			auth.connectAuthEmulator(authInstance, "http://127.0.0.1:9099", { disableWarnings: true });
 			db.connectDatabaseEmulator(database, "127.0.0.1", 9000);
 		}
-
 		const { user } = await auth.signInAnonymously(authInstance);
+		return { db, database, uid: user.uid };
+	})();
+	firebasePromise.catch(() => { firebasePromise = null; }); // allow a retry
+	return firebasePromise;
+}
+
+/**
+ * Calls onRooms([{ room, players }]) with the active rooms, busiest first,
+ * whenever they change. Does nothing when multiplayer is off or unreachable.
+ * Returns a function that stops watching.
+ */
+export function watchRooms(onRooms) {
+	if (!activeConfig()) return () => {};
+	let stop = () => {};
+	let stopped = false;
+	firebase().then(({ db, database }) => {
+		if (stopped) return;
+		stop = db.onValue(db.ref(database, "lobby"), (snap) => {
+			const rooms = [];
+			snap.forEach((child) => {
+				rooms.push({ room: child.key, players: child.size });
+			});
+			rooms.sort((a, b) => b.players - a.players || a.room.localeCompare(b.room));
+			onRooms(rooms);
+		}, (err) => console.warn("Muse: couldn't list rooms", err));
+	}).catch((err) => console.warn("Muse: multiplayer unavailable", err));
+	return () => {
+		stopped = true;
+		stop();
+	};
+}
+
+/**
+ * Joins a room. Returns null when multiplayer isn't configured or can't connect.
+ * onPlayers(map) is called with { uid: { name, instrument, pointers } } for everyone else.
+ */
+export async function joinRoom({ room, name, onPlayers, onStatus }) {
+	if (!activeConfig()) return null;
+
+	let timedOut = false;
+	const timeout = new Promise((resolve) => setTimeout(() => {
+		timedOut = true;
+		resolve(null);
+	}, JOIN_TIMEOUT_MS));
+	return Promise.race([connect({ room, name, onPlayers, onStatus }, () => timedOut), timeout])
+		.then((session) => {
+			if (!session) onStatus?.("offline");
+			return session;
+		});
+}
+
+async function connect({ room, name, onPlayers, onStatus }, gaveUp) {
+	try {
+		const { db, database, uid } = await firebase();
 		if (gaveUp()) return null; // too slow; the player is already playing solo
-		const uid = user.uid;
 		const roomRef = db.ref(database, `rooms/${room}/players`);
 		const meRef = db.ref(database, `rooms/${room}/players/${uid}`);
+		const lobbyRef = db.ref(database, `lobby/${room}/${uid}`);
 
 		db.onValue(roomRef, (snap) => {
 			const others = {};
@@ -98,6 +146,8 @@ async function connect(config, emulator, { room, name, onPlayers, onStatus }, ga
 			onStatus?.(online ? "online" : "offline");
 			if (online) {
 				db.onDisconnect(meRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
+				db.onDisconnect(lobbyRef).remove().catch((err) => console.warn("Muse: onDisconnect failed", err));
+				db.set(lobbyRef, true).catch((err) => console.warn("Muse: couldn't list the room", err));
 				lastSent = "";
 				if (pending && !timer) timer = setTimeout(flush, 0);
 			}
@@ -124,6 +174,7 @@ async function connect(config, emulator, { room, name, onPlayers, onStatus }, ga
 			},
 			leave() {
 				db.remove(meRef);
+				db.remove(lobbyRef);
 			},
 		};
 	} catch (err) {
