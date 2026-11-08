@@ -50,6 +50,14 @@ body {
 	color: var(--muted);
 }
 
+.presence {
+	font-family: var(--mono);
+	font-size: 12px;
+	color: var(--green);
+}
+.presence.offline { color: var(--muted); }
+.presence.offline::after { content: " (offline)"; }
+
 .instruments {
 	display: flex;
 	gap: 8px;
