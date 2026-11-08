@@ -81,16 +81,20 @@ function selectInstrument(i) {
 selectInstrument(current);
 
 picker.addEventListener("keydown", (e) => {
-	if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-		const step = e.key === "ArrowRight" ? 1 : -1;
-		selectInstrument((current + step + INSTRUMENTS.length) % INSTRUMENTS.length);
-		buttons[current].focus();
-		e.preventDefault();
-	}
+	const n = INSTRUMENTS.length;
+	const next = {
+		ArrowRight: current + 1, ArrowDown: current + 1,
+		ArrowLeft: current - 1, ArrowUp: current - 1,
+		Home: 0, End: n - 1,
+	}[e.key];
+	if (next === undefined) return;
+	selectInstrument((next + n) % n);
+	buttons[current].focus();
+	e.preventDefault();
 });
 
 window.addEventListener("keydown", (e) => {
-	if (e.target instanceof HTMLInputElement) return;
+	if (e.target instanceof HTMLInputElement || e.ctrlKey || e.metaKey || e.altKey) return;
 	const n = Number(e.key);
 	if (n >= 1 && n <= INSTRUMENTS.length) selectInstrument(n - 1);
 });
@@ -113,7 +117,7 @@ new ResizeObserver(resize).observe(canvas);
 
 /* ---------- pointers and voices ---------- */
 
-// pointerId -> { x, y, down, lane, instrument, soundId, howl, pulse, trail }
+// pointerId -> { x, y, down, lane, instrument, voices, pulse, trail, type }
 const pointers = new Map();
 
 const laneFor = (y) => Math.min(NOTES - 1, Math.max(0, Math.floor((y / height) * NOTES)));
@@ -122,7 +126,7 @@ const volumeFor = (x) => Math.min(1, Math.max(0.05, x / width));
 function pointerState(e) {
 	let p = pointers.get(e.pointerId);
 	if (!p) {
-		p = { x: 0, y: 0, down: false, lane: -1, soundId: null, howl: null, pulse: 0, trail: [], type: e.pointerType };
+		p = { x: 0, y: 0, down: false, lane: -1, voices: [], pulse: 0, trail: [], type: e.pointerType };
 		pointers.set(e.pointerId, p);
 	}
 	const rect = canvas.getBoundingClientRect();
@@ -131,22 +135,29 @@ function pointerState(e) {
 	return p;
 }
 
+// Each pointer keeps the voices it started (a held note retriggers, so
+// several overlap) so volume changes and releases reach all of them.
 function playVoice(p) {
 	const howl = sounds[p.instrument][p.lane];
+	if (howl.state() !== "loaded") return; // failed sound: stay silent, don't queue
 	const id = howl.play();
 	howl.volume(volumeFor(p.x), id);
-	p.howl = howl;
-	p.soundId = id;
+	p.voices = p.voices.filter((v) => v.howl.playing(v.id));
+	p.voices.push({ howl, id });
+}
+
+function setVoicesVolume(p) {
+	const vol = volumeFor(p.x);
+	for (const v of p.voices) v.howl.volume(vol, v.id);
 }
 
 function releaseVoice(p) {
-	if (p.howl && p.soundId !== null && p.howl.playing(p.soundId)) {
-		const { howl, soundId } = p;
-		howl.fade(howl.volume(soundId), 0, RELEASE_MS, soundId);
-		howl.once("fade", () => howl.stop(soundId), soundId);
+	for (const { howl, id } of p.voices) {
+		if (!howl.playing(id)) continue;
+		howl.fade(howl.volume(id), 0, RELEASE_MS, id);
+		howl.once("fade", () => howl.stop(id), id);
 	}
-	p.howl = null;
-	p.soundId = null;
+	p.voices = [];
 }
 
 canvas.addEventListener("pointerdown", (e) => {
@@ -170,8 +181,8 @@ canvas.addEventListener("pointermove", (e) => {
 			releaseVoice(p);
 			p.lane = lane;
 			playVoice(p);
-		} else if (p.howl) {
-			p.howl.volume(volumeFor(p.x), p.soundId);
+		} else {
+			setVoicesVolume(p);
 		}
 	}
 });
@@ -187,7 +198,7 @@ function endPointer(e) {
 canvas.addEventListener("pointerup", endPointer);
 canvas.addEventListener("pointercancel", endPointer);
 canvas.addEventListener("pointerleave", (e) => {
-	if (e.pointerType === "mouse" && !pointers.get(e.pointerId)?.down) pointers.delete(e.pointerId);
+	if (!pointers.get(e.pointerId)?.down) pointers.delete(e.pointerId);
 });
 
 // The beat: a held note retriggers every TEMPO_MS.
@@ -274,13 +285,21 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 		await allLoaded;
 	}
 	if (failed > 0) {
-		statusEl.textContent = `${failed} sounds failed to load. Some notes will be silent.`;
+		hint.textContent = `${failed} of ${total} sounds failed to load, so some notes will be silent. Try reloading.`;
 	}
 
 	playing = true;
-	document.getElementById("intro").classList.add("hidden");
-	canvas.focus();
+	const intro = document.getElementById("intro");
+	intro.classList.add("hidden");
+	intro.inert = true;
+	document.querySelector(".bar").inert = false;
+	document.querySelector(".stage").inert = false;
+	buttons[current].focus();
 });
+
+// While the intro is open, only the intro is reachable.
+document.querySelector(".bar").inert = true;
+document.querySelector(".stage").inert = true;
 
 loadSounds();
 resize();
