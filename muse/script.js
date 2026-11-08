@@ -5,6 +5,7 @@
 
 import { startViz, stopViz, vizNote } from "./viz.js";
 import { synthVoice } from "./synth.js";
+import { setupMixer } from "./mixer.js";
 import { joinRoom, roomFromHash, cleanRoom, watchRooms, roomTime, MAX_SLOTS, MAX_PLAYERS } from "./multiplayer.js";
 import { LOOP_STEPS, Recorder, encodeLoop, decodeLoop, byStep } from "./loop.js";
 import { KEYS, SCALES, DEFAULT_SETTINGS, cleanSettings, pitchFor, targetMidi } from "./scales.js";
@@ -14,7 +15,7 @@ const TEMPO_MS = 300; // one beat step: 8th notes at 100 BPM, shared by the room
 const STEPS_PER_BAR = 8;
 // How often a held note repeats, in steps: melodic notes every 8th, drums every quarter.
 const repeatEvery = (instrument) => (INSTRUMENTS[instrument]?.synth === "drums" ? 2 : 1);
-const RELEASE_MS = 120;
+const RELEASE_MS = 450; // fade-out when a note is let go or replaced, so it never stops dead
 
 // Names and icons describe how each sound behaves (picked by ear and from
 // its spectrum: pitch, brightness, attack); the files are just ins1..ins8.
@@ -312,8 +313,10 @@ function playVoice(p) {
 	const voice = inst.synth ? synthNote(inst.synth, p.lane, volume) : sampleNote(p.instrument, p.lane, volume);
 	if (!voice) return;
 	vizNote(p.x / width, p.y / height, PEN_HEX[p.instrument], volume);
-	p.voices = p.voices.filter((v) => v.playing());
-	p.voices.push(voice);
+	// The previous strike fades out under the new one (a short crossfade)
+	// instead of piling up or cutting off.
+	for (const v of p.voices) v.release();
+	p.voices = [voice];
 }
 
 // Samples are C pentatonic; other keys and scales play the nearest one at a nudged rate.
@@ -338,6 +341,7 @@ function sampleNote(instrument, lane, volume) {
 // Synth voices join Howler's master gain, so the mute state and the visualizer's analyser cover them too.
 function synthNote(kind, lane, volume) {
 	if (!Howler.ctx || !Howler.masterGain) return null;
+	setupMixer();
 	// Howler suspends the context after ~30s without a Howl playing and only wakes it for Howls.
 	if (Howler.ctx.state !== "running") Howler.ctx.resume();
 	// Melodic synths follow the room's key and scale; drums stay one sound per lane.
@@ -725,6 +729,7 @@ document.getElementById("join").addEventListener("submit", async (e) => {
 
 	// Browsers keep audio locked until a user gesture; this click is one.
 	if (Howler.ctx && Howler.ctx.state === "suspended") Howler.ctx.resume();
+	setupMixer();
 
 	if (loaded + failed < total) {
 		statusEl.dataset.waiting = "1";
