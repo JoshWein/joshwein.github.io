@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Josh Wein | Software Developer</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../../images/favicon-32x32.png">
+<meta name="theme-color" content="#347859">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #212529;
+  --panel: #2b3035;
+  --line: #3a4148;
+  --text: #e3e7ea;
+  --muted: #9aa3ab;
+  --green-dark: #347859;
+  --green: #45ce93;
+  --mint: #62ce9b;
+  --ice: #edffff;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.65 "Lato", system-ui, sans-serif; }
+a { color: var(--mint); text-underline-offset: 3px; }
+a:hover { color: var(--ice); }
+
+.layout { display: grid; grid-template-columns: minmax(320px, 38%) 1fr; min-height: 100vh; }
+
+/* sidebar */
+.side { position: sticky; top: 0; height: 100vh; padding: 56px 52px 40px; display: flex; flex-direction: column; color: var(--ice); background: linear-gradient(165deg, #45ce93 0%, #347859 55%, #24543f 100%); background-size: 100% 200%; animation: drift 12s ease-in-out infinite alternate; overflow: hidden; }
+@keyframes drift { from { background-position: 0 0; } to { background-position: 0 100%; } }
+.side::before { content: ""; position: absolute; width: 520px; height: 520px; right: -260px; bottom: -200px; border-radius: 50%; border: 1px solid rgba(237,255,255,.18); box-shadow: 0 0 0 60px rgba(237,255,255,.04), 0 0 0 120px rgba(237,255,255,.03); }
+.side h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(48px, 5.6vw, 84px); line-height: .95; margin: 0; letter-spacing: -.02em; }
+.side .role { font-size: 19px; margin-top: 14px; opacity: .9; }
+.side .intro { margin-top: 30px; max-width: 26em; font-size: 16px; color: rgba(237,255,255,.86); }
+.side .intro mark { background: rgba(237,255,255,.92); color: #1d4433; padding: 0 .2em; border-radius: 3px; }
+.toc { margin-top: auto; list-style: none; padding: 0; display: grid; gap: 4px; position: relative; }
+.toc a { display: flex; align-items: center; gap: 14px; color: rgba(237,255,255,.72); text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; padding: 6px 0; }
+.toc a::before { content: ""; width: 26px; height: 2px; background: currentColor; transition: width .25s; }
+.toc a:hover, .toc a.active { color: var(--ice); }
+.toc a.active::before { width: 56px; }
+.side .ext { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 30px; position: relative; }
+.side .ext a { color: var(--ice); text-decoration: none; font-size: 14px; font-weight: 700; padding: 7px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(237,255,255,.45); transition: background .2s, color .2s; }
+.side .ext a:hover { background: var(--ice); color: #1d4433; }
+.side .ext .when { display: none; }
+.side .ext .resume:hover .label { display: none; }
+.side .ext .resume:hover .when { display: inline; }
+
+/* content */
+.content { padding: 56px clamp(24px, 6vw, 88px) 40px; max-width: 900px; }
+section { padding: 24px 0 64px; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 36px; color: var(--ice); margin: 0 0 28px; letter-spacing: -.01em; }
+.kicker { color: var(--muted); font-size: 14px; margin: -22px 0 30px; }
+.about p { font-size: 19px; margin: 0 0 16px; }
+.about mark { background: none; color: var(--green); font-weight: 700; }
+
+/* skills */
+.skill-group { display: grid; grid-template-columns: 190px 1fr; gap: 20px; padding: 18px 0; border-top: 1px solid var(--line); }
+.skill-group:last-child { border-bottom: 1px solid var(--line); }
+.skill-group h3 { margin: 4px 0 0; font-size: 15px; font-weight: 700; color: var(--text); }
+.skill-group h3 mark { display: inline-block; margin-top: 6px; background: var(--green-dark); color: var(--ice); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips span { background: var(--mint); color: #000; font-weight: 700; font-size: 13px; padding: 5px 11px; border-radius: 5px; }
+
+/* projects */
+.projects { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.proj { position: relative; background: var(--panel); border-radius: 12px; padding: 24px 24px 20px; border-top: 3px solid var(--green-dark); transition: border-color .25s, transform .25s, background .25s; }
+.proj:hover { border-top-color: var(--green); transform: translateY(-2px); background: #30363c; }
+.proj h3 { font-family: var(--serif); font-weight: 700; font-size: 22px; margin: 0 0 8px; line-height: 1.2; }
+.proj h3 a { color: var(--ice); text-decoration: none; }
+.proj h3 a::after { content: ""; position: absolute; inset: 0; }
+.proj p { margin: 0 0 10px; color: var(--muted); font-size: 15.5px; }
+.proj .links { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; font-weight: 700; }
+.proj .links a, .proj p a { position: relative; z-index: 2; }
+.proj.wide { grid-column: 1 / -1; }
+
+/* experience */
+.job { display: grid; grid-template-columns: 170px 1fr; gap: 24px; padding: 26px 0; border-top: 1px solid var(--line); }
+.job .when { font-style: italic; color: var(--muted); font-size: 15px; padding-top: 3px; }
+.job .co { font-family: var(--serif); font-weight: 700; font-size: 22px; color: var(--ice); line-height: 1.2; }
+.job .title { color: var(--green); font-weight: 700; margin: 4px 0 10px; }
+.job p { margin: 0; color: var(--text); opacity: .85; }
+
+footer { border-top: 1px solid var(--line); padding: 28px 0 10px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+footer nav { display: flex; gap: 16px; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--mint); }
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; }
+  .side { position: relative; height: auto; padding: 64px 16px 32px; }
+  .toc { display: none; }
+  .content { padding: 40px 16px; }
+  .projects { grid-template-columns: 1fr; }
+  .skill-group, .job { grid-template-columns: 1fr; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <h1>Josh Wein</h1>
+    <div class="role">Software Developer</div>
+    <ul class="toc">
+      <li><a href="#about">About Me</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+    </ul>
+    <div class="ext">
+      <a class="resume" href="../../resume.pdf"><span class="label">Resume</span><span class="when">Last Updated: 2/6/17</span></a>
+      <a href="../../blog/">Blog</a>
+      <a href="../../photores.html">Photo Restoration</a>
+      <a href="../../contact.html">Contact</a>
+    </div>
+  </aside>
+
+  <main class="content">
+    <section id="about" class="about">
+      <h2>About Me</h2>
+      <p>Software developer currently living in the North-Eastern part of the US. Focused on building <mark>scalable</mark> systems</p>
+      <p>I try to divide my time as equally as possible between tech, finding new books to read, finding new music to listen to, and finding new food to eat</p>
+    </section>
+
+    <section id="skills">
+      <h2>Skills</h2>
+      <p class="kicker">Nonexhaustive Skill List (as of 2024)</p>
+      <div class="skill-group">
+        <h3>Focus Languages</h3>
+        <div class="chips"><span>JAVA</span><span>JAVASCRIPT</span><span>PYTHON</span><span>C++</span><span>SQL</span><span>CSS</span><span>HTML</span></div>
+      </div>
+      <div class="skill-group">
+        <h3>Libraries &amp; Frameworks<br><mark>Spotlight</mark></h3>
+        <div class="chips"><span>SPRING (most Spring Frameworks)</span><span>ANGULAR/REACT/VUE</span><span>BOOTSTRAP/NAIVEUI</span><span>JQUERY</span><span>JUNIT</span><span>DOCKER</span><span>MAVEN/GRADLE</span><span>TERRAFORM</span></div>
+      </div>
+      <div class="skill-group">
+        <h3>Datastores</h3>
+        <div class="chips"><span>POSTGRES</span><span>ORACLE</span><span>S3</span><span>REDIS</span><span>KAFKA</span><span>RABBITMQ</span></div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+      <div class="projects">
+        <article class="proj">
+          <h3><a href="https://ikblife-bd51a.firebaseapp.com">International Klein Blue Life</a></h3>
+          <p>Tower Defense Game with 40 levels and a built-in level editor. Built using Typescript.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/TowerDefenseGame">View on Github</a></div>
+        </article>
+        <article class="proj">
+          <h3><a href="https://endlesstrailers.com">Endless Trailers</a></h3>
+          <p>Website where users can watch endless(80) amounts of trailers filtered by genre, actor and other filters.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/EndlessTrailers">View on Github</a></div>
+        </article>
+        <article class="proj wide">
+          <h3><a href="../../muse/app.html">Muse</a></h3>
+          <p>Cloud Computing Project - Muse is a realtime multiplayer music experience in the same vein as Plink. It was created mostly using Javascript, HTML5 Canvas, and NodeJS with Socket.IO for the realtime functionality as well as room seperation. The sounds were created in Ableton Live.</p>
+        </article>
+        <article class="proj">
+          <h3><a href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US">bootify</a></h3>
+          <p>Chrome extension that injects bootstrap style into any website. Allows the user to save websites to inject automatically</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/bootify">View on Github</a></div>
+        </article>
+        <article class="proj">
+          <h3><a href="https://github.com/JoshWein/tweetGenerator">NLP Sentence Generator</a></h3>
+          <p>Cloud Computing Project - Generates sentences for a given topic using NLP techniques and backed by a 600,000 tweet corpus database.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/tweetGenerator/blob/master/Report.pdf">View paper</a></div>
+        </article>
+        <article class="proj">
+          <h3><a href="https://www.joshwein.xyz/KeyRotation/">Key Rotation Decryptor/Encryptor</a></h3>
+          <p>JavaScript implementation of the <a target="_blank" href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère cipher/Key Rotation</a>. Decrypts and encrypts text based on the given key.</p>
+        </article>
+        <article class="proj">
+          <h3><a href="http://www.joshwein.xyz">This Website</a></h3>
+          <p>This site was created using: HTML, CSS, Bootstrap, Javascript, and JQuery. The blog is generated using Jekyll.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/joshwein.github.io">View website on Github</a><a target="_blank" href="https://github.com/JoshWein/blog">View blog on Github</a></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+      <div class="job">
+        <div class="when">September 2017 - Current</div>
+        <div><div class="co">Bloomberg L.P.</div><div class="title">Tech Lead/Software Developer</div><p>Tech Lead in Bloomberg Law focused on the Litigation Solutions area (Dockets Product). Focused on designing and delivering long term scalable projects and mentoring engineers.</p></div>
+      </div>
+      <div class="job">
+        <div class="when">Summer 2016</div>
+        <div><div class="co">BlackRock Inc.</div><div class="title">Software Engineering Intern</div><p>Built the next version of a Java backend server for the Aladdin Product Group leveraging Spring, Maven, and Ivy. Brought the project from design through QA testing to a production release.</p></div>
+      </div>
+      <div class="job">
+        <div class="when">Jan 2016 - May 2016</div>
+        <div><div class="co">Viacom</div><div class="title">Multiplatform Engineering Intern</div><p>Led a team of developers in creating an internal web tool for automating configuration file generation. Involved in the full SDLC including project scheduling estimations, design, and development of the project.</p></div>
+      </div>
+      <div class="job">
+        <div class="when">2014 - 2015</div>
+        <div><div class="co">Stony Brook University</div><div class="title">Teaching Assistant &amp; Tutor</div><p>Held office hours each week to assist college students taking Computer Science III and Computer Music with course assignments and exam preparation. Assisted college students with computer science coursework and projects. Acted as a mentor for the students; teaching study habits and homework strategies.</p></div>
+      </div>
+      <div class="job">
+        <div class="when">2013</div>
+        <div><div class="co">Everest BBN</div><div class="title">Network Intern</div><p>Performed on-site maintenance and troubleshooting for servers and network issues. Set up networks for new businesses by running cable and setting up servers. Provided over the phone and on-site customer support.</p></div>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2049 <em>Josh Wein</em></span>
+      <nav>
+        <a href="https://github.com/JoshWein">Github</a>
+        <a href="https://www.linkedin.com/in/joshwein1/">LinkedIn</a>
+        <a href="https://twitter.com/joshweino">Twitter</a>
+        <a href="https://www.facebook.com/joshuaswein">Facebook</a>
+      </nav>
+    </footer>
+  </main>
+</div>
+<script>
+  // Highlight the sidebar link for the section in view.
+  const links = document.querySelectorAll('.toc a');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  document.querySelectorAll('main section').forEach(s => io.observe(s));
+</script>
+</body>
+</html>

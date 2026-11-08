@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Josh Wein | Software Developer</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../../images/favicon-32x32.png">
+<meta name="theme-color" content="#347859">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #212529;
+  --panel: #2b3035;
+  --panel-2: #343a40;
+  --text: #e9ecef;
+  --muted: #a3acb4;
+  --green-dark: #347859;
+  --green: #45ce93;
+  --mint: #62ce9b;
+  --ice: #edffff;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Lato", system-ui, sans-serif; }
+a { color: var(--mint); }
+a:hover { color: var(--ice); }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+/* floating nav */
+.nav { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 4px; padding: 6px; border-radius: 999px; background: rgba(33,37,41,.72); backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.08); max-width: calc(100vw - 32px); overflow-x: auto; scrollbar-width: none; }
+.nav a { color: var(--text); text-decoration: none; font-size: 14px; font-weight: 700; padding: 8px 14px; border-radius: 999px; white-space: nowrap; }
+.nav a:hover { background: rgba(98,206,155,.16); color: var(--ice); }
+.nav a.cta { background: var(--mint); color: #10261b; }
+.nav a.cta:hover { background: var(--ice); }
+
+/* hero keeps the current site's breathing green */
+.hero { min-height: 88vh; display: grid; align-items: end; position: relative; overflow: hidden; animation: bg-trans 10s linear infinite alternate; }
+@keyframes bg-trans { from { background-color: #347859; } to { background-color: #45ce93; } }
+.hero::after { content: ""; position: absolute; inset: auto 0 0 0; height: 140px; background: linear-gradient(transparent, var(--bg)); }
+.hero .grain { position: absolute; inset: 0; opacity: .18; background-image: radial-gradient(rgba(0,0,0,.6) 1px, transparent 1px); background-size: 4px 4px; mix-blend-mode: multiply; }
+.hero .wrap { position: relative; z-index: 2; padding-bottom: 120px; width: 100%; }
+.hero h1 { margin: 0; color: var(--ice); font-weight: 900; font-size: clamp(64px, 14vw, 190px); line-height: .85; letter-spacing: -.045em; text-shadow: 0 2px 30px rgba(0,0,0,.12); }
+.hero .role { display: inline-block; margin-top: 22px; font-size: clamp(18px, 2.4vw, 26px); color: #0f2c20; background: var(--ice); padding: 4px 14px; border-radius: 6px; font-weight: 700; }
+
+/* about */
+.about { padding: 40px 0 90px; }
+.about .lead { font-size: clamp(26px, 3.6vw, 44px); line-height: 1.22; font-weight: 700; margin: 0 0 24px; max-width: 22em; letter-spacing: -.01em; }
+.about .lead mark { background: var(--mint); color: #10261b; padding: 0 .18em; border-radius: 4px; }
+.about p.more { color: var(--muted); font-size: 19px; max-width: 36em; margin: 0; }
+
+h2 { font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: var(--mint); margin: 0 0 26px; font-weight: 900; }
+h2 small { color: var(--muted); letter-spacing: .04em; font-weight: 400; text-transform: none; font-size: 14px; margin-left: 8px; }
+section { padding: 70px 0; }
+
+/* skills: three tiles */
+.skills .grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 16px; }
+.tile { background: var(--panel); border-radius: 18px; padding: 24px; }
+.tile h3 { margin: 0 0 16px; font-size: 18px; font-weight: 900; color: var(--ice); }
+.tile h3 mark { background: none; color: var(--green); font-size: 13px; text-transform: uppercase; letter-spacing: .1em; margin-left: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips span { background: var(--mint); color: #000; font-weight: 700; font-size: 13px; padding: 6px 12px; border-radius: 8px; letter-spacing: .02em; }
+.tile.spot { background: linear-gradient(160deg, #2f4a3d, var(--panel) 65%); box-shadow: inset 0 0 0 1px rgba(98,206,155,.25); }
+
+/* projects bento */
+.bento { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: minmax(200px, auto); gap: 16px; }
+.card { position: relative; background: var(--panel); border-radius: 18px; padding: 26px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; transition: transform .25s, background .25s; }
+.card:hover { transform: translateY(-3px); background: var(--panel-2); }
+.card h3 { margin: 0 0 8px; font-size: 24px; font-weight: 900; color: var(--ice); line-height: 1.15; }
+.card p { margin: 0 0 10px; color: var(--muted); }
+.card .links { display: flex; gap: 16px; flex-wrap: wrap; font-weight: 700; font-size: 15px; }
+.card .links a, .card p a { position: relative; z-index: 2; }
+.card .cover { position: absolute; inset: 0; z-index: 1; }
+.card .tag { position: absolute; top: 22px; left: 26px; font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--mint); }
+.card .arrow { position: absolute; top: 18px; right: 22px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.06); color: var(--ice); transition: background .25s, transform .25s; font-size: 18px; }
+.card:hover .arrow { background: var(--mint); color: #10261b; transform: rotate(-45deg); }
+.span-4 { grid-column: span 4; } .span-3 { grid-column: span 3; } .span-2 { grid-column: span 2; } .tall { grid-row: span 2; }
+.card.feature { background: linear-gradient(135deg, #45ce93 0%, #347859 45%, #24443a 100%); }
+.card.feature p { color: #e3f5ec; }
+.card.feature .links a { color: var(--ice); }
+.card.tagged { padding-top: 58px; }
+.card.big h3 { font-size: clamp(28px, 3.4vw, 42px); }
+
+/* experience */
+.exp { display: grid; gap: 14px; }
+.job { display: grid; grid-template-columns: 220px 1fr; gap: 28px; background: var(--panel); border-radius: 18px; padding: 28px; }
+.job .when { font-style: italic; color: var(--muted); font-size: 15px; }
+.job .co { font-weight: 900; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.job .title { font-size: 22px; font-weight: 900; color: var(--green); margin: 0 0 8px; line-height: 1.2; }
+.job p { margin: 0; color: var(--text); opacity: .86; }
+.job.now { background: linear-gradient(120deg, #2f4a3d, var(--panel) 55%); box-shadow: inset 0 0 0 1px rgba(98,206,155,.25); }
+
+footer { background: #1a1d20; padding: 54px 0; margin-top: 50px; }
+footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+footer .socials { display: flex; gap: 12px; }
+footer .socials a { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #c9d1d6; transition: background .2s; }
+footer .socials a:hover { background: var(--mint); }
+footer .socials img { width: 22px; height: 22px; }
+footer .big-contact { font-size: clamp(24px, 3vw, 34px); font-weight: 900; color: var(--ice); text-decoration: none; }
+footer .big-contact span { color: var(--mint); }
+footer .copy { width: 100%; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 900px) {
+  .skills .grid { grid-template-columns: 1fr; }
+  .bento { grid-template-columns: 1fr 1fr; }
+  .span-4, .span-3, .span-2 { grid-column: span 2; }
+  .tall { grid-row: auto; }
+  .job { grid-template-columns: 1fr; gap: 8px; }
+}
+@media (max-width: 600px) {
+  .wrap { padding: 0 16px; }
+  .nav { top: 10px; left: 16px; right: 16px; transform: none; max-width: none; }
+  .hero { min-height: 70vh; }
+  .hero .wrap { padding-bottom: 80px; }
+  .card { padding: 22px; min-height: 200px; }
+  .job { padding: 22px; }
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="#about">About Me</a>
+  <a href="#skills">Skills</a>
+  <a href="#projects">Projects</a>
+  <a href="#experience">Experience</a>
+  <a href="../../resume.pdf" title="Last Updated: 2/6/17">Resume</a>
+  <a href="../../photores.html">Photo Restoration</a>
+  <a href="../../blog/">Blog</a>
+  <a class="cta" href="../../contact.html">Contact</a>
+</nav>
+
+<header class="hero">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="wrap">
+    <h1>Josh<br>Wein</h1>
+    <div class="role">Software Developer</div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap about" id="about">
+    <h2>About Me</h2>
+    <p class="lead">Software developer currently living in the North-Eastern part of the US. Focused on building <mark>scalable</mark> systems</p>
+    <p class="more">I try to divide my time as equally as possible between tech, finding new books to read, finding new music to listen to, and finding new food to eat</p>
+  </div>
+
+  <section id="skills" class="skills">
+    <div class="wrap">
+      <h2>Nonexhaustive Skill List <small>(as of 2024)</small></h2>
+      <div class="grid">
+        <div class="tile">
+          <h3>Focus Languages</h3>
+          <div class="chips"><span>JAVA</span><span>JAVASCRIPT</span><span>PYTHON</span><span>C++</span><span>SQL</span><span>CSS</span><span>HTML</span></div>
+        </div>
+        <div class="tile spot">
+          <h3>Libraries &amp; Frameworks <mark>Spotlight</mark></h3>
+          <div class="chips"><span>SPRING (most Spring Frameworks)</span><span>ANGULAR/REACT/VUE</span><span>BOOTSTRAP/NAIVEUI</span><span>JQUERY</span><span>JUNIT</span><span>DOCKER</span><span>MAVEN/GRADLE</span><span>TERRAFORM</span></div>
+        </div>
+        <div class="tile">
+          <h3>Datastores</h3>
+          <div class="chips"><span>POSTGRES</span><span>ORACLE</span><span>S3</span><span>REDIS</span><span>KAFKA</span><span>RABBITMQ</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="wrap">
+      <h2>Projects</h2>
+      <div class="bento">
+        <article class="card feature big span-4 tall">
+          <a class="cover" href="https://ikblife-bd51a.firebaseapp.com" aria-label="International Klein Blue Life"></a>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>International Klein Blue Life</h3>
+          <p>Tower Defense Game with 40 levels and a built-in level editor. Built using Typescript.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/TowerDefenseGame">View on Github</a></div>
+        </article>
+        <article class="card span-2">
+          <a class="cover" href="https://endlesstrailers.com" aria-label="Endless Trailers"></a>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>Endless Trailers</h3>
+          <p>Website where users can watch endless(80) amounts of trailers filtered by genre, actor and other filters.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/EndlessTrailers">View on Github</a></div>
+        </article>
+        <article class="card span-2">
+          <a class="cover" href="https://chrome.google.com/webstore/detail/bootify-a-bootstrap-injec/ekbicbimdmfoehanpahkcajejciloahj?hl=en-US" aria-label="bootify"></a>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>bootify</h3>
+          <p>Chrome extension that injects bootstrap style into any website. Allows the user to save websites to inject automatically</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/bootify">View on Github</a></div>
+        </article>
+        <article class="card tagged span-3">
+          <a class="cover" href="../../muse/app.html" aria-label="Muse"></a>
+          <span class="tag">Cloud Computing Project</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>Muse</h3>
+          <p>Muse is a realtime multiplayer music experience in the same vein as Plink. It was created mostly using Javascript, HTML5 Canvas, and NodeJS with Socket.IO for the realtime functionality as well as room seperation. The sounds were created in Ableton Live.</p>
+        </article>
+        <article class="card tagged span-3">
+          <a class="cover" href="https://github.com/JoshWein/tweetGenerator" aria-label="NLP Sentence Generator"></a>
+          <span class="tag">Cloud Computing Project</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>NLP Sentence Generator</h3>
+          <p>Generates sentences for a given topic using NLP techniques and backed by a 600,000 tweet corpus database.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/tweetGenerator/blob/master/Report.pdf">View paper</a></div>
+        </article>
+        <article class="card span-3">
+          <a class="cover" href="https://www.joshwein.xyz/KeyRotation/" aria-label="Key Rotation Decryptor/Encryptor"></a>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>Key Rotation Decryptor/Encryptor</h3>
+          <p>JavaScript implementation of the <a target="_blank" href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère cipher/Key Rotation</a>. Decrypts and encrypts text based on the given key.</p>
+        </article>
+        <article class="card span-3">
+          <a class="cover" href="http://www.joshwein.xyz" aria-label="This Website"></a>
+          <span class="arrow" aria-hidden="true">→</span>
+          <h3>This Website</h3>
+          <p>This site was created using: HTML, CSS, Bootstrap, Javascript, and JQuery. The blog is generated using Jekyll.</p>
+          <div class="links"><a target="_blank" href="https://github.com/JoshWein/joshwein.github.io">View website on Github</a><a target="_blank" href="https://github.com/JoshWein/blog">View blog on Github</a></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap">
+      <h2>Experience</h2>
+      <div class="exp">
+        <div class="job now">
+          <div><div class="when">September 2017 - Current</div><div class="co">Bloomberg L.P.</div></div>
+          <div><h3 class="title">Tech Lead/Software Developer</h3><p>Tech Lead in Bloomberg Law focused on the Litigation Solutions area (Dockets Product). Focused on designing and delivering long term scalable projects and mentoring engineers.</p></div>
+        </div>
+        <div class="job">
+          <div><div class="when">Summer 2016</div><div class="co">BlackRock Inc.</div></div>
+          <div><h3 class="title">Software Engineering Intern</h3><p>Built the next version of a Java backend server for the Aladdin Product Group leveraging Spring, Maven, and Ivy. Brought the project from design through QA testing to a production release.</p></div>
+        </div>
+        <div class="job">
+          <div><div class="when">Jan 2016 - May 2016</div><div class="co">Viacom</div></div>
+          <div><h3 class="title">Multiplatform Engineering Intern</h3><p>Led a team of developers in creating an internal web tool for automating configuration file generation. Involved in the full SDLC including project scheduling estimations, design, and development of the project.</p></div>
+        </div>
+        <div class="job">
+          <div><div class="when">2014 - 2015</div><div class="co">Stony Brook University</div></div>
+          <div><h3 class="title">Teaching Assistant &amp; Tutor</h3><p>Held office hours each week to assist college students taking Computer Science III and Computer Music with course assignments and exam preparation. Assisted college students with computer science coursework and projects. Acted as a mentor for the students; teaching study habits and homework strategies.</p></div>
+        </div>
+        <div class="job">
+          <div><div class="when">2013</div><div class="co">Everest BBN</div></div>
+          <div><h3 class="title">Network Intern</h3><p>Performed on-site maintenance and troubleshooting for servers and network issues. Set up networks for new businesses by running cable and setting up servers. Provided over the phone and on-site customer support.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="big-contact" href="../../contact.html">Contact <span>→</span></a>
+    <div class="socials">
+      <a href="https://github.com/JoshWein" aria-label="Github"><img src="../../images/icons/social-1_round-github.svg" alt=""></a>
+      <a href="https://www.linkedin.com/in/joshwein1/" aria-label="LinkedIn"><img src="../../images/icons/social-1_round-linkedin.svg" alt=""></a>
+      <a href="https://twitter.com/joshweino" aria-label="Twitter"><img src="../../images/icons/social-1_round-twitter.svg" alt=""></a>
+      <a href="https://www.facebook.com/joshuaswein" aria-label="Facebook"><img src="../../images/icons/social-1_round-facebook.svg" alt=""></a>
+    </div>
+    <div class="copy">© 2049 <em>Josh Wein</em></div>
+  </div>
+</footer>
+</body>
+</html>
