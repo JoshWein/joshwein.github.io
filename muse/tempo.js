@@ -23,9 +23,15 @@ export function nextBeatAt(clock, t) {
 	return clock.at + (tickAt(clock, t) + 1 - clock.tick) * stepMs(clock.bpm);
 }
 
-/** A new clock at this tempo, taking over from the next step. */
-export function changeTempo(clock, bpm, t) {
-	return { bpm: clampBpm(bpm), at: Math.round(nextBeatAt(clock, t)), tick: tickAt(clock, t) + 1 };
+/**
+ * A new clock at this tempo, taking over on the first step at least `lead` ms
+ * after t. The lead gives the change time to reach the other players before
+ * it starts, so nobody's beat jumps.
+ */
+export function changeTempo(clock, bpm, t, lead = 0) {
+	const from = t + lead;
+	const at = nextBeatAt(clock, from);
+	return { bpm: clampBpm(bpm), at: Math.round(at), tick: tickAt(clock, from) + 1 };
 }
 
 /** Checks a clock from the room or a link; anything odd falls back to the default. */

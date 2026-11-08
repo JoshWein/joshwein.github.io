@@ -307,7 +307,7 @@ function applyRoom(state) {
 		recInto = -1;
 	}
 	tapBtn.disabled = state.role === "watch";
-	applyTempo(clock); // watchers can't change the tempo
+	showTempo(); // watchers can't change the tempo
 	if (state.role === "play" && linkBpm) {
 		// a shared link brings its tempo into the room
 		const bpm = linkBpm;
@@ -425,46 +425,72 @@ canvas.addEventListener("pointerleave", (e) => {
 
 /* ---------- tempo ---------- */
 
-// The room shares one tempo; anyone playing can change it, and the beat
-// carries on from the next step so loops stay on their bar.
+// The room shares one tempo; anyone playing can change it. A change starts on
+// a step a moment ahead, so it reaches everyone before it takes over, and the
+// step count carries on so loops stay on their bar.
+const TEMPO_LEAD_MS = 500;
 let clock = DEFAULT_CLOCK;
-const STEP_MS = () => stepMs(clock.bpm);
-const currentTick = () => tickAt(clock, roomTime());
+let prevClock = null; // the clock still running until `clock.at`
+const runningClock = (t) => (prevClock && t < clock.at ? prevClock : clock);
+const STEP_MS = () => stepMs(runningClock(roomTime()).bpm);
+const currentTick = () => {
+	const t = roomTime();
+	return tickAt(runningClock(t), t);
+};
 const bpmOut = document.getElementById("bpm");
 const slowerBtn = document.getElementById("slower");
 const fasterBtn = document.getElementById("faster");
 const tapBtn = document.getElementById("tap");
 const tapper = new TapTempo();
 let tempoSendTimer = null;
+let wantBpm = null; // our change, waiting for a burst of clicks to settle
 let linkBpm = null; // a shared link's tempo, waiting to be shared with the room
+
+const shownBpm = () => wantBpm ?? clock.bpm;
+function showTempo() {
+	const bpm = shownBpm();
+	bpmOut.textContent = String(bpm);
+	slowerBtn.disabled = bpm <= MIN_BPM || roomState.role === "watch";
+	fasterBtn.disabled = bpm >= MAX_BPM || roomState.role === "watch";
+}
 
 function applyTempo(next) {
 	const changed = next.bpm !== clock.bpm || next.at !== clock.at || next.tick !== clock.tick;
-	clock = next;
-	bpmOut.textContent = String(clock.bpm);
-	slowerBtn.disabled = clock.bpm <= MIN_BPM || roomState.role === "watch";
-	fasterBtn.disabled = clock.bpm >= MAX_BPM || roomState.role === "watch";
-	if (changed) scheduleBeat();
+	if (changed) {
+		prevClock = runningClock(roomTime());
+		clock = next;
+		scheduleBeat();
+	}
+	showTempo();
 }
 
 function setTempo(bpm, share = false) {
 	if (roomState.role === "watch") return;
 	bpm = clampBpm(bpm);
-	if (bpm === clock.bpm && !share) return;
-	if (bpm !== clock.bpm) applyTempo(changeTempo(clock, bpm, roomTime()));
-	// a burst of clicks sends one change
+	if (bpm === shownBpm() && !share) return;
+	wantBpm = bpm;
+	showTempo();
+	// a burst of clicks sends one change, built from the clock running when it's sent
 	clearTimeout(tempoSendTimer);
-	tempoSendTimer = setTimeout(() => session?.setTempo(clock), 250);
+	tempoSendTimer = setTimeout(() => {
+		const t = roomTime();
+		const bpm = wantBpm;
+		wantBpm = null;
+		applyTempo(changeTempo(runningClock(t), bpm, t, session ? TEMPO_LEAD_MS : 0));
+		session?.setTempo(clock);
+	}, 150);
 }
 
 // - and + move to the next multiple of 5 BPM; with Shift, by 1.
 function nudge(dir, fine) {
-	if (fine) return setTempo(clock.bpm + dir);
-	setTempo(dir > 0 ? Math.floor(clock.bpm / 5) * 5 + 5 : Math.ceil(clock.bpm / 5) * 5 - 5);
+	const bpm = shownBpm();
+	if (fine) return setTempo(bpm + dir);
+	setTempo(dir > 0 ? Math.floor(bpm / 5) * 5 + 5 : Math.ceil(bpm / 5) * 5 - 5);
 }
 
 // A tempo from the room, or null when the room hasn't picked one.
 function applyRoomTempo(raw) {
+	if (wantBpm !== null) return; // our own change is about to replace it
 	if (raw === null && linkBpm) return; // keep the link's tempo until we can share it
 	applyTempo(cleanClock(raw));
 }
@@ -474,7 +500,7 @@ tapBtn.addEventListener("click", () => {
 	const bpm = tapper.tap(performance.now());
 	if (bpm) setTempo(bpm);
 });
-applyTempo(clock);
+showTempo();
 
 /* ---------- the beat ---------- */
 
@@ -490,7 +516,9 @@ let beatTimer = null;
 function beat() {
 	scheduleBeat(); // first, so one bad voice can't stop the beat
 	const tick = currentTick();
-	if (tick === lastBeat) return; // a tempo change rescheduled us onto the same step
+	// A tempo change can reschedule us onto the same step, and one that arrived
+	// late can step the count back a little: never play a step twice.
+	if (tick <= lastBeat && lastBeat - tick < 4) return;
 	lastBeat = tick;
 	for (const p of pointers.values()) {
 		if (p.down) retrigger(p, tick);
@@ -505,7 +533,9 @@ function beat() {
 function scheduleBeat() {
 	clearTimeout(beatTimer);
 	const t = roomTime();
-	beatTimer = setTimeout(beat, nextBeatAt(clock, t) - t + 1);
+	let next = nextBeatAt(runningClock(t), t);
+	if (prevClock && t < clock.at) next = Math.min(next, clock.at); // the new tempo's first step
+	beatTimer = setTimeout(beat, next - t + 1);
 }
 scheduleBeat();
 
