@@ -49,3 +49,7 @@ main { flex: 1 0 auto; }
   .page-head { padding-top: 64px; padding-bottom: 36px; }
   .contact { grid-template-columns: 1fr; gap: 8px; }
 }
+
+/* privacy page */
+.policy h2 { color: var(--ice); font-size: 21px; margin: 2em 0 .5em; }
+.policy a { color: var(--green); }
