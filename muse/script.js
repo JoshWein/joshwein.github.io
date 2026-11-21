@@ -254,7 +254,10 @@ function applyRemotePlayers(players) {
 			p.down = ptr.down === true;
 			if (p.down) p.trail.push({ x: p.x, y: p.y, t: performance.now() });
 			const lane = laneFor(p.y);
-			if (p.down && (!wasDown || lane !== p.lane || instrument !== p.instrument)) {
+			if (p.down && wasDown && lane !== p.lane && instrument === p.instrument) {
+				if (playing) changeLane(p, lane);
+				else p.lane = lane;
+			} else if (p.down && (!wasDown || lane !== p.lane || instrument !== p.instrument)) {
 				releaseVoice(p);
 				p.instrument = instrument;
 				p.lane = lane;
@@ -474,13 +477,8 @@ canvas.addEventListener("pointermove", (e) => {
 	if (p.down) {
 		p.trail.push({ x: p.x, y: p.y, t: performance.now() });
 		const lane = laneFor(p.y);
-		if (lane !== p.lane) {
-			releaseVoice(p);
-			p.lane = lane;
-			playVoice(p);
-		} else {
-			setVoicesVolume(p);
-		}
+		if (lane !== p.lane) changeLane(p, lane);
+		else setVoicesVolume(p);
 	}
 	publish();
 });
@@ -598,6 +596,17 @@ showTempo();
 // The beat: a held note retriggers every step, on boundaries of the shared
 // room clock, so everyone's held notes land together. A note that was just
 // struck skips the next beat instead of doubling up.
+// Dragging onto another row plays the new note no faster than a held note
+// repeats. Right after a note, the new row waits for the next beat (the old
+// note rings on until then), so a fast sweep across the page keeps time
+// instead of firing a burst of overlapping notes that crackle.
+function changeLane(p, lane) {
+	p.lane = lane;
+	const since = performance.now() - (p.lastPlay ?? 0);
+	if (since >= STEP_MS() * repeatEvery(p.instrument) * 0.9) playVoice(p);
+	else setVoicesVolume(p);
+}
+
 function retrigger(p, tick) {
 	if (tick % repeatEvery(p.instrument) !== 0) return;
 	if (performance.now() - (p.lastPlay ?? 0) > STEP_MS() / 2) playVoice(p);
