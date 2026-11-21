@@ -127,6 +127,14 @@ footer em { font-style: normal; color: var(--ink); }
 footer nav { display: flex; gap: 18px; flex-wrap: wrap; }
 footer a { color: var(--text); text-decoration: none; display: inline-block; padding: 4px 0; }
 
+/* medium screens: keep the sheet and bar floating on the desk, and fade the nav when it scrolls */
+@media (max-width: 1060px) {
+  main > section { margin-left: 16px; margin-right: 16px; }
+  .bar .wrap { margin: 0 16px; }
+}
+@media (max-width: 900px) {
+  .bar nav { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); padding-right: 24px; }
+}
 @media (max-width: 760px) {
   body { --bursts: none; }
   .wrap { padding: 0 16px; }
